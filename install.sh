@@ -87,6 +87,12 @@ else
 fi
 
 echo "==> نصب سرویس دائمی بک‌اند ($SERVICE) ..."
+# انتخاب پورت آزاد برای بک‌اند (8000 ممکن است توسط پروژه دیگری اشغال باشد)
+PANEL_PORT=8000
+while ss -tln 2>/dev/null | grep -q ":${PANEL_PORT} "; do
+  PANEL_PORT=$((PANEL_PORT+1))
+done
+echo "   پورت بک‌اند: $PANEL_PORT"
 cat > /etc/systemd/system/${SERVICE}.service <<EOF
 [Unit]
 Description=Instagram Panel API (Flask + gunicorn)
@@ -98,7 +104,7 @@ User=www-data
 Group=www-data
 WorkingDirectory=${APPDIR}
 Environment=PANEL_DATA_DIR=${DATADIR}
-ExecStart=${VENV}/bin/gunicorn app:app --bind 127.0.0.1:8000 --workers 2 --timeout 60
+ExecStart=${VENV}/bin/gunicorn app:app --bind 127.0.0.1:${PANEL_PORT} --workers 2 --timeout 60
 Restart=always
 RestartSec=3
 
@@ -107,6 +113,7 @@ WantedBy=multi-user.target
 EOF
 systemctl daemon-reload
 systemctl enable --now "$SERVICE"
+systemctl restart "$SERVICE"
 sleep 2
 systemctl is-active --quiet "$SERVICE" || { echo "خطا: سرویس بک‌اند بالا نیامد:"; journalctl -u "$SERVICE" -n 20 --no-pager; exit 1; }
 echo "   سرویس بک‌اند فعال است."
@@ -123,7 +130,7 @@ cat <<EOF
 
     # بک‌اند
     location /api/ {
-        proxy_pass http://127.0.0.1:8000;
+        proxy_pass http://127.0.0.1:$PANEL_PORT;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
