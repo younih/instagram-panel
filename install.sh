@@ -153,12 +153,12 @@ ufw allow 80/tcp comment 'HTTP' >/dev/null
 ufw allow 443/tcp comment 'HTTPS' >/dev/null
 
 echo "==> [7/7] گواهی HTTPS ..."
-if [[ ! -d /etc/letsencrypt/live/$DOMAIN ]]; then
-  certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos \
-    --register-unsafely-without-email --redirect
-else
-  echo "   گواهی $DOMAIN از قبل وجود دارد؛ رد شد."
-fi
+# نکته مهم: اسکریپت در مرحله ۶ فایل کانفیگ nginx را از نو می‌نویسد (فقط پورت ۸۰)،
+# پس certbot باید همیشه اجرا شود تا بلاک ۴۴۳/HTTPS را دوباره اضافه کند؛
+# اگر گواهی موجود باشد certbot فقط نصب را ترمیم می‌کند و گواهی تازه صادر نمی‌کند.
+certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos \
+  --register-unsafely-without-email --redirect
+systemctl reload nginx
 
 echo ""
 echo "✅ تمام شد!"
