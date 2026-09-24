@@ -103,8 +103,22 @@ def init_db():
             key   TEXT PRIMARY KEY,
             value TEXT NOT NULL
         );
+
+        CREATE TABLE IF NOT EXISTS ig_accounts (
+            user_id      INTEGER PRIMARY KEY,
+            username     TEXT NOT NULL,
+            enc_secret   TEXT NOT NULL,
+            connected_at TEXT NOT NULL,
+            updated_at   TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
         """
     )
+    # مهاجرت از نسخه قدیمی (ستون enc_password) — فقط اگر وجود داشت
+    cols = {r[1] for r in db.execute("PRAGMA table_info(ig_accounts)")}
+    if "enc_password" in cols and "enc_secret" not in cols:
+        db.execute("ALTER TABLE ig_accounts RENAME COLUMN enc_password TO enc_secret")
+        db.commit()
     defaults = {
         "site_name": "پنل مدیریت اینستاگرام",
         "announcement": "",
@@ -458,6 +472,269 @@ def admin_settings_put():
     db.commit()
     rows = db.execute("SELECT key, value FROM settings").fetchall()
     return ok(settings={r["key"]: r["value"] for r in rows}, message="تنظیمات ذخیره شد.")
+
+
+# ---------------------------------------------------------------- اینستاگرام واقعی
+# اتصال اکانت واقعی اینستاگرام با sessionid (کوکی نشست وب).
+# چرا sessionid؟ لاگین یوزر/پسورد با کتابخانه‌ها روی بعضی IPها توسط اینستاگرام
+# با خطای «نسخه اپ قدیمی است» بلاک می‌شود؛ ولی sessionid که کاربر از مرورگر
+# خودش (بعد از لاگین عادی در instagram.com) کپی می‌کند، این محدودیت را ندارد.
+# sessionid با Fernet روی همین سرور رمزنگاری و ذخیره می‌شود.
+import threading
+import time
+
+_ig_lock = threading.RLock()
+_ig_clients = {}  # uid -> {"cl": Client, "at": timestamp}
+_IG_TTL = 20 * 60  # ۲۰ دقیقه استفاده مجدد از کلاینت
+
+
+def _ig_fernet():
+    from cryptography.fernet import Fernet
+
+    kp = os.path.join(DATA_DIR, ".ig_key")
+    if os.path.exists(kp):
+        with open(kp, "rb") as f:
+            key = f.read().strip()
+    else:
+        key = Fernet.generate_key()
+        with open(kp, "wb") as f:
+            f.write(key)
+        os.chmod(kp, 0o600)
+    return Fernet(key)
+
+
+def _ig_creds(uid):
+    row = (
+        get_db()
+        .execute(
+            "SELECT username, enc_secret FROM ig_accounts WHERE user_id = ?", (uid,)
+        )
+        .fetchone()
+    )
+    if not row:
+        return None, None
+    try:
+        secret = _ig_fernet().decrypt(row["enc_secret"].encode()).decode()
+    except Exception:
+        return row["username"], None
+    return row["username"], secret
+
+
+def _ig_client(uid):
+    """کلاینت لاگین‌شده با sessionid؛ حداکثر ۲۰ دقیقه کش می‌شود."""
+    from instagrapi import Client
+
+    username, secret = _ig_creds(uid)
+    if not username or not secret:
+        return None
+    now = time.time()
+    with _ig_lock:
+        cached = _ig_clients.get(uid)
+        if cached and now - cached["at"] < _IG_TTL:
+            return cached["cl"]
+        cl = Client(request_timeout=15)
+        cl.delay_range = [1, 3]
+        try:
+            cl.login_by_sessionid(secret)  # خودش با user_info اعتبارسنجی می‌کند
+        except Exception:
+            _ig_clients.pop(uid, None)
+            raise
+        _ig_clients[uid] = {"cl": cl, "at": now}
+        return cl
+
+
+def _ig_errmap(e):
+    from instagrapi.exceptions import (
+        ClientError,
+        ClientLoginRequired,
+        ClientRequestTimeout,
+        LoginRequired,
+        PleaseWaitFewMinutes,
+    )
+
+    if isinstance(e, AssertionError):
+        return (
+            "sessionid معتبر نیست؛ از مرورگر کپی‌اش کن (باید با عدد شروع شود و طولانی باشد).",
+            "invalid_sessionid",
+            401,
+        )
+    if isinstance(e, (LoginRequired, ClientLoginRequired)):
+        return (
+            "نشست اینستاگرام منقضی شده؛ دوباره وارد instagram.com شو و sessionid جدید بده.",
+            "session_expired",
+            401,
+        )
+    if isinstance(e, ClientRequestTimeout):
+        return (
+            "اینستاگرام به‌موقع جواب نداد؛ اتصال اینترنت سرور را بررسی کن و دوباره تلاش کن.",
+            "ig_timeout",
+            504,
+        )
+    if isinstance(e, PleaseWaitFewMinutes):
+        return (
+            "اینستاگرام موقتاً محدودت کرد؛ چند دقیقه دیگر تلاش کن.",
+            "rate_limited",
+            429,
+        )
+    if isinstance(e, ClientError):
+        return (f"خطای اینستاگرام: {e}", "ig_error", 502)
+    return (f"خطای غیرمنتظره: {e}", "ig_error", 502)
+
+
+@app.post("/api/ig/connect")
+@login_required
+def ig_connect():
+    from instagrapi import Client
+
+    data = request.get_json(silent=True) or {}
+    sessionid = (data.get("sessionid") or "").strip()
+    if not sessionid:
+        return err("sessionid را وارد کنید.", "validation")
+    # اعتبارسنجی واقعی: تزریق کوکی و خواندن پروفایل
+    cl = Client(request_timeout=15)
+    cl.delay_range = [1, 3]
+    try:
+        with _ig_lock:
+            cl.login_by_sessionid(sessionid)
+            username = cl.username
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+
+    enc = _ig_fernet().encrypt(sessionid.encode()).decode()
+    uid = g.me["id"]
+    db = get_db()
+    db.execute(
+        "INSERT INTO ig_accounts(user_id, username, enc_secret, connected_at, updated_at)"
+        " VALUES (?, ?, ?, ?, ?)"
+        " ON CONFLICT(user_id) DO UPDATE SET username=excluded.username,"
+        " enc_secret=excluded.enc_secret, updated_at=excluded.updated_at",
+        (uid, username, enc, now_iso(), now_iso()),
+    )
+    db.commit()
+    with _ig_lock:
+        _ig_clients[uid] = {"cl": cl, "at": time.time()}
+    return ok(username=username, message="اکانت اینستاگرام متصل شد.")
+
+
+@app.post("/api/ig/disconnect")
+@login_required
+def ig_disconnect():
+    uid = g.me["id"]
+    get_db().execute("DELETE FROM ig_accounts WHERE user_id = ?", (uid,))
+    get_db().commit()
+    with _ig_lock:
+        _ig_clients.pop(uid, None)
+    # پاک‌سازی نشست‌های قدیمی نسخه قبلی (اگر مانده باشند)
+    sp = os.path.join(DATA_DIR, "ig_sessions", f"{uid}.json")
+    if os.path.exists(sp):
+        try:
+            os.remove(sp)
+        except OSError:
+            pass
+    return ok(message="اتصال اینستاگرام قطع شد.")
+
+
+@app.get("/api/ig/status")
+@login_required
+def ig_status():
+    username, _ = _ig_creds(g.me["id"])
+    return ok(connected=bool(username), username=username)
+
+
+@app.get("/api/ig/profile")
+@login_required
+def ig_profile():
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        with _ig_lock:
+            u = cl.user_info(cl.user_id)
+        return ok(
+            profile={
+                "username": u.username,
+                "full_name": u.full_name or "",
+                "biography": u.biography or "",
+                "profile_pic_url": str(u.profile_pic_url or ""),
+                "follower_count": u.follower_count or 0,
+                "following_count": u.following_count or 0,
+                "media_count": u.media_count or 0,
+                "is_private": bool(u.is_private),
+                "is_verified": bool(u.is_verified),
+            }
+        )
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+
+
+@app.get("/api/ig/medias")
+@login_required
+def ig_medias():
+    try:
+        limit = int(request.args.get("limit", 12))
+    except (TypeError, ValueError):
+        limit = 12
+    limit = min(max(limit, 1), 30)
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        with _ig_lock:
+            medias = cl.user_medias(cl.user_id, limit)
+        out = []
+        for m in medias:
+            out.append(
+                {
+                    "id": str(m.pk),
+                    "code": m.code,
+                    "media_type": m.media_type,  # 1=عکس 2=ویدیو 8=آلبوم
+                    "thumbnail_url": str(m.thumbnail_url or ""),
+                    "like_count": m.like_count or 0,
+                    "comment_count": m.comment_count or 0,
+                    "has_liked": bool(m.has_liked),
+                    "caption": (m.caption_text or "")[:180],
+                    "taken_at": m.taken_at.isoformat() if m.taken_at else None,
+                }
+            )
+        return ok(medias=out)
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+
+
+def _ig_action(media_id, action):
+    from instagrapi import Client  # noqa: F401 (ثبت وابستگی)
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    if not media_id:
+        return err("شناسه پست مشخص نیست.", "validation")
+    try:
+        with _ig_lock:
+            if action == "like":
+                cl.media_like(media_id)
+            else:
+                cl.media_unlike(media_id)
+        return ok(message="لایک شد." if action == "like" else "لایک برداشته شد.")
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+
+
+@app.post("/api/ig/like")
+@login_required
+def ig_like():
+    data = request.get_json(silent=True) or {}
+    return _ig_action((data.get("media_id") or "").strip(), "like")
+
+
+@app.post("/api/ig/unlike")
+@login_required
+def ig_unlike():
+    data = request.get_json(silent=True) or {}
+    return _ig_action((data.get("media_id") or "").strip(), "unlike")
 
 
 # ---------------------------------------------------------------- سلامت
