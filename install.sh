@@ -112,13 +112,10 @@ systemctl is-active --quiet "$SERVICE" || { echo "خطا: سرویس بک‌ان
 echo "   سرویس بک‌اند فعال است."
 
 echo "==> [6/7] تنظیم nginx برای $DOMAIN ..."
-cat > /etc/nginx/sites-available/instagram-panel <<EOF
-server {
-    listen 80;
-    server_name ${DOMAIN};
-    root ${WEBROOT};
-    index index.html;
 
+# بلوک مشترک هر دو server (پورت 80 و 443)
+nginx_inner() {
+cat <<EOF
     server_tokens off;
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-Frame-Options "SAMEORIGIN" always;
@@ -138,13 +135,52 @@ server {
     location / {
         try_files \$uri \$uri/ =404;
     }
-}
 EOF
+}
+
+# نوشتن کانفیگ nginx؛ اگر گواهی هست بلاک 443 هم با همان گواهی نوشته می‌شود.
+# (بلاک 443 قدیمیِ ساخته‌ی certbot حذف می‌شود چون location /api/ را ندارد و تداخل می‌کند.)
+write_nginx_config() {
+rm -f /etc/nginx/sites-enabled/instagram-panel-le-ssl.conf \
+      /etc/nginx/sites-available/instagram-panel-le-ssl.conf
+{
+echo "server {"
+echo "    listen 80;"
+echo "    server_name ${DOMAIN};"
+echo "    root ${WEBROOT};"
+echo "    index index.html;"
+echo ""
+if [[ -d /etc/letsencrypt/live/$DOMAIN ]]; then
+echo "    # گواهی از قبل وجود دارد: همه‌چیز به HTTPS هدایت می‌شود"
+echo "    if (\$host = ${DOMAIN}) { return 301 https://\$host\$request_uri; }"
+echo ""
+fi
+nginx_inner
+echo "}"
+if [[ -d /etc/letsencrypt/live/$DOMAIN ]]; then
+echo ""
+echo "server {"
+echo "    listen 443 ssl;"
+echo "    server_name ${DOMAIN};"
+echo "    root ${WEBROOT};"
+echo "    index index.html;"
+echo "    ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;"
+echo "    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;"
+echo "    include /etc/letsencrypt/options-ssl-nginx.conf;"
+echo "    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;"
+echo ""
+nginx_inner
+echo "}"
+fi
+} > /etc/nginx/sites-available/instagram-panel
 ln -sf /etc/nginx/sites-available/instagram-panel /etc/nginx/sites-enabled/instagram-panel
 rm -f /etc/nginx/sites-enabled/default
 nginx -t
-systemctl enable --now nginx
 systemctl reload nginx
+}
+
+write_nginx_config
+systemctl enable --now nginx
 
 echo "==> فعال‌سازی فایروال ..."
 ufw --force enable >/dev/null 2>&1 || true
@@ -153,12 +189,16 @@ ufw allow 80/tcp comment 'HTTP' >/dev/null
 ufw allow 443/tcp comment 'HTTPS' >/dev/null
 
 echo "==> [7/7] گواهی HTTPS ..."
-# نکته مهم: اسکریپت در مرحله ۶ فایل کانفیگ nginx را از نو می‌نویسد (فقط پورت ۸۰)،
-# پس certbot باید همیشه اجرا شود تا بلاک ۴۴۳/HTTPS را دوباره اضافه کند؛
-# اگر گواهی موجود باشد certbot فقط نصب را ترمیم می‌کند و گواهی تازه صادر نمی‌کند.
-certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos \
-  --register-unsafely-without-email --redirect
-systemctl reload nginx
+# مرحله ۶ بلاک 443 را خودش می‌نویسد؛ certbot فقط در نصب اول (نبود گواهی) لازم است،
+# و بعدش کانفیگ دوباره نوشته می‌شود تا بلاک 443 با گواهی تازه همراه شود.
+if [[ ! -d /etc/letsencrypt/live/$DOMAIN ]]; then
+  certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos \
+    --register-unsafely-without-email --redirect \
+    --deploy-hook "systemctl reload nginx"
+  write_nginx_config
+else
+  echo "   گواهی $DOMAIN از قبل وجود دارد؛ از همان استفاده شد."
+fi
 
 echo ""
 echo "✅ تمام شد!"
