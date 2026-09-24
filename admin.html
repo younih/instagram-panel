@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>پنل ادمین</title>
+  <style>
+    :root{
+      color-scheme:light dark;--bg:#f5f6f8;--paper:#fff;--paper-2:#f9fafb;--ink:#16202a;--muted:#68737f;--line:#e4e8ec;
+      --accent:#e23b68;--accent-2:#ff7a45;--blue:#2477e3;--green:#078765;--amber:#c97411;--nav:#121921;--nav-ink:#edf2f6;
+      --shadow:0 14px 40px rgba(26,35,45,.08);--radius:18px;
+    }
+    @media(prefers-color-scheme:dark){:root{--bg:#0e1318;--paper:#161d24;--paper-2:#1a222b;--ink:#edf2f6;--muted:#a8b1bb;--line:#2a3540;--nav:#090d11;--nav-ink:#edf2f6;--shadow:0 16px 44px rgba(0,0,0,.28)}}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Vazirmatn",Tahoma,sans-serif;line-height:1.55}
+    button,input,select,textarea{font:inherit}
+    .app{min-height:100vh;display:grid;grid-template-columns:minmax(0,1fr) 248px;grid-template-areas:"main side";direction:ltr}
+    .sidebar,.content{direction:rtl}.sidebar{grid-area:side}.content{grid-area:main}
+    .sidebar{position:sticky;top:0;height:100vh;background:var(--nav);color:var(--nav-ink);padding:28px 16px 20px;display:flex;flex-direction:column;z-index:20}
+    .profile{display:flex;align-items:center;gap:11px;padding:0 8px 22px;border-bottom:1px solid rgba(255,255,255,.1)}
+    .avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(145deg,#ffbc4a,#ed3c70 55%,#7a4bc9);display:grid;place-items:center;font-weight:800;color:#fff;border:2px solid rgba(255,255,255,.35)}
+    .profile b{font-size:14px}.profile small{display:block;color:#9eabb7;font-size:11px}
+    nav{display:grid;gap:5px;margin-top:22px}
+    .nav-btn{border:0;background:transparent;color:#aeb9c3;padding:11px 12px;border-radius:10px;text-align:right;display:flex;align-items:center;gap:10px;cursor:pointer}
+    .nav-btn:hover,.nav-btn.active{background:#202b35;color:#fff}
+    .nav-btn.active{box-shadow:inset -3px 0 var(--accent)}
+    .badge{background:var(--amber);color:#fff;font-size:10px;font-weight:800;border-radius:99px;padding:1px 8px;margin-right:auto}
+    .side-foot{margin-top:auto;display:grid;gap:8px}
+    .side-foot a,.side-foot button{border:1px solid rgba(255,255,255,.15);background:transparent;color:#cdd6dd;padding:9px;border-radius:10px;cursor:pointer;text-align:center;text-decoration:none;font-size:12px}
+    .content{min-width:0;padding:24px 28px 54px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+    .page-title h1{font-size:25px;margin:0 0 2px}.page-title p{margin:0;color:var(--muted);font-size:13px}
+    .panel{display:none}.panel.active{display:block}
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}
+    .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 1px 0 rgba(20,30,40,.02)}
+    .kpi{padding:18px}.kpi small{color:var(--muted);font-size:12px}.number{font-size:26px;font-weight:800;margin-top:8px}
+    .number.amber{color:var(--amber)}.number.green{color:var(--green)}
+    .table-card{margin-top:14px;overflow:hidden}
+    .table-head{padding:18px 20px 6px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+    .table-head h2{font-size:16px;margin:0}
+    .search{border:1px solid var(--line);background:var(--paper-2);color:var(--ink);border-radius:10px;padding:8px 12px;min-width:200px}
+    table{width:100%;border-collapse:collapse;font-size:12px}
+    th,td{padding:12px 14px;text-align:right;border-top:1px solid var(--line)}
+    th{color:var(--muted);font-size:10px;background:var(--paper-2);border-top:0}
+    td .mail{direction:ltr;display:inline-block;color:var(--muted);font-size:11px}
+    .pill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:10px;font-weight:700}
+    .pill.pending{background:#fdf3e0;color:#8a5a0b}.pill.active{background:#e7f6ef;color:#05603f}
+    .pill.rejected,.pill.disabled{background:#fbe9ec;color:#ae294d}
+    .pill.admin{background:#e8f0fd;color:#174a94}.pill.user{background:var(--paper-2);color:var(--muted)}
+    @media(prefers-color-scheme:dark){.pill.pending{background:#2b2210;color:#e8c877}.pill.active{background:#0f2b20;color:#8fdcb6}.pill.rejected,.pill.disabled{background:#2b1418;color:#f3a9bc}.pill.admin{background:#16283f;color:#9cc2f5}}
+    .row-actions{display:flex;gap:6px;flex-wrap:wrap}
+    .btn{border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:6px 10px;border-radius:8px;cursor:pointer;font-size:11px}
+    .btn.ok{background:var(--green);border-color:transparent;color:#fff}
+    .btn.no{background:transparent;border-color:#f0b9c4;color:var(--accent)}
+    .btn.danger{background:var(--accent);border-color:transparent;color:#fff}
+    .btn:disabled{opacity:.5;cursor:wait}
+    .form-card{padding:22px;margin-top:14px;max-width:640px}
+    .form-card h2{font-size:16px;margin:0 0 4px}.form-card p{color:var(--muted);font-size:12px;margin:0 0 14px}
+    .field{margin-bottom:13px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+    .field input,.field textarea{width:100%;border:1px solid var(--line);background:var(--paper-2);color:var(--ink);border-radius:10px;padding:10px 12px}
+    .field textarea{min-height:90px;resize:vertical}
+    .primary{border:0;background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:10px;cursor:pointer;font-weight:700}
+    .toast{position:fixed;left:22px;bottom:22px;background:var(--ink);color:var(--paper);padding:11px 15px;border-radius:11px;box-shadow:var(--shadow);font-size:12px;opacity:0;transform:translateY(12px);pointer-events:none;transition:.25s;z-index:120}
+    .toast.show{opacity:1;transform:none}
+    .empty{padding:26px;text-align:center;color:var(--muted);font-size:12px}
+    @media(max-width:900px){.app{display:block}.sidebar{display:none}.kpi-grid{grid-template-columns:1fr 1fr}.content{padding:16px 14px 60px}table,thead,tbody,tr,th,td{display:block}thead{display:none}tr{border-top:1px solid var(--line);padding:8px 0}td{border:0;padding:5px 14px;display:flex;justify-content:space-between;gap:10px}td:before{content:attr(data-l);color:var(--muted)}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="profile"><div class="avatar" id="avatar">م</div><div><b id="adminName">مدیر</b><small>پنل ادمین</small></div></div>
+    <nav>
+      <button class="nav-btn active" data-panel="overview">نمای کلی</button>
+      <button class="nav-btn" data-panel="pending">درخواست‌های تأیید <span class="badge" id="pendingBadge" style="display:none">۰</span></button>
+      <button class="nav-btn" data-panel="users">کاربران</button>
+      <button class="nav-btn" data-panel="settings">تنظیمات سایت</button>
+    </nav>
+    <div class="side-foot">
+      <a href="/app.html">پنل کاربری</a>
+      <button id="logoutBtn">خروج</button>
+    </div>
+  </aside>
+
+  <main class="content">
+    <header class="topbar">
+      <div class="page-title"><h1 id="pageH">نمای کلی</h1><p id="pageS">وضعیت امروز سیستم</p></div>
+    </header>
+
+    <section class="panel active" id="p-overview">
+      <div class="kpi-grid">
+        <div class="card kpi"><small>کل کاربران</small><div class="number" id="stTotal">—</div></div>
+        <div class="card kpi"><small>در انتظار تأیید</small><div class="number amber" id="stPending">—</div></div>
+        <div class="card kpi"><small>کاربران فعال</small><div class="number green" id="stActive">—</div></div>
+        <div class="card kpi"><small>ادمین‌ها</small><div class="number" id="stAdmins">—</div></div>
+      </div>
+      <div class="card table-card">
+        <div class="table-head"><h2>تازه‌ترین عضویت‌ها</h2></div>
+        <div id="recentWrap"><div class="empty">در حال بارگذاری…</div></div>
+      </div>
+    </section>
+
+    <section class="panel" id="p-pending">
+      <div class="card table-card" style="margin-top:0">
+        <div class="table-head"><h2>در انتظار تأیید مدیر</h2></div>
+        <div id="pendingWrap"><div class="empty">در حال بارگذاری…</div></div>
+      </div>
+    </section>
+
+    <section class="panel" id="p-users">
+      <div class="card table-card" style="margin-top:0">
+        <div class="table-head"><h2>همه کاربران</h2><input class="search" id="userSearch" placeholder="جست‌وجو نام یا ایمیل…"></div>
+        <div id="usersWrap"><div class="empty">در حال بارگذاری…</div></div>
+      </div>
+    </section>
+
+    <section class="panel" id="p-settings">
+      <div class="card form-card" style="margin-top:0">
+        <h2>تنظیمات سایت</h2>
+        <p>این موارد در صفحه ورود به کاربران نمایش داده می‌شود.</p>
+        <div class="field"><label>نام سایت</label><input id="setSiteName"></div>
+        <div class="field"><label>اطلاعیه (اختیاری)</label><textarea id="setAnnouncement" placeholder="مثلاً: ثبت‌نام‌ها هر شب بررسی می‌شوند."></textarea></div>
+        <button class="primary" id="saveSettings">ذخیره تنظیمات</button>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var me=null, allUsers=[];
+  function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2600);}
+  function api(path,method,body){
+    return fetch(path,{method:method||'GET',headers:{'Content-Type':'application/json'},
+      body:body!==undefined?JSON.stringify(body):undefined}).then(function(r){return r.json().then(function(j){return{status:r.status,body:j};});});
+  }
+  function faDate(iso){try{return new Date(iso).toLocaleDateString('fa-IR');}catch(e){return '—';}}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+  // گیت ورود: فقط ادمین
+  api('/api/auth/me').then(function(r){
+    if(!r.body.ok||r.body.user.role!=='admin'){location.replace('/');return;}
+    me=r.body.user;
+    document.getElementById('adminName').textContent=me.name;
+    document.getElementById('avatar').textContent=(me.name||'م').trim().charAt(0);
+    loadAll();
+  }).catch(function(){location.replace('/');});
+
+  document.getElementById('logoutBtn').addEventListener('click',function(){
+    api('/api/auth/logout','POST').then(function(){location.replace('/');});
+  });
+
+  // ناوبری
+  var titles={overview:['نمای کلی','وضعیت امروز سیستم'],pending:['درخواست‌های تأیید','کاربرانی که منتظر فعال‌سازی‌اند'],users:['کاربران','مدیریت حساب‌ها و نقش‌ها'],settings:['تنظیمات سایت','نمایش در صفحه ورود']};
+  document.querySelectorAll('.nav-btn').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('.nav-btn').forEach(function(x){x.classList.remove('active');});
+      b.classList.add('active');
+      document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+      document.getElementById('p-'+b.dataset.panel).classList.add('active');
+      var t=titles[b.dataset.panel];document.getElementById('pageH').textContent=t[0];document.getElementById('pageS').textContent=t[1];
+    });
+  });
+
+  function statusPill(u){return '<span class="pill '+u.status+'">'+esc(u.status_label)+'</span>';}
+  function rolePill(u){return '<span class="pill '+(u.role==='admin'?'admin':'user')+'">'+(u.role==='admin'?'ادمین':'کاربر')+'</span>';}
+
+  function userRow(u,ctx){
+    var acts=[];
+    if(u.status==='pending'){acts.push('<button class="btn ok" data-act="approve" data-id="'+u.id+'">تأیید</button>','<button class="btn no" data-act="reject" data-id="'+u.id+'">رد</button>');}
+    if(u.status==='active'&&u.id!==me.id){acts.push('<button class="btn" data-act="disable" data-id="'+u.id+'">غیرفعال</button>');}
+    if(u.status==='disabled'){acts.push('<button class="btn ok" data-act="enable" data-id="'+u.id+'">فعال‌سازی</button>');}
+    if(u.id!==me.id){
+      acts.push(u.role==='admin'
+        ?'<button class="btn" data-act="demote" data-id="'+u.id+'">سلب ادمین</button>'
+        :'<button class="btn" data-act="promote" data-id="'+u.id+'">ادمین کن</button>');
+      acts.push('<button class="btn danger" data-act="del" data-id="'+u.id+'">حذف</button>');
+    }
+    return '<tr><td data-l="نام">'+esc(u.name)+'<br><span class="mail">'+esc(u.email)+'</span></td>'
+      +'<td data-l="نقش">'+rolePill(u)+'</td><td data-l="وضعیت">'+statusPill(u)+'</td>'
+      +'<td data-l="عضویت">'+faDate(u.created_at)+'</td>'
+      +'<td data-l="عملیات"><div class="row-actions">'+acts.join('')+'</div></td></tr>';
+  }
+
+  function bindActions(wrap){
+    wrap.querySelectorAll('button[data-act]').forEach(function(b){
+      b.addEventListener('click',function(){doAction(b.dataset.act,parseInt(b.dataset.id,10),b);});
+    });
+  }
+
+  function doAction(act,id,btn){
+    if(act==='del'&&!confirm('این کاربر حذف شود؟'))return;
+    btn.disabled=true;
+    var p;
+    if(act==='approve')p=api('/api/admin/users/'+id+'/approve','POST');
+    else if(act==='reject')p=api('/api/admin/users/'+id+'/reject','POST');
+    else if(act==='disable')p=api('/api/admin/users/'+id+'/disable','POST');
+    else if(act==='enable')p=api('/api/admin/users/'+id+'/enable','POST');
+    else if(act==='promote')p=api('/api/admin/users/'+id,'PUT',{role:'admin'});
+    else if(act==='demote')p=api('/api/admin/users/'+id,'PUT',{role:'user'});
+    else if(act==='del')p=api('/api/admin/users/'+id,'DELETE');
+    p.then(function(r){
+      btn.disabled=false;
+      if(r.body.ok){toast('انجام شد.');loadAll();}
+      else toast(r.body.message||'خطا');
+    }).catch(function(){btn.disabled=false;toast('ارتباط با سرور برقرار نشد.');});
+  }
+
+  function tableHTML(users){
+    if(!users.length)return '<div class="empty">موردی نیست.</div>';
+    return '<table><thead><tr><th>کاربر</th><th>نقش</th><th>وضعیت</th><th>عضویت</th><th>عملیات</th></tr></thead><tbody>'
+      +users.map(function(u){return userRow(u);}).join('')+'</tbody></table>';
+  }
+
+  function loadAll(){
+    api('/api/admin/stats').then(function(r){
+      if(!r.body.ok)return;
+      var s=r.body.stats;
+      document.getElementById('stTotal').textContent=s.total;
+      document.getElementById('stPending').textContent=s.pending;
+      document.getElementById('stActive').textContent=s.active;
+      document.getElementById('stAdmins').textContent=s.admins;
+      var b=document.getElementById('pendingBadge');
+      b.style.display=s.pending>0?'inline-block':'none';b.textContent=s.pending;
+      var w=document.getElementById('recentWrap');
+      w.innerHTML=tableHTML(r.body.recent||[]);bindActions(w);
+    });
+    api('/api/admin/users?status=pending').then(function(r){
+      var w=document.getElementById('pendingWrap');
+      if(!r.body.ok){w.innerHTML='<div class="empty">خطا در بارگذاری.</div>';return;}
+      w.innerHTML=tableHTML(r.body.users||[]);bindActions(w);
+    });
+    api('/api/admin/users').then(function(r){
+      if(!r.body.ok)return;
+      allUsers=r.body.users||[];renderUsers();
+    });
+    api('/api/admin/settings').then(function(r){
+      if(!r.body.ok)return;
+      document.getElementById('setSiteName').value=r.body.settings.site_name||'';
+      document.getElementById('setAnnouncement').value=r.body.settings.announcement||'';
+    });
+  }
+
+  function renderUsers(){
+    var q=(document.getElementById('userSearch').value||'').trim().toLowerCase();
+    var list=allUsers.filter(function(u){
+      return !q||u.name.toLowerCase().indexOf(q)>-1||u.email.toLowerCase().indexOf(q)>-1;
+    });
+    var w=document.getElementById('usersWrap');
+    w.innerHTML=tableHTML(list);bindActions(w);
+  }
+  document.getElementById('userSearch').addEventListener('input',renderUsers);
+
+  document.getElementById('saveSettings').addEventListener('click',function(){
+    var btn=this;btn.disabled=true;
+    api('/api/admin/settings','PUT',{site_name:document.getElementById('setSiteName').value,announcement:document.getElementById('setAnnouncement').value})
+    .then(function(r){btn.disabled=false;toast(r.body.ok?'تنظیمات ذخیره شد.':(r.body.message||'خطا'));})
+    .catch(function(){btn.disabled=false;toast('ارتباط با سرور برقرار نشد.');});
+  });
+})();
+</script>
+</body>
+</html>
