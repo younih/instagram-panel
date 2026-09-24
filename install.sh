@@ -104,7 +104,7 @@ User=www-data
 Group=www-data
 WorkingDirectory=${APPDIR}
 Environment=PANEL_DATA_DIR=${DATADIR}
-ExecStart=${VENV}/bin/gunicorn app:app --bind 127.0.0.1:${PANEL_PORT} --workers 2 --timeout 60
+ExecStart=${VENV}/bin/gunicorn app:app --bind 127.0.0.1:${PANEL_PORT} --workers 2 --timeout 120
 Restart=always
 RestartSec=3
 
@@ -136,7 +136,7 @@ cat <<EOF
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
         proxy_connect_timeout 10s;
-        proxy_read_timeout 30s;
+        proxy_read_timeout 120s;
     }
 
     location / {
