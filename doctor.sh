@@ -9,18 +9,23 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
+# پورت بک‌اند را از فایل سرویس می‌خوانیم (پیش‌فرض 8000)
+PANEL_PORT=$(grep -oP '127\.0\.0\.1:\K[0-9]+' /etc/systemd/system/panel-api.service 2>/dev/null | head -1)
+PANEL_PORT=${PANEL_PORT:-8000}
+echo "(پورت بک‌اند طبق سرویس: $PANEL_PORT)"
+
 echo "========== ۱) وضعیت سرویس‌ها =========="
 if systemctl is-active panel-api --quiet; then echo "panel-api: active ✅"; else echo "panel-api: $(systemctl is-active panel-api) ❌"; fi
 if systemctl is-active nginx --quiet; then echo "nginx: active ✅"; else echo "nginx: $(systemctl is-active nginx) ❌"; fi
 
 echo ""
-echo "========== ۲) چه چیزی روی پورت 8000 است؟ =========="
-ss -tlnp | grep ':8000' || echo "(هیچ‌چیز روی پورت 8000 گوش نمی‌دهد)"
+echo "========== ۲) چه چیزی روی پورت ${PANEL_PORT} است؟ =========="
+ss -tlnp | grep ":${PANEL_PORT}" || echo "(هیچ‌چیز روی این پورت گوش نمی‌دهد)"
 
 echo ""
 echo "========== ۳) سلامت مستقیم بک‌اند =========="
-CODE=$(curl -s -m 5 -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/api/health 2>/dev/null || echo "000")
-echo "http://127.0.0.1:8000/api/health -> $CODE  (سالم یعنی 200)"
+CODE=$(curl -s -m 5 -o /dev/null -w "%{http_code}" http://127.0.0.1:${PANEL_PORT}/api/health 2>/dev/null || echo "000")
+echo "http://127.0.0.1:${PANEL_PORT}/api/health -> $CODE  (سالم یعنی 200)"
 
 echo ""
 echo "========== ۴) لاگ panel-api (۲۵ خط آخر) =========="
@@ -31,25 +36,25 @@ echo "========== ۵) تلاش تعمیر خودکار بک‌اند =========="
 if systemctl is-active panel-api --quiet && [[ "$CODE" == "200" ]]; then
   echo "بک‌اند سالم است؛ نیازی به تعمیر نبود. ✅"
 else
-  LINE=$(ss -tlnp | grep ':8000' | head -1)
+  LINE=$(ss -tlnp | grep ":${PANEL_PORT}" | head -1)
   if [[ -n "$LINE" ]]; then
     PID=$(echo "$LINE" | grep -oP 'pid=\K[0-9]+' | head -1)
     PROC=$(echo "$LINE" | grep -oP 'users:\(\("\K[^"]+' | head -1)
-    echo "پورت 8000 توسط «${PROC:-نامشخص}» (PID: ${PID:-نامشخص}) اشغال شده و مانع بالا آمدن بک‌اند است."
+    echo "پورت ${PANEL_PORT} توسط «${PROC:-نامشخص}» (PID: ${PID:-نامشخص}) اشغال شده و مانع بالا آمدن بک‌اند است."
     read -rp "این پروسه کشته شود؟ [y/N] " ANS
     if [[ "$ANS" =~ ^[yY]$ ]] && [[ -n "$PID" ]]; then
       kill "$PID" && echo "پروسه $PID کشته شد." || echo "کشتن پروسه ناموفق بود."
       sleep 1
     else
-      echo "رد شد؛ بدون خالی شدن پورت، بک‌اند بالا نمی‌آید."
+      echo "رد شد؛ بدون خالی شدن پورت، بک‌اند روی همین پورت بالا نمی‌آید."
     fi
   fi
   echo "ری‌استارت panel-api ..."
   systemctl restart panel-api
   sleep 6
   if systemctl is-active panel-api --quiet; then echo "panel-api: active ✅"; else echo "panel-api: $(systemctl is-active panel-api) ❌"; fi
-  CODE2=$(curl -s -m 5 -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/api/health 2>/dev/null || echo "000")
-  echo "http://127.0.0.1:8000/api/health -> $CODE2"
+  CODE2=$(curl -s -m 5 -o /dev/null -w "%{http_code}" http://127.0.0.1:${PANEL_PORT}/api/health 2>/dev/null || echo "000")
+  echo "http://127.0.0.1:${PANEL_PORT}/api/health -> $CODE2"
   if [[ "$CODE2" == "200" ]]; then
     echo "✅ بک‌اند تعمیر شد! حالا لاگین را امتحان کنید."
   else
