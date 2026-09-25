@@ -164,6 +164,18 @@ def init_db():
         );
         """
     )
+    # مهاجرت جدول زمان‌بندی به چندپلتفرمه (instagram/youtube/tiktok + photo/video)
+    _cols = {r[1] for r in db.execute("PRAGMA table_info(ig_scheduled)")}
+    for _col, _typ, _dflt in (
+        ("platform", "TEXT", "'instagram'"),
+        ("media_type", "TEXT", "'photo'"),
+        ("title", "TEXT", "''"),
+    ):
+        if _col not in _cols:
+            db.execute(
+                "ALTER TABLE ig_scheduled ADD COLUMN %s %s NOT NULL DEFAULT %s"
+                % (_col, _typ, _dflt)
+            )
     db.commit()
     defaults = {
         "site_name": "پنل مدیریت اینستاگرام",
@@ -1190,6 +1202,199 @@ def _ig_save_upload(file_storage):
     return p
 
 
+def _compose_save_upload(file_storage):
+    """ذخیره فایل کامپوزر (عکس یا ویدیو). برمی‌گرداند (path, media_type)."""
+    if not file_storage or not file_storage.filename:
+        raise ValueError("فایل انتخاب نشده است.")
+    ext = os.path.splitext(file_storage.filename.lower())[1]
+    photo_exts = {".jpg", ".jpeg", ".png", ".webp"}
+    video_exts = {".mp4", ".mov", ".webm", ".mkv"}
+    if ext in photo_exts:
+        media_type = "photo"
+        limit = 10 * 1024 * 1024
+    elif ext in video_exts:
+        media_type = "video"
+        limit = 256 * 1024 * 1024
+    else:
+        raise ValueError("فرمت پشتیبانی نمی‌شود (عکس: jpg/png/webp — ویدیو: mp4/mov/webm).")
+    data = file_storage.read()
+    if len(data) > limit:
+        raise ValueError("حجم فایل بیشتر از حد مجاز است.")
+    if len(data) < 1024:
+        raise ValueError("فایل معتبر نیست.")
+    d = os.path.join(DATA_DIR, "ig_uploads")
+    os.makedirs(d, exist_ok=True)
+    p = os.path.join(d, "%s%s" % (uuid.uuid4().hex, ext))
+    with open(p, "wb") as f:
+        f.write(data)
+    return p, media_type
+
+
+def _publish_queue_row(r):
+    """انتشار یک ردیف از صف (چندپلتفرمه). برمی‌گرداند media_id."""
+    from pathlib import Path
+
+    uid = r["user_id"]
+    platform = r["platform"] or "instagram"
+    mtype = r["media_type"] or "photo"
+    path = r["photo_path"]
+    caption = r["caption"] or ""
+    if not os.path.exists(path):
+        raise RuntimeError("فایل پیدا نشد.")
+    if platform == "instagram":
+        cl = _ig_client(uid)
+        if not cl:
+            raise RuntimeError("اکانت اینستاگرام متصل نیست.")
+        with _ig_lock:
+            if mtype == "video":
+                media = cl.video_upload(Path(path), caption)
+            else:
+                media = cl.photo_upload(Path(path), caption)
+        return str(media.pk)
+    if platform == "youtube":
+        if mtype != "video":
+            raise RuntimeError("یوتیوب فقط ویدیو می‌پذیرد.")
+        vid, err = _yt_upload_video(uid, path, r["title"] or "ویدیو", caption)
+        if err:
+            raise RuntimeError(err)
+        return vid
+    if platform == "tiktok":
+        raise RuntimeError("تیک‌تاک هنوز وصل نیست.")
+    raise RuntimeError("پلتفرم نامشخص.")
+
+
+def _process_due():
+    """پردازش همه ردیف‌های رسیده؛ برمی‌گرداند لیست نتایج. نیازمند app context."""
+    now = now_iso()
+    rows = get_db().execute(
+        "SELECT id, user_id, photo_path, caption, title, platform, media_type, attempts"
+        " FROM ig_scheduled WHERE status = 'pending' AND publish_at <= ?",
+        (now,),
+    ).fetchall()
+    results = []
+    for r in rows:
+        try:
+            media_id = _publish_queue_row(r)
+            get_db().execute(
+                "UPDATE ig_scheduled SET status = 'sent', published_at = ?, media_id = ?, error = NULL WHERE id = ?",
+                (now_iso(), media_id, r["id"]),
+            )
+            try:
+                os.remove(r["photo_path"])
+            except OSError:
+                pass
+            results.append({"id": r["id"], "ok": True})
+        except Exception as e:
+            attempts = (r["attempts"] or 0) + 1
+            status = "failed" if attempts >= 3 else "pending"
+            get_db().execute(
+                "UPDATE ig_scheduled SET attempts = ?, status = ?, error = ? WHERE id = ?",
+                (attempts, status, str(e)[:300], r["id"]),
+            )
+            results.append({"id": r["id"], "ok": False})
+    get_db().commit()
+    return results
+
+
+def _process_due_async():
+    def _run():
+        with app.app_context():
+            try:
+                _process_due()
+            except Exception:
+                pass
+
+    threading.Thread(target=_run, daemon=True).start()
+
+
+@app.post("/api/publish/compose")
+@login_required
+def publish_compose():
+    """کامپوزر یکپارچه: یک فایل → چند پلتفرم → فوری یا زمان‌بندی."""
+    platforms = [
+        p.strip().lower()
+        for p in (request.form.get("platforms") or "").split(",")
+        if p.strip()
+    ]
+    platforms = [p for p in platforms if p in ("instagram", "youtube", "tiktok")]
+    if not platforms:
+        return err("پلتفرمی انتخاب نشده است.", "validation")
+    if "tiktok" in platforms:
+        return err("تیک‌تاک هنوز وصل نیست؛ فعلاً اینستاگرام و یوتیوب.", "validation")
+    caption = (request.form.get("caption") or "").strip()
+    title = (request.form.get("title") or "").strip()
+    privacy = (request.form.get("privacy") or "public").strip()
+    if privacy not in ("public", "unlisted", "private"):
+        privacy = "public"
+    if len(caption) > 2200:
+        return err("کپشن خیلی طولانی است.", "validation")
+    try:
+        path, media_type = _compose_save_upload(request.files.get("file"))
+    except ValueError as e:
+        return err(str(e), "validation")
+    if "youtube" in platforms and media_type != "video":
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+        return err("برای یوتیوب باید ویدیو انتخاب کنی.", "validation")
+
+    publish_at_raw = (request.form.get("publish_at") or "").strip()
+    immediate = False
+    if publish_at_raw:
+        try:
+            dt = datetime.fromisoformat(publish_at_raw.replace("Z", "+00:00"))
+        except (ValueError, TypeError, AttributeError):
+            try:
+                os.remove(path)
+            except OSError:
+                pass
+            return err("زمان انتشار معتبر نیست.", "validation")
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        now = datetime.now(timezone.utc)
+        if dt <= now:
+            return err("زمان انتشار باید در آینده باشد.", "validation")
+        if dt > now + timedelta(days=30):
+            try:
+                os.remove(path)
+            except OSError:
+                pass
+            return err("زمان‌بندی حداکثر تا ۳۰ روز آینده.", "validation")
+        publish_at = dt.astimezone(timezone.utc).isoformat()
+    else:
+        immediate = True
+        publish_at = now_iso()
+
+    db = get_db()
+    ids = []
+    import shutil
+
+    for pf in platforms:
+        # برای هر پلتفرم یک کپی از فایل (تا حذف یکی به دیگری آسیب نزند)
+        if len(platforms) > 1:
+            ext = os.path.splitext(path)[1]
+            p2 = os.path.join(os.path.dirname(path), "%s%s" % (uuid.uuid4().hex, ext))
+            shutil.copyfile(path, p2)
+        else:
+            p2 = path
+        cur = db.execute(
+            "INSERT INTO ig_scheduled(user_id, photo_path, caption, title, platform, media_type, publish_at, status, created_at)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?)",
+            (g.me["id"], p2, caption, title, pf, media_type, publish_at, now_iso()),
+        )
+        ids.append(cur.lastrowid)
+    try:
+        os.remove(path)
+    except OSError:
+        pass
+    db.commit()
+    if immediate:
+        _process_due_async()
+        return ok(ids=ids, message="در صف انتشار قرار گرفت؛ وضعیت را در «زمان‌بندی» ببین.")
+    return ok(ids=ids, message="زمان‌بندی ثبت شد.")
+
+
 @app.post("/api/ig/publish")
 @login_required
 def ig_publish():
@@ -1259,7 +1464,7 @@ def ig_schedule():
 @login_required
 def ig_scheduled_list():
     rows = get_db().execute(
-        "SELECT id, caption, publish_at, status, error, attempts, created_at, published_at, media_id"
+        "SELECT id, caption, title, platform, media_type, publish_at, status, error, attempts, created_at, published_at, media_id"
         " FROM ig_scheduled WHERE user_id = ? ORDER BY publish_at",
         (g.me["id"],),
     ).fetchall()
@@ -1346,43 +1551,7 @@ def internal_snapshot_all():
 @app.post("/api/internal/ig/run-scheduled")
 @_internal_required
 def internal_run_scheduled():
-    from pathlib import Path
-
-    now = now_iso()
-    rows = get_db().execute(
-        "SELECT id, user_id, photo_path, caption, attempts FROM ig_scheduled"
-        " WHERE status = 'pending' AND publish_at <= ?",
-        (now,),
-    ).fetchall()
-    results = []
-    for r in rows:
-        try:
-            cl = _ig_client(r["user_id"])
-            if not cl:
-                raise RuntimeError("اکانت اینستاگرام متصل نیست")
-            if not os.path.exists(r["photo_path"]):
-                raise RuntimeError("فایل عکس پیدا نشد")
-            with _ig_lock:
-                media = cl.photo_upload(Path(r["photo_path"]), r["caption"] or "")
-            get_db().execute(
-                "UPDATE ig_scheduled SET status = 'sent', published_at = ?, media_id = ? WHERE id = ?",
-                (now_iso(), str(media.pk), r["id"]),
-            )
-            try:
-                os.remove(r["photo_path"])
-            except OSError:
-                pass
-            results.append({"id": r["id"], "ok": True})
-        except Exception as e:
-            attempts = (r["attempts"] or 0) + 1
-            status = "failed" if attempts >= 3 else "pending"
-            get_db().execute(
-                "UPDATE ig_scheduled SET attempts = ?, status = ?, error = ? WHERE id = ?",
-                (attempts, status, str(e)[:300], r["id"]),
-            )
-            results.append({"id": r["id"], "ok": False})
-    get_db().commit()
-    return ok(results=results)
+    return ok(results=_process_due())
 
 
 # ---------------------------------------------------------------- یوتیوب (OAuth گوگل)
@@ -1406,6 +1575,7 @@ _YT_SCOPES = [
     "email",
     "profile",
     "https://www.googleapis.com/auth/youtube.readonly",
+    "https://www.googleapis.com/auth/youtube.upload",
 ]
 
 _yt_states = {}  # state -> {"uid": int, "at": float}
@@ -1569,6 +1739,112 @@ def _yt_channel_by_token(access_token):
         },
         None,
     )
+
+
+def _yt_upload_video(uid, file_path, title, description="", privacy="public"):
+    """آپلود ویدیو به یوتیوب با پروتکل resumable. برمی‌گرداند (video_id, error)."""
+    import mimetypes
+
+    token = _yt_access(uid)
+    if not token:
+        return None, "توکن یوتیوب نامعتبر است؛ دوباره وصل شو."
+    if privacy not in ("public", "unlisted", "private"):
+        privacy = "public"
+    try:
+        size = os.path.getsize(file_path)
+    except OSError:
+        return None, "فایل ویدیو پیدا نشد."
+    if size > 256 * 1024 * 1024:
+        return None, "حجم ویدیو بیشتر از ۲۵۶ مگابایت است."
+    mime = mimetypes.guess_type(file_path)[0] or "video/mp4"
+    meta = {
+        "snippet": {
+            "title": (title or "ویدیو").strip()[:100],
+            "description": (description or "")[:5000],
+        },
+        "status": {"privacyStatus": privacy},
+    }
+
+    def _init(tok):
+        url = "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status"
+        req = _urlreq.Request(
+            url,
+            data=_json.dumps(meta).encode(),
+            headers={
+                "Authorization": "Bearer " + tok,
+                "Content-Type": "application/json; charset=UTF-8",
+                "X-Upload-Content-Length": str(size),
+                "X-Upload-Content-Type": mime,
+            },
+            method="POST",
+        )
+        with _urlreq.urlopen(req, timeout=30) as resp:
+            return resp.headers.get("Location")
+
+    try:
+        session_url = _init(token)
+    except _urlreq.HTTPError as e:
+        if e.code in (401, 403):
+            token = _yt_refresh(uid)
+            if token:
+                try:
+                    session_url = _init(token)
+                except _urlreq.HTTPError as e2:
+                    if e2.code == 403:
+                        return None, "یوتیوب اجازه آپلود نداد (کد 403). احتمالاً اسکوپ youtube.upload را نداری؛ دوباره «اتصال با گوگل» را بزن."
+                    return None, "خطای شروع آپلود (کد %s)." % e2.code
+            else:
+                return None, "توکن یوتیوب منقضی شده؛ دوباره وصل شو."
+        elif e.code == 403:
+            return None, "یوتیوب اجازه آپلود نداد (کد 403). اسکوپ youtube.upload لازم است؛ دوباره «اتصال با گوگل» را بزن."
+        else:
+            return None, "خطای شروع آپلود (کد %s)." % e.code
+    except Exception as e:
+        return None, "خطای شروع آپلود: " + str(e)[:150]
+    if not session_url:
+        return None, "یوتیوب آدرس آپلود برنگرداند."
+
+    chunk_size = 8 * 1024 * 1024
+    try:
+        with open(file_path, "rb") as f:
+            offset = 0
+            while offset < size:
+                chunk = f.read(chunk_size)
+                if not chunk:
+                    break
+                end = offset + len(chunk) - 1
+                req = _urlreq.Request(
+                    session_url,
+                    data=chunk,
+                    headers={
+                        "Content-Type": mime,
+                        "Content-Length": str(len(chunk)),
+                        "Content-Range": "bytes %d-%d/%d" % (offset, end, size),
+                    },
+                    method="PUT",
+                )
+                try:
+                    with _urlreq.urlopen(req, timeout=180) as resp:
+                        if resp.status in (200, 201):
+                            j = _json.loads(resp.read().decode())
+                            return j.get("id"), None
+                except _urlreq.HTTPError as e:
+                    if e.code == 308:
+                        rng = e.headers.get("Range", "")
+                        if rng and "-" in rng:
+                            try:
+                                offset = int(rng.rsplit("-", 1)[-1]) + 1
+                            except ValueError:
+                                offset = end + 1
+                        else:
+                            offset = end + 1
+                        f.seek(offset)
+                        continue
+                    return None, "خطای آپلود (کد %s)." % e.code
+                offset = end + 1
+    except Exception as e:
+        return None, "خطا حین آپلود: " + str(e)[:150]
+    return None, "آپلود ناتمام ماند؛ دوباره تلاش کن."
 
 
 def _yt_popup(msg, ok_):
