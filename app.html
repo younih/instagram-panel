@@ -149,98 +149,85 @@
     @media(max-width:720px){.app{display:block}.sidebar{display:none}.content{padding:14px 14px 90px}.topbar{align-items:flex-start}.page-title h1{font-size:21px}.kpi-grid{grid-template-columns:1fr 1fr;gap:9px}.kpi{padding:14px}.number{font-size:21px}.ig-grid{grid-template-columns:repeat(2,1fr)}.tool-card{padding:16px}.toast{left:14px;right:14px;bottom:22px;text-align:center}}
     @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 
-    /* ===== آرام و شفاف (۰۴) — دیزاین‌سیستم ===== */
+    /* ===== تم تیره «سبز نئون» — الهام‌گرفته از SalesOps ===== */
     :root{
-      --bg:#f5fafb;--paper:#ffffff;--paper-2:#edf3f6;--ink:#17303b;--muted:#5f7d89;--line:#dde8ec;
-      --accent:#0c728b;--accent-soft:#dcebef;--accent-softer:#d9eef2;--chip:#c7e0e6;
-      --blue:#0c728b;--green:#08785d;--amber:#a86a08;--red:#c0392b;--violet:#5b7fa6;
-      --shadow:0 5px 20px rgba(46,79,91,.07);--radius:12px;--chart-grid:#e2ecef;--area:#e3eef1;
+      color-scheme:dark;
+      --bg:#020203;--paper:#050607;--paper-2:#101214;--ink:#eeeeee;--muted:#8f8f8f;--line:#191b1d;
+      --accent:#45ba50;--accent-2:#00b1d8;--cyan:#00b1d8;
+      --blue:#00b1d8;--green:#45ba50;--amber:#ff8b25;--red:#f14d4c;--violet:#ad87ed;
+      --nav:#040406;--nav-ink:#eeeeee;
+      --shadow:none;--radius:12px;--chart-grid:#191b1d;--area:#0a120a;
     }
-    @media(prefers-color-scheme:dark){
-      :root{--bg:#0e1a20;--paper:#15242b;--paper-2:#1b2e36;--ink:#e9f2f5;--muted:#93a9b3;--line:#24363e;
-        --accent:#3aa7bd;--accent-soft:#16262d;--accent-softer:#1b3038;--chip:#1e343c;
-        --blue:#3aa7bd;--green:#4ade80;--amber:#f0b429;--red:#f87171;
-        --shadow:0 10px 30px rgba(0,0,0,.35);--chart-grid:#22353d;--area:#16272e}
-    }
-    body{background:var(--bg)}
-    .sidebar{background:var(--accent-soft);color:var(--ink)}
-    .profile{border-bottom:1px solid rgba(23,48,59,.12)}
-    .avatar{background:#fff;color:var(--accent);border:0;border-radius:14px;box-shadow:0 4px 14px rgba(38,75,89,.10)}
+    *{-webkit-font-smoothing:antialiased}
+    body{background:var(--bg);color:var(--ink)}
+    .app{grid-template-columns:minmax(0,1fr) 260px}
+    /* --- سایدبار --- */
+    .sidebar{background:var(--nav);border-left:1px solid var(--line);padding:0}
+    .profile{height:64px;padding:0 20px;border-bottom:1px solid var(--line);gap:12px}
+    .avatar{background:linear-gradient(135deg,var(--accent),var(--cyan));color:#020203;border:0;border-radius:10px;width:36px;height:36px;font-size:16px}
     .profile small{color:var(--muted)}
-    .nav-label{color:#7d99a4}
-    .nav-btn{color:#41606c;border-radius:9px;font-size:13px;transition:background .15s}
-    .nav-btn:hover{background:rgba(255,255,255,.65);color:var(--ink);transform:none}
-    .nav-btn.active{background:#fff;color:var(--accent);font-weight:700;box-shadow:0 4px 14px rgba(38,75,89,.08)}
-    .side-note{background:var(--chip);color:var(--ink);border:0;border-radius:12px}
+    nav{padding:16px 12px}
+    .sidebar nav{padding:16px 12px}
+    .nav-label{color:var(--muted);font-size:11px}
+    .nav-btn{color:var(--muted);border-radius:8px;font-size:14px;font-weight:500}
+    .nav-btn:hover{background:var(--paper-2);color:var(--ink)}
+    .nav-btn.active{background:var(--paper-2);color:var(--ink);font-weight:600;box-shadow:inset -3px 0 var(--accent)}
+    .side-note{background:var(--paper-2);border:1px solid var(--line);color:var(--muted);border-radius:12px}
     .side-note b{color:var(--ink)}
-    .card{background:var(--paper);border:0;border-radius:var(--radius);box-shadow:var(--shadow);transition:none}
-    .kpi::before{display:none}
-    .kpi:hover{transform:none}
-    .kpi-f .kpi-ico,.kpi-g .kpi-ico,.kpi-p .kpi-ico,.kpi-e .kpi-ico{background:var(--accent-softer)}
-    .kpi-grid .kpi:first-child{background:var(--accent);color:#fff}
-    .kpi-grid .kpi:first-child .kpi-top{color:rgba(255,255,255,.85)}
-    .kpi-grid .kpi:first-child .number{color:#fff}
-    .kpi-grid .kpi:first-child .delta{color:#b8f4e2}
-    .kpi-grid .kpi:first-child .kpi-ico{background:rgba(255,255,255,.18)}
-    .delta{color:var(--green)}
+    /* --- هدر چسبان --- */
+    .content{padding:24px}
+    .topbar{position:sticky;top:0;z-index:30;background:rgba(2,2,3,.78);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);margin:-24px -24px 24px;padding:13px 24px}
+    .page-title h1{font-size:20px;font-weight:600}
+    .page-title p{font-size:13px}
+    .live-badge{background:var(--paper-2);border:1px solid var(--line);color:var(--muted)}
+    .live-badge:before{background:var(--muted)}
+    .live-badge.on{background:rgba(69,186,80,.12);color:var(--green);border-color:transparent}
+    .live-badge.on:before{background:var(--green);box-shadow:0 0 0 3px rgba(69,186,80,.15)}
+    /* --- کارت‌ها --- */
+    .card{background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:none}
+    .kpi{transition:border-color .2s}
+    .kpi:hover{border-color:rgba(69,186,80,.5)}
+    .kpi-f .kpi-ico,.kpi-g .kpi-ico,.kpi-p .kpi-ico,.kpi-e .kpi-ico{background:var(--paper-2)}
+    .number{font-size:28px;font-weight:800}
+    .delta{color:var(--green);font-weight:600;font-size:12px}
     .delta.down{color:var(--red)}
-    .primary{background:var(--accent);border:0;color:#fff;padding:11px 20px;border-radius:12px;font-weight:700;box-shadow:0 8px 20px rgba(12,114,139,.22);transition:transform .15s,box-shadow .15s}
-    .primary:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(12,114,139,.30);opacity:1}
-    .primary:active{transform:none}
-    .secondary{border-radius:12px;padding:10px 16px;transition:.15s}
-    .secondary:hover{background:var(--paper-2);border-color:var(--accent);color:var(--accent)}
-    .choice{border-radius:11px;padding:8px 15px}
-    .choice.active{background:var(--accent);border-color:transparent;color:#fff;box-shadow:0 6px 16px rgba(12,114,139,.22)}
-    .mini-btn{border-radius:9px;transition:.15s}
+    .tool-card h3{font-size:16px;font-weight:600}
+    .card-title h2{font-size:16px;font-weight:600}
+    .section-head h2{font-size:22px;font-weight:700}
+    /* --- دکمه‌ها و فرم‌ها --- */
+    .primary{background:var(--accent);border:0;color:#020203;font-weight:700}
+    .primary:hover{opacity:.88;transform:none;box-shadow:none}
+    .secondary{border-radius:10px}
+    .secondary:hover{border-color:var(--accent);color:var(--accent);background:none}
+    .chip,.icon-btn{background:var(--paper-2);border:1px solid var(--line);color:var(--ink)}
+    .choice.active{background:var(--accent);border-color:transparent;color:#020203}
+    .mini-btn{background:var(--paper-2)}
     .mini-btn:hover{border-color:var(--accent);color:var(--accent)}
-    .mini-btn.danger{color:var(--red);border-color:var(--red)}
+    .mini-btn.danger{color:var(--red);border-color:rgba(241,77,76,.5)}
     .mini-btn.danger:hover{color:var(--red);border-color:var(--red)}
-    .field input,.field select,.field textarea{border-radius:12px;padding:11px 13px;border:1.5px solid var(--line);transition:border .15s,box-shadow .15s}
-    .field input:focus,.field select:focus,.field textarea:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px rgba(12,114,139,.12)}
+    .field input,.field select,.field textarea{background:var(--paper-2);border:1px solid var(--line);color:var(--ink);border-radius:10px}
+    .field input:focus,.field select:focus,.field textarea:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px rgba(69,186,80,.15)}
     .cmp-pf-card:hover{border-color:var(--accent)}
-    .cmp-pf-card input{accent-color:var(--accent)}
+    /* --- لیست‌ها و متفرقه --- */
+    .social-row:hover,.best-row:hover{background:var(--paper-2);border-radius:8px}
+    .best-thumb{background:var(--paper-2)}
+    .beng{color:var(--accent)}
+    .toast{background:var(--paper-2);border:1px solid var(--line);color:var(--ink);font-weight:600}
+    kbd{background:var(--paper-2);border:1px solid var(--line)}
+    .empty-note{color:var(--muted)}
+    .welcome h2{font-size:22px;font-weight:700}
+    .st-sent{background:rgba(69,186,80,.12);color:var(--green)}
+    .st-pending{background:rgba(255,139,37,.12);color:var(--amber)}
+    .st-failed{background:rgba(241,77,76,.12);color:var(--red)}
+    .msg.mine{background:var(--accent);color:#020203;border-color:transparent}
     .notice.err{border-color:var(--red);color:var(--red)}
     .sched-err{color:var(--red)}
-    .msg.mine{background:var(--accent);color:#fff;border-color:transparent}
-    .st-sent{background:#e2f3ec;color:#08785d}
-    .st-pending{background:#fdf3e0;color:#a86a08}
-    .st-failed{background:#fdecec;color:#b3261e}
-    .page-title h1{font-size:26px;font-weight:800;letter-spacing:-.2px}
-    .section-head h2{font-size:22px;font-weight:800}
-    .card-title h2{font-size:16px;font-weight:700}
-    .ig-card:hover{transform:none}
-    .toast{border-radius:13px;font-weight:600}
+    .story-item{background:var(--paper);border:1px solid var(--line)}
     ::-webkit-scrollbar{width:9px;height:9px}
-    ::-webkit-scrollbar-thumb{background:#b9cdd4;border-radius:99px;border:2px solid transparent;background-clip:content-box}
-    /* --- داشبورد آرام --- */
-    .welcome{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px;flex-wrap:wrap}
-    .welcome h2{margin:0;font-size:22px;font-weight:800;letter-spacing:-.2px}
-    .welcome p{margin:4px 0 0;color:var(--muted);font-size:12px}
-    .best-list{display:grid}
-    .best-row{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid var(--line)}
-    .best-row:last-child{border-bottom:0}
-    .best-thumb{width:46px;height:46px;border-radius:11px;background:var(--accent-softer);display:grid;place-items:center;overflow:hidden;flex:0 0 auto;font-size:20px}
-    .best-thumb img{width:100%;height:100%;object-fit:cover;display:block}
-    .best-row .bbody{flex:1;min-width:0}
-    .best-row .bbody b{display:block;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .best-row .bbody small{color:var(--muted);font-size:10px}
-    .beng{font-style:normal;font-weight:800;font-size:14px;color:var(--accent)}
-    @media(prefers-color-scheme:dark){
-      .sidebar{background:#101e24}
-      .profile{border-bottom-color:rgba(255,255,255,.08)}
-      .avatar{background:#1c323a;box-shadow:none}
-      .nav-btn{color:#9db4bd}
-      .nav-btn:hover{background:rgba(255,255,255,.06);color:var(--ink)}
-      .nav-btn.active{background:#1c323a;color:var(--accent);box-shadow:none}
-      .nav-label{color:#6d8a95}
-      .side-note{background:#1b3038}
-      .st-sent{background:#123a24;color:#4ade80}
-      .st-pending{background:#3a2c10;color:#f0b429}
-      .st-failed{background:#3d1512;color:#f87171}
-      ::-webkit-scrollbar-thumb{background:#33404f;border:2px solid transparent;background-clip:content-box;border-radius:99px}
-    }
-  
-    /* ===== استوری و هایلایت ===== */
+    ::-webkit-scrollbar-thumb{background:#2a2e31;border-radius:99px;border:2px solid transparent;background-clip:content-box}
+    ::-webkit-scrollbar-track{background:transparent}
+
+/* ===== استوری و هایلایت ===== */
     .story-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
     .story-item{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center;box-shadow:var(--shadow)}
     .story-item img{width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:8px;background:var(--paper-2)}
@@ -791,7 +778,7 @@
     }
     // area + line
     var grad=ctx.createLinearGradient(0,pad.t,0,H-pad.b);
-    grad.addColorStop(0,'rgba(12,114,139,.22)');grad.addColorStop(1,'rgba(12,114,139,0)');
+    grad.addColorStop(0,'rgba(69,186,80,.22)');grad.addColorStop(1,'rgba(69,186,80,0)');
     ctx.beginPath();ctx.moveTo(X(0),Y(vals[0]));
     vals.forEach(function(v,i){ctx.lineTo(X(i),Y(v))});
     ctx.lineTo(X(vals.length-1),H-pad.b);ctx.lineTo(X(0),H-pad.b);ctx.closePath();
@@ -823,7 +810,7 @@
       html+='<div class="hday">'+days[d]+'</div>';
       for(h=0;h<24;h++){
         var a=mx?grid[d][h]/mx:0;
-        html+='<div class="hcell" title="'+days[d]+' ساعت '+h+': '+grid[d][h]+' پست" style="background:rgba(12,114,139,'+(0.05+a*0.9).toFixed(2)+')"></div>';
+        html+='<div class="hcell" title="'+days[d]+' ساعت '+h+': '+grid[d][h]+' پست" style="background:rgba(69,186,80,'+(0.05+a*0.9).toFixed(2)+')"></div>';
       }
     }
     document.getElementById('heatmap').innerHTML=html+'</div>';
