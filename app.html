@@ -239,7 +239,22 @@
       .st-failed{background:#3d1512;color:#f87171}
       ::-webkit-scrollbar-thumb{background:#33404f;border:2px solid transparent;background-clip:content-box;border-radius:99px}
     }
-  </style>
+  
+    /* ===== استوری و هایلایت ===== */
+    .story-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+    .story-item{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center;box-shadow:var(--shadow)}
+    .story-item img{width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:8px;background:var(--paper-2)}
+    .story-item .mini-btn{margin-top:6px}
+    .hl-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+    .hl-row:last-child{border-bottom:0}
+    .hl-row img{width:48px;height:48px;border-radius:50%;object-fit:cover;background:var(--paper-2);flex-shrink:0}
+    .hl-row .who{flex:1;min-width:0}
+    .hl-row .who b{display:block;font-size:14px}
+    .hl-row .who span{font-size:11px;color:var(--muted)}
+    .hl-pick{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+    .hl-pick label{display:flex;align-items:center;gap:7px;background:var(--paper-2);border:1px solid var(--line);border-radius:10px;padding:5px 10px 5px 5px;cursor:pointer;font-size:12px}
+    .hl-pick img{width:30px;height:42px;object-fit:cover;border-radius:6px}
+</style>
 </head>
 <body>
 <script>
@@ -269,6 +284,7 @@
       <button class="nav-btn" data-panel="comments">💬 کامنت‌ها</button>
       <button class="nav-btn" data-panel="direct">✉️ دایرکت</button>
       <button class="nav-btn" data-panel="followers">👥 فالوور</button>
+      <button class="nav-btn" data-panel="stories">📖 استوری و هایلایت</button>
       <button class="nav-btn" data-panel="publish">🚀 انتشار</button>
       <button class="nav-btn" data-panel="scheduled">⏰ زمان‌بندی</button>
       <div class="nav-label">یوتیوب</div>
@@ -463,6 +479,17 @@
     <section class="panel" id="profile">
       <div class="section-head"><div><h2>پروفایل واقعی</h2><p>اطلاعات زنده از اکانت متصل</p></div><button class="secondary" id="refreshProfile">به‌روزرسانی</button></div>
       <article class="card tool-card" id="profileCard"><div class="empty-note">هنوز اکانتی متصل نیست.</div></article>
+      <article class="card tool-card" style="margin-top:14px">
+        <h3>✏️ ویرایش پروفایل</h3>
+        <div class="form-stack" style="margin-top:10px">
+          <div class="field" style="margin-top:0"><label for="peFullName">نام</label><input type="text" id="peFullName" maxlength="64"></div>
+          <div class="field"><label for="peBio">بیو (حداکثر ۱۵۰ کاراکتر)</label><textarea id="peBio" maxlength="150" style="min-height:80px"></textarea></div>
+          <div class="field"><label for="peUrl">لینک وب‌سایت</label><input type="text" id="peUrl" dir="ltr" placeholder="https://…"></div>
+        </div>
+        <div class="tool-actions"><button class="primary" id="peSave">ذخیره تغییرات</button></div>
+        <div class="field" style="margin-top:16px"><label for="pePhoto">تغییر عکس پروفایل</label><input type="file" id="pePhoto" accept="image/jpeg,image/png,image/webp"></div>
+        <div class="tool-actions"><button class="secondary" id="pePhotoBtn">آپلود عکس پروفایل</button></div>
+      </article>
     </section>
 
     <section class="panel" id="medias">
@@ -480,6 +507,16 @@
           <button class="primary" id="sendComment">ارسال کامنت</button>
           <button class="secondary" id="cancelReply" style="display:none">لغو پاسخ</button>
         </div>
+      </article>
+      <article class="card tool-card" style="margin-top:14px">
+        <h3>🤖 پاسخ خودکار به کامنت‌ها</h3>
+        <p>هر ۱۵ دقیقه به کامنت‌های جواب‌داده‌نشدهٔ ۵ پست آخر جواب می‌دهد (حداکثر ۸ کامنت در هر دور). از <kbd>{name}</kbd> برای درج نام کاربر استفاده کن.</p>
+        <div class="field" style="margin-top:0"><label for="arText">متن پاسخ</label><textarea id="arText" maxlength="500" placeholder="مثلاً: مرسی {name} عزیز! 🌹"></textarea></div>
+        <div class="tool-actions">
+          <button class="primary" id="arSave">ذخیره و فعال‌سازی</button>
+          <button class="secondary" id="arDisable" style="display:none">غیرفعال‌سازی</button>
+        </div>
+        <div class="helper" id="arState"></div>
       </article>
     </section>
 
@@ -502,10 +539,38 @@
           <button class="choice active" data-tab="followers">فالوورها</button>
           <button class="choice" data-tab="following">فالووینگ‌ها</button>
           <button class="choice" data-tab="notback">فالوبک نکرده‌ها</button>
+          <button class="choice" data-tab="requests">درخواست‌ها</button>
+          <button class="choice" data-tab="blocked">بلاک‌شده‌ها</button>
         </div>
         <div class="field"><input id="socialSearch" placeholder="جستجو در نام کاربری…"></div>
         <div id="socialList" style="margin-top:8px"><div class="empty-note">—</div></div>
         <div class="helper">دریافت لیست‌ها ممکن است چند ثانیه طول بکشد.</div>
+      </article>
+    </section>
+
+    <section class="panel" id="stories">
+      <div class="section-head"><div><h2>استوری و هایلایت</h2><p>استوری‌ها، بینندگان و هایلایت‌ها</p></div><button class="secondary" id="refreshStories">به‌روزرسانی</button></div>
+      <article class="card tool-card">
+        <h3>📤 انتشار استوری</h3>
+        <div class="field" style="margin-top:10px"><label for="storyFile">عکس استوری (jpg/png/webp تا ۱۰ مگابایت)</label><input type="file" id="storyFile" accept="image/jpeg,image/png,image/webp"></div>
+        <div class="field"><label for="storyCaption">کپشن استوری (اختیاری)</label><input type="text" id="storyCaption" maxlength="200" placeholder="متن استوری…"></div>
+        <div class="tool-actions"><button class="primary" id="storyUploadBtn">انتشار استوری</button></div>
+      </article>
+      <article class="card tool-card" style="margin-top:14px">
+        <h3>استوری‌های فعال</h3>
+        <div id="storyList" style="margin-top:10px"><div class="empty-note">—</div></div>
+      </article>
+      <article class="card tool-card" id="storyViewersCard" style="margin-top:14px;display:none">
+        <div class="card-title"><div><h3>👁️ بینندگان استوری</h3><p id="viewersCount"></p></div><button class="secondary" id="closeViewers">بستن</button></div>
+        <div id="storyViewersList"><div class="empty-note">—</div></div>
+      </article>
+      <article class="card tool-card" style="margin-top:14px">
+        <h3>✨ هایلایت‌ها</h3>
+        <div id="hlList" style="margin-top:8px"><div class="empty-note">—</div></div>
+        <div class="field" style="margin-top:14px"><label for="hlTitle">ساخت هایلایت جدید</label><input type="text" id="hlTitle" maxlength="50" placeholder="عنوان هایلایت…"></div>
+        <div class="helper">استوری‌هایی که در این هایلایت باشند را انتخاب کن:</div>
+        <div class="hl-pick" id="hlStoryPick"><div class="empty-note">—</div></div>
+        <div class="tool-actions"><button class="primary" id="hlCreateBtn">ساخت هایلایت</button></div>
       </article>
     </section>
 
@@ -566,6 +631,7 @@
     comments:['کامنت‌ها','مدیریت کامنت‌های پست‌ها'],
     direct:['دایرکت','گفتگوهای اینستاگرام'],
     followers:['فالوور','مدیریت دنبال‌کننده‌ها'],
+    stories:['استوری و هایلایت','استوری‌ها، بینندگان و هایلایت‌ها'],
     publish:['انتشار چندپلتفرمه','یک فایل، چند مقصد: اینستاگرام و یوتیوب'],
     scheduled:['زمان‌بندی‌شده‌ها','صف انتشار چندپلتفرمه'],
     youtube:['یوتیوب','آمار کانال و ویدیوها'],
@@ -580,6 +646,8 @@
     window.scrollTo(0,0);
     if(id==='youtube')loadYouTube();
     if(id==='connect')ytRefreshConnUI();
+    if(id==='stories'){loadStories();loadHighlights();}
+    if(id==='comments'){loadAutoreply();}
   }
   document.querySelectorAll('[data-panel]').forEach(function(b){b.addEventListener('click',function(){showPanel(b.dataset.panel)})});
   document.querySelectorAll('#pfTabs .choice').forEach(function(b){
@@ -995,6 +1063,8 @@
       '</div>'+
       (p.biography?'<div class="ig-bio">'+esc(p.biography)+'</div>':'')+
       '<div class="helper">'+(p.is_private?'حساب خصوصی':'حساب عمومی')+(p.is_verified?' · تیک آبی':'')+'</div>';
+    var _fn=document.getElementById('peFullName');if(_fn)_fn.value=p.full_name||'';
+    var _bb=document.getElementById('peBio');if(_bb)_bb.value=p.biography||'';
   }
   function renderMedias(list){
     latestMedias=list;latestMediaId=list.length?list[0].id:null;
@@ -1143,11 +1213,11 @@
   document.getElementById('refreshThreads').addEventListener('click',function(){loadThreads();if(activeThread)loadMessages()});
 
   /* ---------- فالوور ---------- */
-  var socialCache={followers:null,following:null},socialTab='followers',socialLoading=false;
+  var socialCache={followers:null,following:null,requests:null,blocked:null},socialTab='followers',socialLoading=false;
   document.querySelectorAll('#followers .choice').forEach(function(b){
     b.addEventListener('click',function(){
       document.querySelectorAll('#followers .choice').forEach(function(x){x.classList.remove('active')});
-      b.classList.add('active');socialTab=b.dataset.tab;renderSocial();
+      b.classList.add('active');socialTab=b.dataset.tab;if(socialTab==='requests'||socialTab==='blocked'){ensureReqBlock(socialTab)}else{renderSocial()};
     });
   });
   document.getElementById('socialSearch').addEventListener('input',renderSocial);
@@ -1158,6 +1228,7 @@
   }
   function renderSocial(){
     var box=document.getElementById('socialList');
+    if(socialTab==='requests'||socialTab==='blocked'){renderReqBlock();return}
     var list=socialTab==='followers'?socialCache.followers:(socialTab==='following'?socialCache.following:notBackList());
     if(!list){box.innerHTML='<div class="empty-note">«به‌روزرسانی» را بزن.</div>';return}
     var q=document.getElementById('socialSearch').value.trim().toLowerCase();
@@ -1175,11 +1246,12 @@
       }
       return '<div class="social-row">'+
         (u.profile_pic_url?'<img src="'+esc(u.profile_pic_url)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'<img alt="">')+
-        '<div class="who"><b>@'+esc(u.username)+'</b><span>'+esc(u.full_name||'')+(u.is_verified?' ✓':'')+'</span></div>'+btn+'</div>';
+        '<div class="who"><b>@'+esc(u.username)+'</b><span>'+esc(u.full_name||'')+(u.is_verified?' ✓':'')+'</span></div>'+'<div style="display:flex;gap:6px;flex-shrink:0">'+btn+'<button class="mini-btn danger" data-act="block" data-id="'+u.pk+'">بلاک</button></div></div>';
     }).join('');
   }
   function loadSocial(){
     if(!guard())return;
+    if(socialTab==='requests'||socialTab==='blocked'){ensureReqBlock(socialTab);return}
     if(socialLoading)return;
     socialLoading=true;
     document.getElementById('socialList').innerHTML='<div class="empty-note">در حال دریافت…</div>';
@@ -1197,9 +1269,17 @@
     var b=ev.target.closest('[data-act]');if(!b)return;
     var act=b.getAttribute('data-act'),id=b.getAttribute('data-id');
     if(act==='unfollow'&&!confirm('آنفالو شود؟'))return;
+    if(act==='block'&&!confirm('این کاربر بلاک شود؟'))return;
+    if(act==='req-decline'&&!confirm('درخواست رد شود؟'))return;
     b.disabled=true;
-    api('/api/ig/'+act,{method:'POST',body:JSON.stringify({user_id:id})})
-      .then(function(){toast('انجام شد');log(act+' '+id);loadSocial()})
+    var path='/api/ig/'+act;
+    if(act==='req-approve')path='/api/ig/follow-request/approve';
+    else if(act==='req-decline')path='/api/ig/follow-request/decline';
+    api(path,{method:'POST',body:JSON.stringify({user_id:id})})
+      .then(function(){toast('انجام شد');log(act+' '+id);
+        if(socialTab==='requests'||socialTab==='blocked'){socialCache[socialTab]=null;ensureReqBlock(socialTab)}
+        else{loadSocial()}
+      })
       .catch(function(e){toast(e.message);b.disabled=false});
   });
 
@@ -1360,6 +1440,180 @@
     });
   });
   setTimeout(function(){if(!window.__me){refreshStatus(true).then(function(j){if(j&&j.connected){loadProfile();loadMedias();loadDashboard()}})}},2500);
+
+  /* ---------- درخواست‌ها و بلاک‌شده‌ها ---------- */
+  function ensureReqBlock(tab){
+    var box=document.getElementById('socialList');
+    box.innerHTML='<div class="empty-note">در حال دریافت…</div>';
+    var url=tab==='requests'?'/api/ig/follow-requests':'/api/ig/blocked';
+    api(url).then(function(j){socialCache[tab]=j.users;renderSocial()})
+      .catch(function(e){box.innerHTML='<div class="empty-note">'+esc(e.message)+'</div>'});
+  }
+  function renderReqBlock(){
+    var box=document.getElementById('socialList');
+    var list=socialCache[socialTab];
+    if(!list){box.innerHTML='<div class="empty-note">«به‌روزرسانی» را بزن.</div>';return}
+    var q=document.getElementById('socialSearch').value.trim().toLowerCase();
+    var items=list.filter(function(u){return !q||u.username.toLowerCase().indexOf(q)>-1||(u.full_name||'').toLowerCase().indexOf(q)>-1});
+    if(!items.length){box.innerHTML='<div class="empty-note">موردی پیدا نشد.</div>';return}
+    box.innerHTML='<div class="helper" style="margin:0 0 6px">'+fa(items.length)+' نفر</div>'+items.map(function(u){
+      var btns=socialTab==='requests'
+        ?'<button class="mini-btn" data-act="req-approve" data-id="'+u.pk+'">تأیید</button><button class="mini-btn danger" data-act="req-decline" data-id="'+u.pk+'">رد</button>'
+        :'<button class="mini-btn" data-act="unblock" data-id="'+u.pk+'">آنبلاک</button>';
+      return '<div class="social-row">'+
+        (u.profile_pic_url?'<img src="'+esc(u.profile_pic_url)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'<img alt="">')+
+        '<div class="who"><b>@'+esc(u.username)+'</b><span>'+esc(u.full_name||'')+(u.is_verified?' ✓':'')+'</span></div>'+
+        '<div style="display:flex;gap:6px;flex-shrink:0">'+btns+'</div></div>';
+    }).join('');
+  }
+
+  /* ---------- استوری و هایلایت ---------- */
+  var storyCache=[];
+  function loadStories(){
+    if(!guard())return;
+    document.getElementById('storyList').innerHTML='<div class="empty-note">در حال دریافت…</div>';
+    api('/api/ig/stories').then(function(j){
+      storyCache=j.stories||[];
+      renderStories();renderHlPick();
+    }).catch(function(e){
+      document.getElementById('storyList').innerHTML='<div class="empty-note">'+esc(e.message)+'</div>';
+      if(!notConn(e))toast(e.message);
+    });
+  }
+  function renderStories(){
+    var box=document.getElementById('storyList');
+    if(!storyCache.length){box.innerHTML='<div class="empty-note">استوری فعالی نداری.</div>';return}
+    box.innerHTML='<div class="story-grid">'+storyCache.map(function(s){
+      return '<div class="story-item">'+
+        (s.thumbnail_url?'<img src="'+esc(s.thumbnail_url)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'')+
+        '<button class="mini-btn" data-story="'+s.pk+'">👁️ بینندگان</button></div>';
+    }).join('')+'</div>';
+  }
+  document.getElementById('storyList').addEventListener('click',function(ev){
+    var b=ev.target.closest('[data-story]');if(!b)return;
+    var pk=b.getAttribute('data-story');
+    b.disabled=true;
+    api('/api/ig/story/'+pk+'/viewers').then(function(j){
+      document.getElementById('storyViewersCard').style.display='';
+      document.getElementById('viewersCount').textContent=fa(j.count)+' بیننده';
+      document.getElementById('storyViewersList').innerHTML=j.users.length?j.users.map(function(u){
+        return '<div class="social-row">'+
+          (u.profile_pic_url?'<img src="'+esc(u.profile_pic_url)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'<img alt="">')+
+          '<div class="who"><b>@'+esc(u.username)+'</b><span>'+esc(u.full_name||'')+'</span></div></div>';
+      }).join(''):'<div class="empty-note">هنوز کسی ندیده.</div>';
+    }).catch(function(e){toast(e.message)}).then(function(){b.disabled=false});
+  });
+  document.getElementById('closeViewers').addEventListener('click',function(){
+    document.getElementById('storyViewersCard').style.display='none';
+  });
+  document.getElementById('storyUploadBtn').addEventListener('click',function(){
+    if(!guard())return;
+    var f=document.getElementById('storyFile').files[0];
+    if(!f){toast('اول عکس استوری را انتخاب کن');return}
+    var fd=new FormData();fd.append('file',f);
+    fd.append('caption',document.getElementById('storyCaption').value.trim());
+    var b=this;b.disabled=true;toast('در حال انتشار استوری…');
+    api('/api/ig/story/upload',{method:'POST',body:fd}).then(function(j){
+      toast(j.message);document.getElementById('storyFile').value='';document.getElementById('storyCaption').value='';
+      loadStories();
+    }).catch(function(e){toast(e.message)}).then(function(){b.disabled=false});
+  });
+  document.getElementById('refreshStories').addEventListener('click',function(){loadStories();loadHighlights()});
+  function loadHighlights(){
+    if(!guard())return;
+    document.getElementById('hlList').innerHTML='<div class="empty-note">در حال دریافت…</div>';
+    api('/api/ig/highlights').then(function(j){renderHighlights(j.highlights||[])})
+      .catch(function(e){
+        document.getElementById('hlList').innerHTML='<div class="empty-note">'+esc(e.message)+'</div>';
+        if(!notConn(e))toast(e.message);
+      });
+  }
+  function renderHighlights(list){
+    var box=document.getElementById('hlList');
+    if(!list.length){box.innerHTML='<div class="empty-note">هایلایتی نداری.</div>';return}
+    box.innerHTML=list.map(function(h){
+      return '<div class="hl-row">'+
+        (h.cover_url?'<img src="'+esc(h.cover_url)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'')+
+        '<div class="who"><b>'+esc(h.title)+'</b><span>'+fa(h.media_count)+' استوری</span></div>'+
+        '<button class="mini-btn danger" data-hl="'+h.pk+'">حذف</button></div>';
+    }).join('');
+  }
+  function renderHlPick(){
+    var box=document.getElementById('hlStoryPick');
+    if(!storyCache.length){box.innerHTML='<div class="empty-note">استوری فعالی برای انتخاب نیست.</div>';return}
+    box.innerHTML=storyCache.map(function(s){
+      return '<label><input type="checkbox" value="'+s.pk+'">'+
+        (s.thumbnail_url?'<img src="'+esc(s.thumbnail_url)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'')+
+        '<span>استوری</span></label>';
+    }).join('');
+  }
+  document.getElementById('hlList').addEventListener('click',function(ev){
+    var b=ev.target.closest('[data-hl]');if(!b)return;
+    if(!confirm('این هایلایت حذف شود؟'))return;
+    b.disabled=true;
+    api('/api/ig/highlight/delete',{method:'POST',body:JSON.stringify({highlight_id:b.getAttribute('data-hl')})})
+      .then(function(){toast('حذف شد');loadHighlights()})
+      .catch(function(e){toast(e.message);b.disabled=false});
+  });
+  document.getElementById('hlCreateBtn').addEventListener('click',function(){
+    if(!guard())return;
+    var title=document.getElementById('hlTitle').value.trim();
+    if(!title){toast('عنوان هایلایت را بنویس');return}
+    var ids=Array.prototype.map.call(document.querySelectorAll('#hlStoryPick input:checked'),function(c){return c.value});
+    if(!ids.length){toast('حداقل یک استوری انتخاب کن');return}
+    var b=this;b.disabled=true;
+    api('/api/ig/highlight/create',{method:'POST',body:JSON.stringify({title:title,story_ids:ids})})
+      .then(function(j){toast(j.message);document.getElementById('hlTitle').value='';loadHighlights()})
+      .catch(function(e){toast(e.message)}).then(function(){b.disabled=false});
+  });
+
+  /* ---------- پاسخ خودکار به کامنت‌ها ---------- */
+  function loadAutoreply(){
+    api('/api/ig/autoreply').then(function(j){
+      document.getElementById('arText').value=j.reply_text||'';
+      document.getElementById('arDisable').style.display=j.enabled?'':'none';
+      document.getElementById('arState').textContent=j.enabled?'✅ فعال است — هر ۱۵ دقیقه کامنت‌های جدید بررسی می‌شوند.':'غیرفعال است.';
+    }).catch(function(e){if(!notConn(e))toast(e.message)});
+  }
+  document.getElementById('arSave').addEventListener('click',function(){
+    var t=document.getElementById('arText').value.trim();
+    if(!t){toast('متن پاسخ را بنویس');return}
+    var b=this;b.disabled=true;
+    api('/api/ig/autoreply',{method:'POST',body:JSON.stringify({enabled:true,reply_text:t})})
+      .then(function(){toast('فعال شد');loadAutoreply()})
+      .catch(function(e){toast(e.message)}).then(function(){b.disabled=false});
+  });
+  document.getElementById('arDisable').addEventListener('click',function(){
+    var b=this;b.disabled=true;
+    api('/api/ig/autoreply',{method:'POST',body:JSON.stringify({enabled:false,reply_text:document.getElementById('arText').value.trim()})})
+      .then(function(){toast('غیرفعال شد');loadAutoreply()})
+      .catch(function(e){toast(e.message)}).then(function(){b.disabled=false});
+  });
+
+  /* ---------- ویرایش پروفایل ---------- */
+  document.getElementById('peSave').addEventListener('click',function(){
+    if(!guard())return;
+    var payload={
+      full_name:document.getElementById('peFullName').value.trim(),
+      biography:document.getElementById('peBio').value.trim()
+    };
+    var url=document.getElementById('peUrl').value.trim();
+    if(url)payload.external_url=url;
+    var b=this;b.disabled=true;
+    api('/api/ig/profile/edit',{method:'POST',body:JSON.stringify(payload)})
+      .then(function(j){toast(j.message);loadProfile()})
+      .catch(function(e){toast(e.message)}).then(function(){b.disabled=false});
+  });
+  document.getElementById('pePhotoBtn').addEventListener('click',function(){
+    if(!guard())return;
+    var f=document.getElementById('pePhoto').files[0];
+    if(!f){toast('اول عکس را انتخاب کن');return}
+    var fd=new FormData();fd.append('file',f);
+    var b=this;b.disabled=true;toast('در حال آپلود…');
+    api('/api/ig/profile/photo',{method:'POST',body:fd})
+      .then(function(j){toast(j.message);document.getElementById('pePhoto').value='';loadProfile()})
+      .catch(function(e){toast(e.message)}).then(function(){b.disabled=false});
+  });
 })();
 </script>
 </body>
