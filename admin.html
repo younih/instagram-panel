@@ -124,6 +124,11 @@
         <p>این موارد در صفحه ورود به کاربران نمایش داده می‌شود.</p>
         <div class="field"><label>نام سایت</label><input id="setSiteName"></div>
         <div class="field"><label>اطلاعیه (اختیاری)</label><textarea id="setAnnouncement" placeholder="مثلاً: ثبت‌نام‌ها هر شب بررسی می‌شوند."></textarea></div>
+        <h2 style="margin-top:18px">یوتیوب (Google OAuth)</h2>
+        <p>کلیدهای ساخته‌شده در Google Cloud Console. بدون این‌ها دکمه «اتصال با گوگل» کار نمی‌کند.</p>
+        <div class="field"><label>Google Client ID</label><input id="setGoogleId" dir="ltr" style="text-align:left"></div>
+        <div class="field"><label>Google Client Secret</label><input id="setGoogleSecret" type="password" dir="ltr" style="text-align:left" autocomplete="off"></div>
+        <div class="field"><label>آدرس عمومی سایت</label><input id="setBaseUrl" dir="ltr" style="text-align:left" placeholder="https://panel.example.com"></div>
         <button class="primary" id="saveSettings">ذخیره تنظیمات</button>
       </div>
     </section>
@@ -243,6 +248,9 @@
       if(!r.body.ok)return;
       document.getElementById('setSiteName').value=r.body.settings.site_name||'';
       document.getElementById('setAnnouncement').value=r.body.settings.announcement||'';
+      document.getElementById('setGoogleId').value=r.body.settings.google_client_id||'';
+      document.getElementById('setGoogleSecret').value=r.body.settings.google_client_secret||'';
+      document.getElementById('setBaseUrl').value=r.body.settings.public_base_url||'';
     });
   }
 
@@ -258,7 +266,9 @@
 
   document.getElementById('saveSettings').addEventListener('click',function(){
     var btn=this;btn.disabled=true;
-    api('/api/admin/settings','PUT',{site_name:document.getElementById('setSiteName').value,announcement:document.getElementById('setAnnouncement').value})
+    api('/api/admin/settings','PUT',{site_name:document.getElementById('setSiteName').value,announcement:document.getElementById('setAnnouncement').value,
+      google_client_id:document.getElementById('setGoogleId').value.trim(),google_client_secret:document.getElementById('setGoogleSecret').value.trim(),
+      public_base_url:document.getElementById('setBaseUrl').value.trim().replace(/\/$/,'')})
     .then(function(r){btn.disabled=false;toast(r.body.ok?'تنظیمات ذخیره شد.':(r.body.message||'خطا'));})
     .catch(function(){btn.disabled=false;toast('ارتباط با سرور برقرار نشد.');});
   });
