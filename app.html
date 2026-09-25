@@ -101,6 +101,35 @@
     .heat .hcell{aspect-ratio:1;border-radius:3px;background:var(--paper-2);min-width:14px}
     .heat .hday{font-size:10px;white-space:nowrap}
     .heat .hh{font-size:8px;text-align:center}
+    /* --- داشبورد جدید --- */
+    .kpi-top{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px}
+    .kpi-ico{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font-size:18px;flex:0 0 auto}
+    .kpi-f .kpi-ico{background:#e8f0fe}.kpi-g .kpi-ico{background:#e7f6ec}.kpi-p .kpi-ico{background:#f3e8fd}.kpi-e .kpi-ico{background:#fff4e0}
+    @media(prefers-color-scheme:dark){.kpi-f .kpi-ico{background:#1a2c4e}.kpi-g .kpi-ico{background:#123a24}.kpi-p .kpi-ico{background:#2c1d4e}.kpi-e .kpi-ico{background:#3a2c10}}
+    .kpi{position:relative;overflow:hidden}
+    .kpi:before{content:"";position:absolute;top:0;right:0;left:0;height:3px;background:var(--blue)}
+    .kpi-g:before{background:var(--green)}.kpi-p:before{background:#8b5cf6}.kpi-e:before{background:var(--accent-2)}
+    .pulse{animation:kpl 1.1s ease-in-out infinite}
+    @keyframes kpl{50%{opacity:.35}}
+    .notice{padding:13px 15px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-size:12px;margin-bottom:14px}
+    .notice b{color:var(--ink)}
+    .notice.err{border-color:var(--accent);color:var(--accent)}
+    .nav-label{font-size:10px;color:#5b6b78;padding:10px 12px 0;letter-spacing:.3px}
+    /* --- استودیو تولید محتوا --- */
+    .studio-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+    .cap-out{background:var(--paper-2);border:1px solid var(--line);border-radius:12px;padding:14px;font-size:13px;line-height:2;white-space:pre-wrap;margin-top:10px}
+    .cap-out .cap-actions{margin-top:10px;display:flex;gap:8px}
+    .tagchips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+    .tagchip{background:var(--paper-2);border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-size:11px;direction:ltr;cursor:pointer}
+    .tagchip:hover{border-color:var(--blue)}
+    .hook{border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin-top:10px;font-size:13px}
+    .hook .hfmt{font-size:10px;color:var(--blue);font-weight:700}
+    .hook p{margin:6px 0 10px;line-height:1.9}
+    .pf-card{display:none}
+    .pf-card.active{display:block}
+    .soon{border:1px dashed var(--line);border-radius:14px;padding:22px;text-align:center;color:var(--muted);font-size:13px}
+    .soon b{color:var(--ink);display:block;font-size:15px;margin-bottom:8px}
+    @media(max-width:1000px){.studio-grid{grid-template-columns:1fr}}
     @media(prefers-color-scheme:dark){.st-pending{background:#3a2c10;color:#f0b429}.st-sent{background:#123a24;color:#4ade80}.st-failed{background:#3d1512;color:#f87171}}
     @media(max-width:1000px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.dash-grid{grid-template-columns:1fr}.dm-layout{grid-template-columns:1fr}}
     @media(max-width:720px){.app{display:block}.sidebar{display:none}.content{padding:14px 14px 90px}.topbar{align-items:flex-start}.page-title h1{font-size:21px}.kpi-grid{grid-template-columns:1fr 1fr;gap:9px}.kpi{padding:14px}.number{font-size:21px}.ig-grid{grid-template-columns:repeat(2,1fr)}.tool-card{padding:16px}.toast{left:14px;right:14px;bottom:22px;text-align:center}}
@@ -127,7 +156,9 @@
     <div class="profile"><div class="avatar">ک</div><div><b id="sbUserName">…</b><small id="sbUserMail" dir="ltr" style="text-align:right"></small></div></div>
     <nav>
       <button class="nav-btn active" data-panel="dashboard">داشبورد</button>
-      <button class="nav-btn" data-panel="connect">اتصال اینستاگرام</button>
+      <button class="nav-btn" data-panel="studio">تولید محتوا</button>
+      <div class="nav-label">اینستاگرام</div>
+      <button class="nav-btn" data-panel="connect">اتصال اکانت‌ها</button>
       <button class="nav-btn" data-panel="profile">پروفایل</button>
       <button class="nav-btn" data-panel="medias">پست‌ها</button>
       <button class="nav-btn" data-panel="comments">کامنت‌ها</button>
@@ -135,6 +166,7 @@
       <button class="nav-btn" data-panel="followers">فالوور</button>
       <button class="nav-btn" data-panel="publish">انتشار</button>
       <button class="nav-btn" data-panel="scheduled">زمان‌بندی</button>
+      <div class="nav-label">ابزار</div>
       <button class="nav-btn" data-panel="test">تست اکشن</button>
     </nav>
     <div class="nav-divider"></div>
@@ -151,22 +183,90 @@
     </div>
 
     <section class="panel active" id="dashboard">
-      <div class="section-head"><div><h2>داشبورد</h2><p>نمای زنده عملکرد پیج</p></div><button class="secondary" id="snapshotBtn">ثبت اسنپ‌شات</button></div>
+      <div class="section-head">
+        <div><h2>داشبورد</h2><p>نمای زنده عملکرد پیج</p></div>
+        <div class="tool-actions" style="margin:0">
+          <button class="secondary" id="retryStats" style="display:none">تلاش مجدد</button>
+          <button class="secondary" id="snapshotBtn">ثبت اسنپ‌شات</button>
+        </div>
+      </div>
+      <div class="notice err" id="dashError" style="display:none"></div>
       <div class="kpi-grid">
-        <div class="card kpi"><div class="kpi-head"><span>دنبال‌کننده</span></div><div class="number" id="kFollowers">—</div><div class="delta" id="dFollowers"></div></div>
-        <div class="card kpi"><div class="kpi-head"><span>دنبال‌شونده</span></div><div class="number" id="kFollowing">—</div><div class="delta" id="dFollowing"></div></div>
-        <div class="card kpi"><div class="kpi-head"><span>پست‌ها</span></div><div class="number" id="kPosts">—</div><div class="delta" id="dPosts"></div></div>
-        <div class="card kpi"><div class="kpi-head"><span>نرخ تعامل</span></div><div class="number" id="kEng">—</div><div class="delta">میانگین ۱۲ پست آخر</div></div>
+        <div class="card kpi kpi-f"><div class="kpi-top"><span class="kpi-ico">👥</span><span>دنبال‌کننده</span></div><div class="number" id="kFollowers">—</div><div class="delta" id="dFollowers"></div></div>
+        <div class="card kpi kpi-g"><div class="kpi-top"><span class="kpi-ico">📤</span><span>دنبال‌شونده</span></div><div class="number" id="kFollowing">—</div><div class="delta" id="dFollowing"></div></div>
+        <div class="card kpi kpi-p"><div class="kpi-top"><span class="kpi-ico">🖼️</span><span>پست‌ها</span></div><div class="number" id="kPosts">—</div><div class="delta" id="dPosts"></div></div>
+        <div class="card kpi kpi-e"><div class="kpi-top"><span class="kpi-ico">⚡</span><span>نرخ تعامل</span></div><div class="number" id="kEng">—</div><div class="delta">میانگین ۱۲ پست آخر</div></div>
       </div>
-      <div class="dash-grid">
-        <article class="card chart-card"><div class="card-title"><div><h2>رشد دنبال‌کننده</h2><p>اسنپ‌شات خودکار هر ۳۰ دقیقه</p></div></div><canvas id="growthChart"></canvas><div class="empty-note" id="chartEmpty" style="display:none">هنوز داده کافی نیست؛ بعد از چند اسنپ‌شات نمودار رسم می‌شود.</div></article>
-        <article class="card chart-card"><div class="card-title"><div><h2>ساعت‌های انتشار</h2><p>توزیع ۳۰ پست آخر در هفته (به وقت تو)</p></div></div><div class="heat-scroll"><div id="heatmap"><div class="empty-note">—</div></div></div></article>
-      </div>
-      <div class="section-head" style="margin-top:22px"><div><h2>بهترین پست‌ها</h2><p>۶ پست با بیشترین تعامل</p></div></div>
+      <article class="card chart-card" style="margin-top:14px">
+        <div class="card-title"><div><h2>رشد دنبال‌کننده</h2><p>اسنپ‌شات خودکار هر ۳۰ دقیقه · برای رسم نمودار حداقل ۲ اسنپ‌شات لازم است</p></div></div>
+        <canvas id="growthChart"></canvas>
+        <div class="empty-note" id="chartEmpty" style="display:none">هنوز داده کافی نیست؛ بعد از چند اسنپ‌شات نمودار رسم می‌شود.</div>
+      </article>
+      <article class="card chart-card" style="margin-top:14px">
+        <div class="card-title"><div><h2>ساعت‌های انتشار</h2><p>توزیع ۳۰ پست آخر در روزهای هفته (به وقت تو) · خانه‌های پررنگ‌تر = پست بیشتر</p></div></div>
+        <div class="heat-scroll"><div id="heatmap"><div class="empty-note">—</div></div></div>
+      </article>
+      <div class="section-head" style="margin-top:22px"><div><h2>بهترین پست‌ها</h2><p>۶ پست با بیشترین تعامل (لایک + کامنت)</p></div></div>
       <div class="ig-grid" id="bestGrid"><div class="empty-note" style="grid-column:1/-1">—</div></div>
     </section>
 
+    <section class="panel" id="studio">
+      <div class="section-head"><div><h2>استودیو تولید محتوا</h2><p>کپشن، هشتگ و ایده پست — بدون نیاز به اینترنت اضافه</p></div></div>
+      <div class="studio-grid">
+        <article class="card tool-card">
+          <h3>کپشن‌ساز</h3>
+          <p>موضوع پست را بنویس، لحن را انتخاب کن، سه کپشن آماده بگیر.</p>
+          <div class="form-stack">
+            <div class="field" style="margin-top:0"><label for="capTopic">موضوع پست</label><input id="capTopic" placeholder="مثلاً: آموزش سئو، معرفی محصول جدید…"></div>
+            <div class="field"><label>لحن</label><div class="tabs" id="capTones">
+              <button class="choice active" data-tone="friendly">دوستانه</button>
+              <button class="choice" data-tone="pro">حرفه‌ای</button>
+              <button class="choice" data-tone="funny">طنز</button>
+              <button class="choice" data-tone="motiv">انگیزشی</button>
+            </div></div>
+            <div class="field"><label for="capCta">دعوت به اقدام (CTA)</label><select id="capCta">
+              <option value="نظرت رو برام کامنت کن 👇">کامنت: نظرت رو بنویس</option>
+              <option value="سیو کن که یادت نره 📌">سیو پست</option>
+              <option value="بفرست برای کسی که بهش نیاز داره 📤">اشتراک‌گذاری</option>
+              <option value="سوالی داری؟ دایرکت بده 📩">دایرکت</option>
+            </select></div>
+            <div class="tool-actions"><button class="primary" id="genCaption">ساخت کپشن</button></div>
+          </div>
+          <div id="capOut"></div>
+        </article>
+        <article class="card tool-card">
+          <h3>هشتگ‌ساز</h3>
+          <p>هشتگ‌های دسته‌بندی‌شده بر اساس حوزه‌ات. روی هر هشتگ بزن تا کپی شود.</p>
+          <div class="field" style="margin-top:0"><label for="tagCat">حوزه</label><select id="tagCat">
+            <option value="general">عمومی</option><option value="business">کسب‌وکار</option>
+            <option value="fashion">مد و زیبایی</option><option value="food">غذا</option>
+            <option value="travel">سفر</option><option value="tech">تکنولوژی</option>
+            <option value="fitness">فیتنس</option><option value="edu">آموزش</option>
+          </select></div>
+          <div class="tool-actions"><button class="primary" id="genTags">نمایش هشتگ‌ها</button><button class="secondary" id="copyTags" style="display:none">کپی همه</button></div>
+          <div class="tagchips" id="tagOut"></div>
+          <div class="helper">ترکیب پیشنهادی: ۵ هشتگ پرترافیک + ۱۰ متوسط + ۵ نیچ.</div>
+        </article>
+      </div>
+      <article class="card tool-card" style="margin-top:14px">
+        <h3>ایده و قلاب محتوا</h3>
+        <p>حوزه‌ات را بنویس تا ۵ قلاب آماده برای پست بعدی بگیری.</p>
+        <div class="form-stack">
+          <div class="field" style="margin-top:0"><label for="hookNiche">حوزه کاری</label><input id="hookNiche" placeholder="مثلاً: آشپزی، فیتنس، برنامه‌نویسی…"></div>
+          <div class="tool-actions"><button class="primary" id="genHooks">۵ ایده بده</button></div>
+        </div>
+        <div id="hookOut"></div>
+      </article>
+    </section>
+
     <section class="panel" id="connect">
+      <div class="section-head"><div><h2>اتصال اکانت‌ها</h2><p>پلتفرم موردنظرت را انتخاب کن</p></div></div>
+      <div class="tabs" id="pfTabs" style="margin-bottom:14px">
+        <button class="choice active" data-pf="instagram">اینستاگرام</button>
+        <button class="choice" data-pf="tiktok">تیک‌تاک</button>
+        <button class="choice" data-pf="youtube">یوتیوب</button>
+      </div>
+      <div class="pf-card active" id="pf-instagram">
       <article class="card tool-card">
         <h3>اتصال اکانت اینستاگرام</h3>
         <p>با <b>sessionid</b> (کوکی نشست) وصل می‌شوی — بدون گذرواژه، بدون کد تأیید، بدون بلاک شدن:</p>
@@ -184,6 +284,17 @@
         </div>
         <div class="helper">sessionid معادل کلید ورود به اکانت است؛ رمزنگاری‌شده فقط روی همین سرور ذخیره می‌شود و به هیچ‌کس داده نمی‌شود. اگر روی گوشی از اکانت خارج شوی، باید sessionid جدید بدهی.</div>
       </article>
+      </div>
+      <div class="pf-card" id="pf-tiktok">
+        <div class="soon"><b>تیک‌تاک — به‌زودی</b>
+        اتصال واقعی تیک‌تاک نیاز به ساخت اپ در <span dir="ltr">TikTok Developers</span> و گرفتن کلید دارد.
+        اگر می‌خواهی فعالش کنم، بگو تا قدم‌به‌قدم راهنماییت کنم؛ بعد از گرفتن کلید، لاگین و آمار پیج را همین‌جا اضافه می‌کنم.</div>
+      </div>
+      <div class="pf-card" id="pf-youtube">
+        <div class="soon"><b>یوتیوب — به‌زودی</b>
+        اتصال یوتیوب با <span dir="ltr">Google Cloud OAuth</span> انجام می‌شود (آمار کانال، ویدیوها، کامنت‌ها).
+        اگر می‌خواهی فعالش کنم، بگو تا راهنمای ساخت کلید را بدهم؛ بعدش همین پنل چندپلتفرمه می‌شود.</div>
+      </div>
       <article class="card tool-card" style="margin-top:14px"><h3>لاگ</h3><div class="log-box" id="logBox">ready.</div></article>
     </section>
 
@@ -274,7 +385,8 @@
 (function(){
   var titles={
     dashboard:['داشبورد','نمای زنده عملکرد پیج'],
-    connect:['اتصال اینستاگرام','اکانت واقعی‌ات را وصل کن و تست واقعی بزن'],
+    studio:['تولید محتوا','کپشن، هشتگ و ایده پست'],
+    connect:['اتصال اکانت‌ها','اینستاگرام، تیک‌تاک و یوتیوب'],
     profile:['پروفایل','اطلاعات زنده از اکانت متصل'],
     medias:['پست‌ها','پست‌های اخیر اکانت متصل'],
     comments:['کامنت‌ها','مدیریت کامنت‌های پست‌ها'],
@@ -293,6 +405,14 @@
     window.scrollTo(0,0);
   }
   document.querySelectorAll('[data-panel]').forEach(function(b){b.addEventListener('click',function(){showPanel(b.dataset.panel)})});
+  document.querySelectorAll('#pfTabs .choice').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('#pfTabs .choice').forEach(function(x){x.classList.remove('active')});
+      b.classList.add('active');
+      var pf=b.dataset.pf;
+      document.querySelectorAll('.pf-card').forEach(function(c){c.classList.toggle('active',c.id==='pf-'+pf)});
+    });
+  });
 
   function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},3000)}
   function log(msg){var b=document.getElementById('logBox');if(!b)return;var line=new Date().toLocaleTimeString('en-GB')+'  '+msg;b.textContent=b.textContent+'\n'+line;b.scrollTop=b.scrollHeight}
@@ -407,9 +527,20 @@
         (m.caption?'<div class="ig-cap">'+esc(m.caption)+'</div>':'')+'</div></article>';
     }).join('');
   }
+  function dashLoading(on){
+    ['kFollowers','kFollowing','kPosts','kEng'].forEach(function(id){
+      var el=document.getElementById(id);
+      el.classList.toggle('pulse',on);
+      el.textContent=on?'…':'—';
+    });
+  }
   function loadDashboard(){
     if(!guard())return;
+    document.getElementById('dashError').style.display='none';
+    document.getElementById('retryStats').style.display='none';
+    dashLoading(true);
     api('/api/ig/stats').then(function(j){
+      dashLoading(false);
       var s=j.stats;
       setNum('kFollowers',s.followers);setNum('kFollowing',s.following);setNum('kPosts',s.media_count);
       document.getElementById('kEng').textContent=s.engagement_rate+'٪';
@@ -422,12 +553,115 @@
       }else{setDelta('dFollowers',null);setDelta('dFollowing',null);setDelta('dPosts',null)}
       drawChart(snaps);renderBest(s.best_posts);renderHeat(s.recent);
       log('dashboard loaded');
-    }).catch(function(e){log('dashboard error: '+e.message);if(!notConn(e))toast(e.message)});
+    }).catch(function(e){
+      dashLoading(false);
+      log('dashboard error: '+e.message);
+      if(notConn(e))return;
+      var de=document.getElementById('dashError');
+      de.innerHTML='<b>خطا در دریافت آمار:</b> '+esc(e.message)+' — ممکن است اتصال کند باشد؛ دوباره تلاش کن.';
+      de.style.display='';
+      document.getElementById('retryStats').style.display='';
+      toast(e.message);
+    });
   }
+  document.getElementById('retryStats').addEventListener('click',loadDashboard);
   document.getElementById('snapshotBtn').addEventListener('click',function(){
     var b=this;b.disabled=true;
     api('/api/ig/snapshot',{method:'POST'}).then(function(j){toast(j.message);log('snapshot saved');loadDashboard()})
       .catch(function(e){toast(e.message)}).then(function(){b.disabled=false});
+  });
+
+  /* ---------- استودیو تولید محتوا ---------- */
+  function copyText(t){
+    function done(){toast('کپی شد')}
+    function fb(){var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done()}catch(e){toast('کپی نشد')}document.body.removeChild(ta)}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done).catch(fb)}else fb();
+  }
+  var capTones={
+    friendly:['بالاخره نوبت {t} رسید! خیلی وقت بود می‌خواستم در موردش حرف بزنم. تو چه تجربه‌ای داری؟\n\n{cta}',
+              'اگه {t} هم دغدغه‌ی توئه، این پست رو از دست نده!\n\n{cta}',
+              'یه چیزی در مورد {t} فهمیدم که دلم خواست با تو هم شریک بشم…\n\n{cta}'],
+    pro:['{t}: راهنمای کوتاه و کاربردی. کپشن رو کامل بخون و نکات کلیدی رو از دست نده.\n\n{cta}',
+         'در این پست به {t} می‌پردازیم؛ دقیق و بدون حاشیه.\n\n{cta}',
+         '{t} یکی از مهم‌ترین موضوعات این حوزه است. خلاصه‌ی چیزی که باید بدونی اینجاست.\n\n{cta}'],
+    funny:['من در برابر {t}: یه نبرد حماسی که معمولاً من می‌بازم 😂\n\n{cta}',
+           'اگه {t} آدم بود، الان داشت بهم می‌خندید…\n\n{cta}',
+           'قرار بود فقط یه نگاه به {t} بندازم؛ حالا اینجام 😅\n\n{cta}'],
+    motiv:['{t} سخته، ولی تو از سختی‌هاش قوی‌تری! امروز یه قدم بردار.\n\n{cta}',
+           'همه از یه جایی شروع کردن؛ {t} هم از همین امروز شروع می‌شه.\n\n{cta}',
+           'یه سال دیگه، از خودت ممنون می‌شی که امروز برای {t} شروع کردی.\n\n{cta}']
+  };
+  var capTone='friendly';
+  document.querySelectorAll('#capTones .choice').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('#capTones .choice').forEach(function(x){x.classList.remove('active')});
+      b.classList.add('active');capTone=b.dataset.tone;
+    });
+  });
+  document.getElementById('genCaption').addEventListener('click',function(){
+    var topic=document.getElementById('capTopic').value.trim();
+    if(!topic){toast('اول موضوع پست را بنویس');return}
+    var cta=document.getElementById('capCta').value;
+    var box=document.getElementById('capOut');
+    box.innerHTML=capTones[capTone].map(function(tp,i){
+      var txt=tp.replace(/\{t\}/g,topic).replace(/\{cta\}/g,cta);
+      return '<div class="cap-out"><div>'+esc(txt).replace(/\n/g,'<br>')+'</div><div class="cap-actions"><button class="mini-btn" data-ci="'+i+'">کپی کپشن '+(i+1)+'</button></div></div>';
+    }).join('');
+    box.querySelectorAll('[data-ci]').forEach(function(b){
+      b.addEventListener('click',function(){
+        var i=parseInt(b.getAttribute('data-ci'),10);
+        copyText(capTones[capTone][i].replace(/\{t\}/g,topic).replace(/\{cta\}/g,cta));
+      });
+    });
+  });
+  var tagBank={
+    general:['#اینستاگرام','#اکسپلور','#پست_جدید','#ایران','#تهران','#روزمرگی','#لایک','#explore','#instagood','#love','#photooftheday','#iran','#tehran','#igers','#instadaily','#lifestyle','#vibes','#reels'],
+    business:['#کسب_و_کار','#کارآفرینی','#دیجیتال_مارکتینگ','#بازاریابی','#استارتاپ','#فروش','#برندینگ','#موفقیت','#کسب_درآمد','#بیزینس','#marketing','#business','#entrepreneur','#startup','#branding','#success','#smallbusiness','#marketingdigital'],
+    fashion:['#مد','#فشن','#استایل','#زیبایی','#آرایش','#میکاپ','#لباس','#تیپ','#مدل','#fashion','#style','#beauty','#makeup','#ootd','#fashionista','#outfit','#stylish','#reelsinstagram'],
+    food:['#غذا','#آشپزی','#رستوران','#خوشمزه','#دسر','#کیک','#غذای_ایرانی','#کافی_شاپ','#food','#foodie','#instafood','#yummy','#delicious','#cooking','#foodphotography','#dessert','#restaurant','#homemade'],
+    travel:['#سفر','#گردشگری','#طبیعت','#ایرانگردی','#مسافرت','#کوه','#دریا','#ماجراجویی','#travel','#wanderlust','#nature','#travelphotography','#adventure','#travelgram','#instatravel','#landscape','#vacation','#reels'],
+    tech:['#تکنولوژی','#فناوری','#گجت','#موبایل','#هوش_مصنوعی','#برنامه_نویسی','#کامپیوتر','#tech','#technology','#gadget','#ai','#coding','#programming','#smartphone','#innovation','#software','#digital','#tehran'],
+    fitness:['#فیتنس','#ورزش','#باشگاه','#بدنسازی','#سلامتی','#تناسب_اندام','#یوگا','#دوندگی','#fitness','#gym','#workout','#health','#fit','#training','#sport','#healthy','#motivation','#exercise'],
+    edu:['#آموزش','#یادگیری','#زبان_انگلیسی','#کنکور','#دانشجو','#مدرسه','#کتاب','#مطالعه','#education','#learning','#study','#student','#knowledge','#learn','#school','#studygram','#onlinelearning','#tips']
+  };
+  var lastTags=[];
+  document.getElementById('genTags').addEventListener('click',function(){
+    lastTags=tagBank[document.getElementById('tagCat').value]||tagBank.general;
+    var box=document.getElementById('tagOut');
+    box.innerHTML=lastTags.map(function(t){return '<span class="tagchip" data-tag="'+t+'">'+t+'</span>'}).join('');
+    document.getElementById('copyTags').style.display='';
+    box.querySelectorAll('[data-tag]').forEach(function(c){
+      c.addEventListener('click',function(){copyText(c.getAttribute('data-tag'))});
+    });
+  });
+  document.getElementById('copyTags').addEventListener('click',function(){if(lastTags.length)copyText(lastTags.join(' '))});
+  var hooks=[
+    ['ریلز','۳ اشتباهی که ۹۰٪ آدم‌ها در {n} می‌کنن (و تو نکن!)'],
+    ['پست','کسی بهت نگفته که {n}… ولی من می‌گم'],
+    ['ریلز','اگه از صفر شروع می‌کردم، این ۵ کار رو برای {n} می‌کردم'],
+    ['استوری','یه راز کوچیک در مورد {n} که همه‌ی حرفه‌ای‌ها می‌دونن'],
+    ['پست اسلایدی','قبل و بعد: چطور {n} رو متحول کردم'],
+    ['ریلز','۵ ابزار رایگان برای {n} که باید بشناسی'],
+    ['پست','چرا {n} برای تو جواب نمی‌ده؟ (و راه‌حلش)'],
+    ['استوری','یه روز از زندگی من + {n}'],
+    ['ریلز','بزرگ‌ترین دروغی که در مورد {n} شنیدی'],
+    ['پست','از {n} نتیجه گرفتم؛ دقیقاً این‌جوری'],
+    ['استوری تعاملی','تست: تو در {n} چقدر حرفه‌ای هستی؟ (نظرسنجی بذار)'],
+    ['ریلز','{n} در ۶۰ ثانیه: همه‌ی چیزی که لازمه بدونی']
+  ];
+  document.getElementById('genHooks').addEventListener('click',function(){
+    var niche=document.getElementById('hookNiche').value.trim()||'حوزه‌ی کاریت';
+    var idx=hooks.map(function(_,i){return i}).sort(function(){return Math.random()-.5}).slice(0,5);
+    var box=document.getElementById('hookOut');
+    box.innerHTML=idx.map(function(i){
+      var txt=hooks[i][1].replace(/\{n\}/g,niche);
+      return '<div class="hook"><span class="hfmt">'+hooks[i][0]+'</span><p>'+esc(txt)+'</p><button class="mini-btn" data-hk="'+i+'">کپی</button></div>';
+    }).join('');
+    box.querySelectorAll('[data-hk]').forEach(function(b){
+      b.addEventListener('click',function(){
+        copyText(hooks[parseInt(b.getAttribute('data-hk'),10)][1].replace(/\{n\}/g,niche));
+      });
+    });
   });
 
   /* ---------- پروفایل و پست‌ها ---------- */
