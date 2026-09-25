@@ -54,6 +54,10 @@ app.config.update(
     SESSION_COOKIE_SAMESITE="Lax",
     PERMANENT_SESSION_LIFETIME=timedelta(days=30),
 )
+# پشت nginx هستیم؛ طرح/هاست واقعی را از هدرهای X-Forwarded بخوان
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
 EMAIL_RE = re.compile(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
 
@@ -148,12 +152,25 @@ def init_db():
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
         CREATE INDEX IF NOT EXISTS idx_ig_scheduled_due ON ig_scheduled(status, publish_at);
+
+        CREATE TABLE IF NOT EXISTS yt_accounts (
+            user_id       INTEGER PRIMARY KEY,
+            channel_id    TEXT NOT NULL,
+            channel_title TEXT NOT NULL DEFAULT '',
+            thumb         TEXT NOT NULL DEFAULT '',
+            enc_tokens    TEXT NOT NULL,
+            connected_at  TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
         """
     )
     db.commit()
     defaults = {
         "site_name": "پنل مدیریت اینستاگرام",
         "announcement": "",
+        "google_client_id": "",
+        "google_client_secret": "",
+        "public_base_url": "",
     }
     for k, v in defaults.items():
         db.execute("INSERT OR IGNORE INTO settings(key, value) VALUES (?, ?)", (k, v))
@@ -489,7 +506,7 @@ def admin_settings_get():
 @admin_required
 def admin_settings_put():
     data = request.get_json(silent=True) or {}
-    allowed = {"site_name", "announcement"}
+    allowed = {"site_name", "announcement", "google_client_id", "google_client_secret", "public_base_url"}
     db = get_db()
     for k in allowed:
         if k in data:
@@ -1366,6 +1383,397 @@ def internal_run_scheduled():
             results.append({"id": r["id"], "ok": False})
     get_db().commit()
     return ok(results=results)
+
+
+# ---------------------------------------------------------------- یوتیوب (OAuth گوگل)
+# اتصال واقعی کانال یوتیوب با Google OAuth 2.0 — فقط خواندنی (آمار کانال و ویدیوها).
+# پیش‌نیاز (یک‌بار توسط ادمین):
+#   1) ساخت OAuth Client ID از نوع Web در Google Cloud + فعال‌سازی YouTube Data API v3
+#   2) ثبت redirect URI دقیق: https://<subdomain>/api/yt/oauth/callback
+#   3) وارد کردن Client ID/Secret در تنظیمات پنل ادمین (+ آدرس عمومی سایت)
+# توکن‌ها با Fernet رمزنگاری و در yt_accounts ذخیره می‌شوند؛ access token
+# به‌صورت خودکار با refresh token تمدید می‌شود.
+import json as _json
+import urllib.parse as _urlparse
+import urllib.request as _urlreq
+
+_YT_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
+_YT_TOKEN_URL = "https://oauth2.googleapis.com/token"
+_YT_REVOKE_URL = "https://oauth2.googleapis.com/revoke"
+_YT_API = "https://www.googleapis.com/youtube/v3"
+_YT_SCOPES = [
+    "openid",
+    "email",
+    "profile",
+    "https://www.googleapis.com/auth/youtube.readonly",
+]
+
+_yt_states = {}  # state -> {"uid": int, "at": float}
+_yt_state_lock = threading.RLock()
+
+
+def _yt_settings():
+    rows = get_db().execute("SELECT key, value FROM settings").fetchall()
+    s = {r["key"]: r["value"] for r in rows}
+    return {
+        "client_id": (s.get("google_client_id") or "").strip(),
+        "client_secret": (s.get("google_client_secret") or "").strip(),
+        "base_url": (s.get("public_base_url") or "").strip().rstrip("/"),
+    }
+
+
+def _yt_redirect_uri():
+    base = _yt_settings()["base_url"]
+    if base:
+        return base + "/api/yt/oauth/callback"
+    return request.url_root.rstrip("/") + "/api/yt/oauth/callback"
+
+
+def _yt_configured():
+    s = _yt_settings()
+    return bool(s["client_id"] and s["client_secret"])
+
+
+def _yt_tokens_row(uid):
+    return get_db().execute("SELECT * FROM yt_accounts WHERE user_id = ?", (uid,)).fetchone()
+
+
+def _yt_load_tokens(uid):
+    row = _yt_tokens_row(uid)
+    if not row:
+        return None
+    try:
+        return _json.loads(_ig_fernet().decrypt(row["enc_tokens"].encode()).decode())
+    except Exception:
+        return None
+
+
+def _yt_save(uid, tokens, channel):
+    enc = _ig_fernet().encrypt(_json.dumps(tokens).encode()).decode()
+    db = get_db()
+    db.execute(
+        "INSERT INTO yt_accounts(user_id, channel_id, channel_title, thumb, enc_tokens, connected_at)"
+        " VALUES (?, ?, ?, ?, ?, ?)"
+        " ON CONFLICT(user_id) DO UPDATE SET channel_id=excluded.channel_id,"
+        " channel_title=excluded.channel_title, thumb=excluded.thumb,"
+        " enc_tokens=excluded.enc_tokens, connected_at=excluded.connected_at",
+        (
+            uid,
+            channel.get("id", ""),
+            channel.get("title", ""),
+            channel.get("thumb", ""),
+            enc,
+            now_iso(),
+        ),
+    )
+    db.commit()
+
+
+def _yt_refresh(uid):
+    toks = _yt_load_tokens(uid)
+    if not toks or not toks.get("refresh_token"):
+        return None
+    s = _yt_settings()
+    data = _urlparse.urlencode(
+        {
+            "client_id": s["client_id"],
+            "client_secret": s["client_secret"],
+            "refresh_token": toks["refresh_token"],
+            "grant_type": "refresh_token",
+        }
+    ).encode()
+    try:
+        req = _urlreq.Request(
+            _YT_TOKEN_URL,
+            data=data,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        with _urlreq.urlopen(req, timeout=20) as resp:
+            j = _json.loads(resp.read().decode())
+    except Exception:
+        return None
+    if "access_token" not in j:
+        return None
+    toks["access_token"] = j["access_token"]
+    toks["expires_at"] = time.time() + int(j.get("expires_in", 3600)) - 60
+    enc = _ig_fernet().encrypt(_json.dumps(toks).encode()).decode()
+    db = get_db()
+    db.execute("UPDATE yt_accounts SET enc_tokens = ? WHERE user_id = ?", (enc, uid))
+    db.commit()
+    return toks["access_token"]
+
+
+def _yt_access(uid):
+    toks = _yt_load_tokens(uid)
+    if not toks:
+        return None
+    if toks.get("expires_at", 0) < time.time() + 30:
+        return _yt_refresh(uid)
+    return toks.get("access_token")
+
+
+def _yt_get(uid, path, params):
+    """فراخوانی YouTube Data API با تمدید خودکار توکن. برمی‌گرداند (data, error)."""
+    token = _yt_access(uid)
+    if not token:
+        return None, "توکن یوتیوب نامعتبر است؛ دوباره وصل شو."
+
+    def _call(tok):
+        url = _YT_API + path + "?" + _urlparse.urlencode(params)
+        req = _urlreq.Request(url, headers={"Authorization": "Bearer " + tok})
+        with _urlreq.urlopen(req, timeout=25) as resp:
+            return _json.loads(resp.read().decode())
+
+    try:
+        return _call(token), None
+    except _urlreq.HTTPError as e:
+        if e.code == 401:
+            token = _yt_refresh(uid)
+            if token:
+                try:
+                    return _call(token), None
+                except Exception as e2:
+                    return None, "خطای یوتیوب: " + str(e2)[:200]
+        try:
+            detail = e.read().decode()[:300]
+        except Exception:
+            detail = ""
+        return None, "خطای YouTube API (کد %s). %s" % (e.code, detail)
+    except Exception as e:
+        return None, "خطا در تماس با یوتیوب: " + str(e)[:200]
+
+
+def _yt_channel_by_token(access_token):
+    try:
+        q = _urlparse.urlencode({"part": "snippet,statistics", "mine": "true"})
+        req = _urlreq.Request(
+            _YT_API + "/channels?" + q, headers={"Authorization": "Bearer " + access_token}
+        )
+        with _urlreq.urlopen(req, timeout=25) as resp:
+            j = _json.loads(resp.read().decode())
+    except Exception as e:
+        return None, "خطا در خواندن کانال: " + str(e)[:150]
+    items = j.get("items") or []
+    if not items:
+        return None, "کانالی برای این حساب گوگل پیدا نشد."
+    it = items[0]
+    sn, st = it.get("snippet", {}), it.get("statistics", {})
+    thumbs = sn.get("thumbnails", {}) or {}
+    thumb = (thumbs.get("default") or {}).get("url", "")
+    return (
+        {
+            "id": it.get("id", ""),
+            "title": sn.get("title", ""),
+            "thumb": thumb,
+            "stats": st,
+        },
+        None,
+    )
+
+
+def _yt_popup(msg, ok_):
+    flag = "yt-connected" if ok_ else "yt-failed"
+    safe = msg.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    html = (
+        "<!doctype html><html dir=rtl><head><meta charset=utf-8><title>یوتیوب</title></head>"
+        "<body style='font-family:sans-serif;text-align:center;padding:60px 20px'>"
+        "<p>" + safe + "</p><p>این پنجره بسته می‌شود…</p>"
+        "<script>try{if(window.opener){window.opener.postMessage('" + flag + "','*')}}catch(e){}"
+        "setTimeout(function(){window.close()},1500)</script>"
+        "</body></html>"
+    )
+    return html, 200, {"Content-Type": "text/html; charset=utf-8"}
+
+
+@app.get("/api/yt/config-hint")
+@login_required
+def yt_config_hint():
+    return ok(configured=_yt_configured(), redirect_uri=_yt_redirect_uri())
+
+
+@app.get("/api/yt/oauth/start")
+@login_required
+def yt_oauth_start():
+    if not _yt_configured():
+        return err("کلید گوگل در تنظیمات ادمین وارد نشده است.", "not_configured", 503)
+    state = secrets.token_urlsafe(24)
+    with _yt_state_lock:
+        _yt_states[state] = {"uid": g.me["id"], "at": time.time()}
+        for k in [k for k, v in _yt_states.items() if time.time() - v["at"] > 600]:
+            _yt_states.pop(k, None)
+    params = _urlparse.urlencode(
+        {
+            "client_id": _yt_settings()["client_id"],
+            "redirect_uri": _yt_redirect_uri(),
+            "response_type": "code",
+            "scope": " ".join(_YT_SCOPES),
+            "access_type": "offline",
+            "prompt": "consent",
+            "state": state,
+        }
+    )
+    from flask import redirect
+
+    return redirect(_YT_AUTH_URL + "?" + params, code=302)
+
+
+@app.get("/api/yt/oauth/callback")
+@login_required
+def yt_oauth_callback():
+    if request.args.get("error"):
+        return _yt_popup("اتصال توسط شما لغو شد.", False)
+    code = request.args.get("code", "")
+    state = request.args.get("state", "")
+    with _yt_state_lock:
+        st = _yt_states.pop(state, None)
+    if not st or st["uid"] != g.me["id"] or not code:
+        return _yt_popup("نشست تأیید نامعتبر است؛ دوباره تلاش کن.", False)
+    s = _yt_settings()
+    data = _urlparse.urlencode(
+        {
+            "code": code,
+            "client_id": s["client_id"],
+            "client_secret": s["client_secret"],
+            "redirect_uri": _yt_redirect_uri(),
+            "grant_type": "authorization_code",
+        }
+    ).encode()
+    try:
+        req = _urlreq.Request(
+            _YT_TOKEN_URL,
+            data=data,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        with _urlreq.urlopen(req, timeout=20) as resp:
+            toks = _json.loads(resp.read().decode())
+    except Exception as e:
+        return _yt_popup("خطا در دریافت توکن: " + str(e)[:150], False)
+    if "access_token" not in toks:
+        return _yt_popup("گوگل توکن برنگرداند.", False)
+    tokens = {
+        "access_token": toks["access_token"],
+        "refresh_token": toks.get("refresh_token", ""),
+        "expires_at": time.time() + int(toks.get("expires_in", 3600)) - 60,
+    }
+    ch, cerr = _yt_channel_by_token(tokens["access_token"])
+    if cerr:
+        return _yt_popup(cerr, False)
+    _yt_save(g.me["id"], tokens, ch)
+    return _yt_popup("کانال «%s» وصل شد!" % ch.get("title", ""), True)
+
+
+@app.get("/api/yt/status")
+@login_required
+def yt_status():
+    row = _yt_tokens_row(g.me["id"])
+    if not row:
+        return ok(connected=False)
+    return ok(
+        connected=True,
+        channel={
+            "id": row["channel_id"],
+            "title": row["channel_title"],
+            "thumb": row["thumb"],
+            "connected_at": row["connected_at"],
+        },
+    )
+
+
+@app.post("/api/yt/disconnect")
+@login_required
+def yt_disconnect():
+    toks = _yt_load_tokens(g.me["id"])
+    if toks and toks.get("access_token"):
+        try:  # revoke بهترین‌تلاش است؛ شکستش مهم نیست
+            data = _urlparse.urlencode({"token": toks["access_token"]}).encode()
+            _urlreq.urlopen(
+                _urlreq.Request(_YT_REVOKE_URL, data=data), timeout=10
+            ).read()
+        except Exception:
+            pass
+    db = get_db()
+    db.execute("DELETE FROM yt_accounts WHERE user_id = ?", (g.me["id"],))
+    db.commit()
+    return ok(message="اتصال یوتیوب قطع شد.")
+
+
+@app.get("/api/yt/channel")
+@login_required
+def yt_channel():
+    j, e = _yt_get(
+        g.me["id"], "/channels", {"part": "snippet,statistics", "mine": "true"}
+    )
+    if e:
+        return err(e, "yt_error", 502)
+    items = j.get("items") or []
+    if not items:
+        return err("کانالی پیدا نشد.", "yt_error", 404)
+    it = items[0]
+    sn, st = it.get("snippet", {}), it.get("statistics", {})
+    thumbs = sn.get("thumbnails", {}) or {}
+    thumb = (thumbs.get("medium") or thumbs.get("default") or {}).get("url", "")
+    return ok(
+        channel={
+            "id": it.get("id"),
+            "title": sn.get("title"),
+            "description": (sn.get("description") or "")[:300],
+            "thumb": thumb,
+            "published_at": sn.get("publishedAt"),
+            "stats": st,
+        }
+    )
+
+
+@app.get("/api/yt/videos")
+@login_required
+def yt_videos():
+    j, e = _yt_get(g.me["id"], "/channels", {"part": "contentDetails", "mine": "true"})
+    if e:
+        return err(e, "yt_error", 502)
+    items = j.get("items") or []
+    pl = None
+    if items:
+        pl = ((items[0].get("contentDetails", {}) or {}).get("relatedPlaylists") or {}).get(
+            "uploads"
+        )
+    if not pl:
+        return err("پلی‌لیست ویدیوها پیدا نشد.", "yt_error", 404)
+    pj, pe = _yt_get(
+        g.me["id"],
+        "/playlistItems",
+        {"part": "contentDetails", "playlistId": pl, "maxResults": 12},
+    )
+    if pe:
+        return err(pe, "yt_error", 502)
+    vids = [
+        it["contentDetails"]["videoId"]
+        for it in pj.get("items", [])
+        if (it.get("contentDetails") or {}).get("videoId")
+    ]
+    if not vids:
+        return ok(videos=[])
+    vj, ve = _yt_get(
+        g.me["id"], "/videos", {"part": "snippet,statistics", "id": ",".join(vids)}
+    )
+    if ve:
+        return err(ve, "yt_error", 502)
+    out = []
+    for it in vj.get("items", []):
+        sn, st = it.get("snippet", {}), it.get("statistics", {})
+        thumbs = sn.get("thumbnails", {}) or {}
+        th = thumbs.get("medium") or thumbs.get("default") or {}
+        out.append(
+            {
+                "id": it.get("id"),
+                "title": sn.get("title"),
+                "thumb": th.get("url"),
+                "published_at": sn.get("publishedAt"),
+                "views": st.get("viewCount", "0"),
+                "likes": st.get("likeCount", "0"),
+                "comments": st.get("commentCount", "0"),
+            }
+        )
+    return ok(videos=out)
 
 
 # ---------------------------------------------------------------- سلامت
