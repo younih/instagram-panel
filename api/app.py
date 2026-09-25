@@ -152,6 +152,21 @@ def init_db():
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
         CREATE INDEX IF NOT EXISTS idx_ig_scheduled_due ON ig_scheduled(status, publish_at);
+        CREATE TABLE IF NOT EXISTS ig_autoreply (
+            user_id    INTEGER PRIMARY KEY,
+            enabled    INTEGER NOT NULL DEFAULT 0,
+            reply_text TEXT NOT NULL DEFAULT '',
+            last_run   TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+        CREATE TABLE IF NOT EXISTS ig_replied_comments (
+            comment_pk TEXT PRIMARY KEY,
+            user_id    INTEGER NOT NULL,
+            media_id   TEXT NOT NULL DEFAULT '',
+            replied_at TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS idx_replied_user ON ig_replied_comments(user_id);
 
         CREATE TABLE IF NOT EXISTS yt_accounts (
             user_id       INTEGER PRIMARY KEY,
@@ -1552,6 +1567,428 @@ def internal_snapshot_all():
 @_internal_required
 def internal_run_scheduled():
     return ok(results=_process_due())
+
+
+# ---------------------------------------------------------------- استوری و هایلایت
+def _ig_story_short(st):
+    return {
+        "pk": str(st.pk),
+        "thumbnail_url": str(getattr(st, "thumbnail_url", "") or ""),
+        "taken_at": _ig_taken_iso(getattr(st, "taken_at", None)),
+    }
+
+
+def _ig_viewer_short(v):
+    return {
+        "pk": str(v.pk),
+        "username": getattr(v, "username", "") or "",
+        "full_name": getattr(v, "full_name", "") or "",
+        "profile_pic_url": str(getattr(v, "profile_pic_url", "") or ""),
+    }
+
+
+def _ig_highlight_short(h):
+    cover = getattr(h, "cover_media", None)
+    thumb = str(getattr(cover, "thumbnail_url", "") or "") if cover else ""
+    return {
+        "pk": str(h.pk),
+        "title": getattr(h, "title", "") or "",
+        "cover_url": thumb,
+        "media_count": int(getattr(h, "media_count", 0) or 0),
+    }
+
+
+@app.post("/api/ig/story/upload")
+@login_required
+def ig_story_upload():
+    f = request.files.get("file")
+    caption = (request.form.get("caption") or "").strip()[:2200]
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        path = _ig_save_upload(f)
+    except ValueError as e:
+        return err(str(e), "validation")
+    try:
+        with _ig_lock:
+            st = cl.photo_upload_to_story(path, caption=caption)
+        return ok(story=_ig_story_short(st), message="استوری منتشر شد.")
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+    finally:
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+
+
+@app.get("/api/ig/stories")
+@login_required
+def ig_stories():
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        with _ig_lock:
+            stories = cl.user_stories(cl.user_id)
+        return ok(stories=[_ig_story_short(s) for s in stories], count=len(stories))
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+
+
+@app.get("/api/ig/story/<story_pk>/viewers")
+@login_required
+def ig_story_viewers(story_pk):
+    if not str(story_pk).isdigit():
+        return err("استوری مشخص نیست.", "validation")
+    try:
+        amount = min(max(int(request.args.get("amount", 100)), 1), 200)
+    except (TypeError, ValueError):
+        amount = 100
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        with _ig_lock:
+            viewers = cl.story_viewers(int(story_pk), amount=amount)
+        return ok(users=[_ig_viewer_short(v) for v in viewers], count=len(viewers))
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+
+
+@app.get("/api/ig/highlights")
+@login_required
+def ig_highlights():
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        with _ig_lock:
+            items = cl.user_highlights(cl.user_id)
+        return ok(highlights=[_ig_highlight_short(h) for h in items], count=len(items))
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+
+
+@app.post("/api/ig/highlight/create")
+@login_required
+def ig_highlight_create():
+    data = request.get_json(silent=True) or {}
+    title = (data.get("title") or "").strip()
+    story_ids = data.get("story_ids") or []
+    if not title:
+        return err("عنوان هایلایت لازم است.", "validation")
+    if len(title) > 50:
+        return err("عنوان هایلایت حداکثر ۵۰ کاراکتر باشد.", "validation")
+    if (
+        not isinstance(story_ids, list)
+        or not story_ids
+        or not all(str(x).isdigit() for x in story_ids)
+    ):
+        return err("حداقل یک استوری معتبر انتخاب کن.", "validation")
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        with _ig_lock:
+            h = cl.highlight_create(title, [str(x) for x in story_ids])
+        return ok(highlight=_ig_highlight_short(h), message="هایلایت ساخته شد.")
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+
+
+@app.post("/api/ig/highlight/delete")
+@login_required
+def ig_highlight_delete():
+    data = request.get_json(silent=True) or {}
+    hid = str(data.get("highlight_id") or "").strip()
+    if not hid.isdigit():
+        return err("هایلایت مشخص نیست.", "validation")
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        with _ig_lock:
+            res = cl.highlight_delete(hid)
+        return ok(result=bool(res), message="هایلایت حذف شد.")
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+
+
+# ---------------------------------------------------------------- درخواست‌های فالو
+@app.get("/api/ig/follow-requests")
+@login_required
+def ig_follow_requests():
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        with _ig_lock:
+            users = cl.user_follow_requests(amount=50)
+        return ok(users=[_ig_user_short(u) for u in users], count=len(users))
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+
+
+def _ig_request_action(action):
+    data = request.get_json(silent=True) or {}
+    target = str(data.get("user_id") or "").strip()
+    if not target.isdigit():
+        return err("کاربر مشخص نیست.", "validation")
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        with _ig_lock:
+            if action == "approve":
+                res = cl.user_follow_request_approve(target)
+            else:
+                res = cl.user_follow_request_decline(target)
+        return ok(result=bool(res), message="انجام شد.")
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+
+
+@app.post("/api/ig/follow-request/approve")
+@login_required
+def ig_follow_request_approve():
+    return _ig_request_action("approve")
+
+
+@app.post("/api/ig/follow-request/decline")
+@login_required
+def ig_follow_request_decline():
+    return _ig_request_action("decline")
+
+
+# ---------------------------------------------------------------- بلاک
+def _ig_user_raw(d):
+    return {
+        "pk": str(d.get("pk") or d.get("id") or ""),
+        "username": d.get("username") or "",
+        "full_name": d.get("full_name") or "",
+        "profile_pic_url": str(d.get("profile_pic_url") or ""),
+        "is_private": bool(d.get("is_private")),
+        "is_verified": bool(d.get("is_verified")),
+    }
+
+
+def _ig_block_action(action):
+    data = request.get_json(silent=True) or {}
+    target = str(data.get("user_id") or "").strip()
+    if not target.isdigit():
+        return err("کاربر مشخص نیست.", "validation")
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        with _ig_lock:
+            res = cl.user_block(target) if action == "block" else cl.user_unblock(target)
+        return ok(result=bool(res), message="انجام شد.")
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+
+
+@app.post("/api/ig/block")
+@login_required
+def ig_block():
+    return _ig_block_action("block")
+
+
+@app.post("/api/ig/unblock")
+@login_required
+def ig_unblock():
+    return _ig_block_action("unblock")
+
+
+@app.get("/api/ig/blocked")
+@login_required
+def ig_blocked():
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        with _ig_lock:
+            result = cl.private_request("users/blocked_list/")
+        users = result.get("blocked_list", []) if isinstance(result, dict) else []
+        return ok(users=[_ig_user_raw(u) for u in users if isinstance(u, dict)], count=len(users))
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+
+
+# ---------------------------------------------------------------- ویرایش پروفایل
+@app.post("/api/ig/profile/edit")
+@login_required
+def ig_profile_edit():
+    data = request.get_json(silent=True) or {}
+    biography = (data.get("biography") or "").strip()
+    full_name = (data.get("full_name") or "").strip()
+    external_url = (data.get("external_url") or "").strip()
+    if len(biography) > 150:
+        return err("بیو حداکثر ۱۵۰ کاراکتر باشد.", "validation")
+    if len(full_name) > 64:
+        return err("نام حداکثر ۶۴ کاراکتر باشد.", "validation")
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    payload = {}
+    if biography or "biography" in data:
+        payload["biography"] = biography
+    if full_name or "full_name" in data:
+        payload["full_name"] = full_name
+    if external_url or "external_url" in data:
+        payload["external_url"] = external_url
+    if not payload:
+        return err("چیزی برای تغییر نفرستادی.", "validation")
+    try:
+        with _ig_lock:
+            acc = cl.account_edit(**payload)
+        return ok(
+            message="پروفایل به‌روزرسانی شد.",
+            biography=getattr(acc, "biography", "") or "",
+            full_name=getattr(acc, "full_name", "") or "",
+        )
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+
+
+@app.post("/api/ig/profile/photo")
+@login_required
+def ig_profile_photo():
+    f = request.files.get("file")
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        path = _ig_save_upload(f)
+    except ValueError as e:
+        return err(str(e), "validation")
+    try:
+        with _ig_lock:
+            u = cl.account_change_picture(path)
+        return ok(message="عکس پروفایل عوض شد.", profile_pic_url=str(u.profile_pic_url or ""))
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+    finally:
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+
+
+# ---------------------------------------------------------------- پاسخ خودکار به کامنت‌ها
+@app.get("/api/ig/autoreply")
+@login_required
+def ig_autoreply_get():
+    row = (
+        get_db()
+        .execute("SELECT enabled, reply_text FROM ig_autoreply WHERE user_id = ?", (g.me["id"],))
+        .fetchone()
+    )
+    return ok(
+        enabled=bool(row["enabled"]) if row else False,
+        reply_text=row["reply_text"] if row else "",
+    )
+
+
+@app.post("/api/ig/autoreply")
+@login_required
+def ig_autoreply_set():
+    data = request.get_json(silent=True) or {}
+    enabled = bool(data.get("enabled"))
+    text = (data.get("reply_text") or "").strip()
+    if enabled and not text:
+        return err("متن پاسخ خودکار را بنویس.", "validation")
+    if len(text) > 500:
+        return err("متن پاسخ حداکثر ۵۰۰ کاراکتر باشد.", "validation")
+    db = get_db()
+    db.execute(
+        "INSERT INTO ig_autoreply(user_id, enabled, reply_text) VALUES (?,?,?) "
+        "ON CONFLICT(user_id) DO UPDATE SET enabled=excluded.enabled, reply_text=excluded.reply_text",
+        (g.me["id"], int(enabled), text),
+    )
+    db.commit()
+    return ok(message="ذخیره شد.", enabled=enabled)
+
+
+@app.post("/api/internal/ig/autoreply")
+@_internal_required
+def internal_autoreply():
+    """هر ۱۵ دقیقه: به کامنت‌های جواب‌داده‌نشدهٔ ۵ پست آخر، پاسخ خودکار می‌دهد."""
+    from instagrapi import Client
+
+    db = get_db()
+    rows = db.execute(
+        "SELECT a.user_id, a.reply_text, b.enc_secret FROM ig_autoreply a "
+        "JOIN ig_accounts b ON b.user_id = a.user_id "
+        "WHERE a.enabled = 1 AND a.reply_text <> ''"
+    ).fetchall()
+    done, failed = 0, 0
+    for r in rows:
+        uid = r["user_id"]
+        try:
+            sess = _ig_fernet().decrypt(r["enc_secret"].encode()).decode()
+            cl = Client(request_timeout=15)
+            cl.delay_range = [2, 5]
+            cl.login_by_sessionid(sess)
+            me_id = str(cl.user_id)
+            tpl = r["reply_text"]
+            sent = 0
+            with _ig_lock:
+                medias = cl.user_medias(cl.user_id, amount=5)
+            for m in medias:
+                if sent >= 8:
+                    break
+                try:
+                    with _ig_lock:
+                        comments = cl.media_comments(m.pk, amount=25)
+                except Exception:
+                    continue
+                for c in comments:
+                    if sent >= 8:
+                        break
+                    cu = c.user
+                    if not cu or str(cu.pk) == me_id:
+                        continue
+                    cpk = str(c.pk)
+                    seen = db.execute(
+                        "SELECT 1 FROM ig_replied_comments WHERE comment_pk = ?", (cpk,)
+                    ).fetchone()
+                    if seen:
+                        continue
+                    text = tpl.replace("{name}", cu.username or "")
+                    try:
+                        with _ig_lock:
+                            cl.media_comment(m.pk, text, replied_to_comment_id=c.pk)
+                        db.execute(
+                            "INSERT OR IGNORE INTO ig_replied_comments(comment_pk, user_id, media_id, replied_at)"
+                            " VALUES (?,?,?,?)",
+                            (cpk, uid, str(m.pk), now_iso()),
+                        )
+                        db.commit()
+                        sent += 1
+                    except Exception:
+                        continue
+            db.execute("UPDATE ig_autoreply SET last_run = ? WHERE user_id = ?", (now_iso(), uid))
+            db.commit()
+            done += 1
+        except Exception:
+            failed += 1
+    return ok(done=done, failed=failed)
+
 
 
 # ---------------------------------------------------------------- یوتیوب (OAuth گوگل)
