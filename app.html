@@ -149,83 +149,161 @@
     @media(max-width:720px){.app{display:block}.sidebar{display:none}.content{padding:14px 14px 90px}.topbar{align-items:flex-start}.page-title h1{font-size:21px}.kpi-grid{grid-template-columns:1fr 1fr;gap:9px}.kpi{padding:14px}.number{font-size:21px}.ig-grid{grid-template-columns:repeat(2,1fr)}.tool-card{padding:16px}.toast{left:14px;right:14px;bottom:22px;text-align:center}}
     @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 
-    /* ===== تم تیره «سبز نئون» — الهام‌گرفته از SalesOps ===== */
+        /* ===== شیشه‌ای تیره (glassmorphism) — الهام‌گرفته از داشبورد مرجع ===== */
     :root{
       color-scheme:dark;
-      --bg:#020203;--paper:#050607;--paper-2:#101214;--ink:#eeeeee;--muted:#8f8f8f;--line:#191b1d;
-      --accent:#45ba50;--accent-2:#00b1d8;--cyan:#00b1d8;
-      --blue:#00b1d8;--green:#45ba50;--amber:#ff8b25;--red:#f14d4c;--violet:#ad87ed;
-      --nav:#040406;--nav-ink:#eeeeee;
-      --shadow:none;--radius:12px;--chart-grid:#191b1d;--area:#0a120a;
+      --bg:#09090b;--paper:rgba(24,24,27,.6);--paper-2:rgba(255,255,255,.03);--ink:#f4f4f5;--muted:#a1a1aa;--line:rgba(255,255,255,.08);
+      --accent:#8a3ab9;--accent-2:#e95950;--cyan:#60a5fa;
+      --blue:#60a5fa;--green:#34d399;--amber:#fbbf24;--red:#f87171;--violet:#a78bfa;
+      --ig-o:#fbad50;--ig-p:#e95950;--ig-u:#8a3ab9;
+      --grad:linear-gradient(135deg,#fbad50,#e95950,#8a3ab9);
+      --nav:#09090b;--nav-ink:#f4f4f5;
+      --shadow:0 4px 30px rgba(0,0,0,.5);--radius:20px;--chart-grid:rgba(255,255,255,.05);--area:#09090b;
     }
     *{-webkit-font-smoothing:antialiased}
     body{background:var(--bg);color:var(--ink)}
+    .glow-bg{position:fixed;border-radius:50%;filter:blur(120px);z-index:-1;pointer-events:none}
+    .glass-panel{background:rgba(24,24,27,.6);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.08);box-shadow:0 4px 30px rgba(0,0,0,.5)}
     .app{grid-template-columns:minmax(0,1fr) 260px}
-    /* --- سایدبار --- */
-    .sidebar{background:var(--nav);border-left:1px solid var(--line);padding:0}
-    .profile{height:64px;padding:0 20px;border-bottom:1px solid var(--line);gap:12px}
-    .avatar{background:linear-gradient(135deg,var(--accent),var(--cyan));color:#020203;border:0;border-radius:10px;width:36px;height:36px;font-size:16px}
-    .profile small{color:var(--muted)}
-    nav{padding:16px 12px}
-    .sidebar nav{padding:16px 12px}
-    .nav-label{color:var(--muted);font-size:11px}
-    .nav-btn{color:var(--muted);border-radius:8px;font-size:14px;font-weight:500}
-    .nav-btn:hover{background:var(--paper-2);color:var(--ink)}
-    .nav-btn.active{background:var(--paper-2);color:var(--ink);font-weight:600;box-shadow:inset -3px 0 var(--accent)}
-    .side-note{background:var(--paper-2);border:1px solid var(--line);color:var(--muted);border-radius:12px}
-    .side-note b{color:var(--ink)}
-    /* --- هدر چسبان --- */
+    /* --- سایدبار شیشه‌ای --- */
+    .sidebar{background:rgba(9,9,11,.55);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-left:1px solid var(--line);padding:0;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;z-index:20}
+    .profile{height:76px;padding:0 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+    .avatar{width:40px;height:40px;border-radius:13px;background:var(--grad);display:grid;place-items:center;color:#fff;border:0;box-shadow:0 6px 18px rgba(233,89,80,.28);flex:0 0 auto;font-size:0}
+    .avatar svg{width:22px;height:22px}
+    .profile b{font-size:14px;display:block}
+    .profile small{color:var(--muted);font-size:11px}
+    nav{padding:14px 12px;display:grid;gap:4px}
+    .sidebar nav{overflow:auto;padding:14px 12px}
+    .nav-btn{border:1px solid transparent;background:transparent;color:#a1a1aa;padding:10px 12px;border-radius:11px;text-align:right;display:flex;align-items:center;gap:11px;cursor:pointer;font-size:13.5px;font-weight:500;width:100%;transition:background .15s,color .15s}
+    .nav-btn:hover{background:rgba(255,255,255,.05);color:#fff}
+    .nav-btn.active{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.07);color:#fff;font-weight:600}
+    .nav-ico{width:20px;height:20px;flex:0 0 auto}
+    .nav-label{color:#52525b;font-size:10.5px;font-weight:600;padding:12px 12px 2px}
+    .nav-divider{height:1px;background:var(--line);margin:8px 12px}
+    .side-note{margin:auto 12px 12px;background:rgba(255,255,255,.03);border:1px solid var(--line);color:var(--muted);border-radius:14px;padding:13px;font-size:11px}
+    .side-note b{color:var(--ink);display:block;margin-bottom:3px;font-size:12px}
+    /* --- هدر چسبان شیشه‌ای --- */
     .content{padding:24px}
-    .topbar{position:sticky;top:0;z-index:30;background:rgba(2,2,3,.78);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);margin:-24px -24px 24px;padding:13px 24px}
-    .page-title h1{font-size:20px;font-weight:600}
-    .page-title p{font-size:13px}
-    .live-badge{background:var(--paper-2);border:1px solid var(--line);color:var(--muted)}
-    .live-badge:before{background:var(--muted)}
-    .live-badge.on{background:rgba(69,186,80,.12);color:var(--green);border-color:transparent}
-    .live-badge.on:before{background:var(--green);box-shadow:0 0 0 3px rgba(69,186,80,.15)}
+    .topbar{position:sticky;top:0;z-index:30;background:rgba(9,9,11,.72);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);margin:-24px -24px 24px;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+    .page-title h1{font-size:20px;font-weight:700;margin:0}
+    .page-title p{font-size:12.5px;color:var(--muted);margin:2px 0 0}
+    .top-actions{display:flex;align-items:center;gap:10px}
+    .search-wrap{position:relative}
+    .search-wrap svg{position:absolute;top:50%;transform:translateY(-50%);inset-inline-start:12px;width:16px;height:16px;color:var(--muted);pointer-events:none}
+    .search-pill{background:rgba(255,255,255,.03);border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:9px 14px;padding-inline-start:36px;font-size:12px;width:210px;transition:.15s;font-family:inherit}
+    .search-pill:focus{outline:0;border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.06)}
+    .search-pill::placeholder{color:var(--muted)}
+    .btn-white{display:inline-flex;align-items:center;gap:7px;background:#fff;color:#09090b;border:0;border-radius:999px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 0 18px rgba(255,255,255,.12);transition:.15s;white-space:nowrap}
+    .btn-white:hover{background:#e4e4e7}
+    .btn-white svg{width:15px;height:15px}
+    .live-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--muted);padding:8px 14px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap}
+    .live-badge:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--muted)}
+    .live-badge.on{background:rgba(52,211,153,.1);color:#34d399;border-color:rgba(52,211,153,.22)}
+    .live-badge.on:before{background:#34d399;box-shadow:0 0 0 3px rgba(52,211,153,.15)}
     /* --- کارت‌ها --- */
-    .card{background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:none}
-    .kpi{transition:border-color .2s}
-    .kpi:hover{border-color:rgba(69,186,80,.5)}
-    .kpi-f .kpi-ico,.kpi-g .kpi-ico,.kpi-p .kpi-ico,.kpi-e .kpi-ico{background:var(--paper-2)}
-    .number{font-size:28px;font-weight:800}
-    .delta{color:var(--green);font-weight:600;font-size:12px}
-    .delta.down{color:var(--red)}
+    .card{background:var(--paper);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .kpi{position:relative;overflow:hidden;padding:20px;transition:border-color .2s}
+    .kpi:hover{border-color:rgba(255,255,255,.2)}
+    .kpi:before{display:none}
+    .kpi-glow{position:absolute;top:-48px;inset-inline-end:-48px;width:140px;height:140px;border-radius:50%;filter:blur(50px);opacity:.3;pointer-events:none;transition:opacity .2s}
+    .kpi:hover .kpi-glow{opacity:.5}
+    .kpi-f .kpi-glow{background:#3b82f6}.kpi-g .kpi-glow{background:#e95950}.kpi-p .kpi-glow{background:#8a3ab9}.kpi-e .kpi-glow{background:#10b981}
+    .kpi-row{position:relative;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:14px}
+    .kpi-label{margin:0 0 8px;color:var(--muted);font-size:12px;font-weight:500}
+    .kpi-ico{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;flex:0 0 auto}
+    .kpi-ico svg{width:22px;height:22px}
+    .kpi-f .kpi-ico{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.28);color:#60a5fa;box-shadow:0 0 18px rgba(59,130,246,.12)}
+    .kpi-g .kpi-ico{background:rgba(233,89,80,.12);border:1px solid rgba(233,89,80,.28);color:#f87171;box-shadow:0 0 18px rgba(233,89,80,.12)}
+    .kpi-p .kpi-ico{background:rgba(138,58,185,.16);border:1px solid rgba(138,58,185,.32);color:#a78bfa;box-shadow:0 0 18px rgba(138,58,185,.16)}
+    .kpi-e .kpi-ico{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.28);color:#34d399;box-shadow:0 0 18px rgba(16,185,129,.12)}
+    .number{font-size:28px;font-weight:800;margin:0;letter-spacing:-.5px}
+    .delta{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:#34d399;background:rgba(52,211,153,.1);padding:4px 10px;border-radius:8px;margin-top:10px}
+    .delta.down{color:#f87171;background:rgba(248,113,113,.1)}
+    .delta:empty{display:none}
+    .seg{display:flex;gap:6px;flex:0 0 auto}
+    .seg-btn{border:1px solid transparent;background:transparent;color:var(--muted);font-size:11px;font-weight:600;padding:7px 14px;border-radius:9px;cursor:pointer;transition:.15s}
+    .seg-btn:hover{color:var(--ink);background:rgba(255,255,255,.05)}
+    .seg-btn.active{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.08)}
     .tool-card h3{font-size:16px;font-weight:600}
-    .card-title h2{font-size:16px;font-weight:600}
+    .card-title h2{font-size:16px;font-weight:700}
+    .card-title{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
     .section-head h2{font-size:22px;font-weight:700}
+    /* --- جدول شیشه‌ای --- */
+    .tbl-wrap{overflow-x:auto;margin:0 -4px;padding:0 4px}
+    .tbl{width:100%;border-collapse:collapse;font-size:12px;min-width:520px}
+    .tbl th{text-align:right;font-size:10.5px;color:var(--muted);font-weight:600;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+    .tbl td{padding:12px;border-bottom:1px solid var(--line);vertical-align:middle}
+    .tbl tbody tr:last-child td{border-bottom:0}
+    .tbl tbody tr{transition:background .15s}
+    .tbl tbody tr:hover{background:rgba(255,255,255,.03)}
+    .tbl td b{font-weight:600}
+    .tbl .td-date{color:var(--muted);white-space:nowrap}
     /* --- دکمه‌ها و فرم‌ها --- */
-    .primary{background:var(--accent);border:0;color:#020203;font-weight:700}
-    .primary:hover{opacity:.88;transform:none;box-shadow:none}
-    .secondary{border-radius:10px}
-    .secondary:hover{border-color:var(--accent);color:var(--accent);background:none}
-    .chip,.icon-btn{background:var(--paper-2);border:1px solid var(--line);color:var(--ink)}
-    .choice.active{background:var(--accent);border-color:transparent;color:#020203}
-    .mini-btn{background:var(--paper-2)}
-    .mini-btn:hover{border-color:var(--accent);color:var(--accent)}
-    .mini-btn.danger{color:var(--red);border-color:rgba(241,77,76,.5)}
-    .mini-btn.danger:hover{color:var(--red);border-color:var(--red)}
-    .field input,.field select,.field textarea{background:var(--paper-2);border:1px solid var(--line);color:var(--ink);border-radius:10px}
-    .field input:focus,.field select:focus,.field textarea:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px rgba(69,186,80,.15)}
-    .cmp-pf-card:hover{border-color:var(--accent)}
+    .primary{background:var(--grad);border:0;color:#fff;font-weight:700;border-radius:12px;padding:10px 18px;cursor:pointer;box-shadow:0 8px 22px rgba(233,89,80,.22);transition:.15s}
+    .primary:hover{opacity:.93;transform:translateY(-1px)}
+    .primary:disabled{opacity:.55;cursor:wait;transform:none}
+    .secondary{border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--ink);padding:9px 15px;border-radius:11px;cursor:pointer;transition:.15s;font-size:12.5px}
+    .secondary:hover{border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.06)}
+    .chip,.icon-btn{background:rgba(255,255,255,.03);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:8px 12px;cursor:pointer}
+    .choice.active{background:var(--accent);border-color:transparent;color:#fff}
+    .mini-btn{background:rgba(255,255,255,.03);border:1px solid var(--line);color:var(--ink);padding:6px 12px;border-radius:9px;cursor:pointer;font-size:11px;white-space:nowrap;transition:.15s}
+    .mini-btn:hover{border-color:rgba(138,58,185,.65);color:#c4b5fd}
+    .mini-btn.danger{color:var(--red);border-color:rgba(248,113,113,.45)}
+    .mini-btn.danger:hover{border-color:var(--red);color:var(--red);background:rgba(248,113,113,.08)}
+    .field input,.field select,.field textarea{background:rgba(255,255,255,.03);border:1px solid var(--line);color:var(--ink);border-radius:12px}
+    .field select option{background:#18181b;color:#f4f4f5}
+    .field input:focus,.field select:focus,.field textarea:focus{outline:0;border-color:rgba(138,58,185,.7);box-shadow:0 0 0 3px rgba(138,58,185,.18)}
+    .cmp-pf-card{background:rgba(255,255,255,.03)}
+    .cmp-pf-card:hover{border-color:rgba(138,58,185,.65)}
+    .cmp-pf-card input{accent-color:var(--accent)}
     /* --- لیست‌ها و متفرقه --- */
-    .social-row:hover,.best-row:hover{background:var(--paper-2);border-radius:8px}
-    .best-thumb{background:var(--paper-2)}
-    .beng{color:var(--accent)}
-    .toast{background:var(--paper-2);border:1px solid var(--line);color:var(--ink);font-weight:600}
-    kbd{background:var(--paper-2);border:1px solid var(--line)}
+    .social-row:hover,.best-row:hover{background:rgba(255,255,255,.03);border-radius:10px}
+    .best-thumb{background:rgba(255,255,255,.05);border:1px solid var(--line)}
+    .beng{color:#c4b5fd}
+    .toast{background:rgba(24,24,27,.88);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--line);color:var(--ink);font-weight:600;border-radius:13px}
+    kbd{background:rgba(255,255,255,.06);border:1px solid var(--line)}
     .empty-note{color:var(--muted)}
     .welcome h2{font-size:22px;font-weight:700}
-    .st-sent{background:rgba(69,186,80,.12);color:var(--green)}
-    .st-pending{background:rgba(255,139,37,.12);color:var(--amber)}
-    .st-failed{background:rgba(241,77,76,.12);color:var(--red)}
-    .msg.mine{background:var(--accent);color:#020203;border-color:transparent}
-    .notice.err{border-color:var(--red);color:var(--red)}
+    .st{font-size:10px;padding:4px 11px;border-radius:99px;font-weight:700;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+    .st:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;flex:0 0 auto}
+    .st-sent,.st-published{background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.22)}
+    .st-pending{background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.22)}
+    .st-failed{background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.22)}
+    .msg.mine{background:var(--accent);color:#fff;border-color:transparent}
+    .notice{border-radius:14px}
+    .notice.err{border:1px solid rgba(248,113,113,.45);color:var(--red);background:rgba(248,113,113,.06)}
     .sched-err{color:var(--red)}
     .story-item{background:var(--paper);border:1px solid var(--line)}
-    ::-webkit-scrollbar{width:9px;height:9px}
-    ::-webkit-scrollbar-thumb{background:#2a2e31;border-radius:99px;border:2px solid transparent;background-clip:content-box}
+    .pf-badge{background:rgba(255,255,255,.04)}
+    ::-webkit-scrollbar{width:8px;height:8px}
     ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:99px}
+    ::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.2)}
+    /* --- داشبورد کارمحور: تطبیق شیشه‌ای --- */
+    .task-ico{background:rgba(255,255,255,.04)}
+    .wiz-step.done{color:#c4b5fd}
+    .wiz-step.done i{background:var(--accent);border-color:transparent;color:#fff}
+    .wiz-step.cur i{border-color:var(--accent);color:#c4b5fd}
+    .wiz-track.done{background:var(--accent)}
+    .dropzone{background:rgba(255,255,255,.02)}
+    .thread-item.active{background:rgba(255,255,255,.05)}
+    #growthChart{width:100%;height:280px;direction:ltr;display:block}
+    .dash-grid>*{min-width:0}
+    .tbl-wrap{min-width:0}
+    .topbar{flex-wrap:wrap}
+    @media(max-width:1100px){
+      .search-pill{width:150px}
+    }
+    #heatMap{overflow-x:auto}
+    @media(max-width:720px){
+      .sidebar{display:none}
+      .dash-grid{grid-template-columns:1fr}
+      .top-actions{flex-wrap:wrap;width:100%}
+      .search-wrap{order:3;flex:1 1 100%}
+      .search-pill{width:100%}
+      .topbar{gap:10px}
+      .kpi-grid{grid-template-columns:1fr 1fr}
+    }
 
 /* ===== استوری و هایلایت ===== */
     .story-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
@@ -287,74 +365,91 @@
   }).catch(function(){});
 })();
 </script>
+<div class="glow-bg" style="width:520px;height:520px;background:rgba(138,58,185,.16);top:-10%;left:-10%"></div>
+<div class="glow-bg" style="width:620px;height:620px;background:rgba(37,99,235,.10);bottom:-20%;right:-10%"></div>
+<div class="glow-bg" style="width:420px;height:420px;background:rgba(251,173,80,.08);top:30%;left:40%"></div>
 <div class="app">
   <aside class="sidebar">
-    <div class="profile"><div class="avatar">ک</div><div><b id="sbUserName">…</b><small id="sbUserMail" dir="ltr" style="text-align:right"></small></div></div>
+    <div class="profile"><div class="avatar"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.2" fill="currentColor" stroke="none"/></svg></div><div><b id="sbUserName">…</b><small id="sbUserMail" dir="ltr" style="text-align:right"></small></div></div>
     <nav>
-      <button class="nav-btn active" data-panel="dashboard">📊 داشبورد</button>
-      <button class="nav-btn" data-panel="tasks">✅ کارمحور</button>
-      <button class="nav-btn" data-panel="studio">🎨 تولید محتوا</button>
+      <button class="nav-btn active" data-panel="dashboard"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>داشبورد</button>
+      <button class="nav-btn" data-panel="tasks"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8.5 12.5l2.5 2.5 5-5.5"/></svg>کارمحور</button>
+      <button class="nav-btn" data-panel="studio"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.3L19.2 10l-5.3 1.9L12 17.2l-1.9-5.3L4.8 10l5.3-1.7z"/><path d="M18.5 15.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/></svg>تولید محتوا</button>
       <div class="nav-label">اینستاگرام</div>
-      <button class="nav-btn" data-panel="connect">🔗 اتصال اکانت‌ها</button>
-      <button class="nav-btn" data-panel="profile">👤 پروفایل</button>
-      <button class="nav-btn" data-panel="medias">🖼️ پست‌ها</button>
-      <button class="nav-btn" data-panel="comments">💬 کامنت‌ها</button>
-      <button class="nav-btn" data-panel="direct">✉️ دایرکت</button>
-      <button class="nav-btn" data-panel="followers">👥 فالوور</button>
-      <button class="nav-btn" data-panel="stories">📖 استوری و هایلایت</button>
-      <button class="nav-btn" data-panel="publish">🚀 انتشار</button>
-      <button class="nav-btn" data-panel="scheduled">⏰ زمان‌بندی</button>
+      <button class="nav-btn" data-panel="connect"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 007.1 0l2.9-2.9a5 5 0 00-7.1-7.1l-1.6 1.6"/><path d="M14 10a5 5 0 00-7.1 0l-2.9 2.9a5 5 0 007.1 7.1l1.6-1.6"/></svg>اتصال اکانت‌ها</button>
+      <button class="nav-btn" data-panel="profile"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg>پروفایل</button>
+      <button class="nav-btn" data-panel="medias"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="M4.5 18l4.5-4.5 3 3 3.5-3.5 4 4"/></svg>پست‌ها</button>
+      <button class="nav-btn" data-panel="comments"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v9a2 2 0 01-2 2H9l-5 4z"/></svg>کامنت‌ها</button>
+      <button class="nav-btn" data-panel="direct"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3.5 7.5l8.5 6 8.5-6"/></svg>دایرکت</button>
+      <button class="nav-btn" data-panel="followers"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5"/><path d="M16 4.7a3.5 3.5 0 010 6.9M18.5 14.6c2 .8 3 2.4 3 4.4"/></svg>فالوور</button>
+      <button class="nav-btn" data-panel="stories"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10 5 7 4.5 4 4.5v14c3 0 6 .5 8 2 2-1.5 5-2 8-2v-14c-3 0-6 .5-8 2z"/><path d="M12 6.5v14"/></svg>استوری و هایلایت</button>
+      <button class="nav-btn" data-panel="publish"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L10.5 13.5"/><path d="M21 3l-6.8 18-3.7-7.5L3 9.8z"/></svg>انتشار</button>
+      <button class="nav-btn" data-panel="scheduled"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>زمان‌بندی</button>
       <div class="nav-label">یوتیوب</div>
-      <button class="nav-btn" data-panel="youtube">▶️ کانال یوتیوب</button>
+      <button class="nav-btn" data-panel="youtube"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="4"/><path d="M10.5 9.8v4.4l4-2.2z" fill="currentColor" stroke="none"/></svg>کانال یوتیوب</button>
       <div class="nav-label">ابزار</div>
-      <button class="nav-btn" data-panel="test">تست اکشن</button>
+      <button class="nav-btn" data-panel="test"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13.5H11L9.5 22 19 10h-6.5z"/></svg>تست اکشن</button>
     </nav>
     <div class="nav-divider"></div>
     <nav>
-      <button class="nav-btn" id="adminLink" style="display:none">پنل ادمین</button>
-      <button class="nav-btn" id="logoutBtn">خروج</button>
+      <button class="nav-btn" id="adminLink" style="display:none"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7.5 3v6c0 4.5-3.2 7.8-7.5 9-4.3-1.2-7.5-4.5-7.5-9V6z"/><path d="M9 12l2 2 4-4.5"/></svg>پنل ادمین</button>
+      <button class="nav-btn" id="logoutBtn"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4H5v16h9"/><path d="M11 8l-4 4 4 4"/><path d="M7 12h10"/></svg>خروج</button>
     </nav>
     <div class="side-note"><b>پنل اینستاگرام</b><span>اتصال واقعی · آنالیز · انتشار · تعامل</span></div>
   </aside>
   <main class="content">
     <div class="topbar">
       <div class="page-title"><h1 id="pageHeading">داشبورد</h1><p id="pageSub">نمای زنده عملکرد پیج</p></div>
-      <div class="top-actions"><span class="live-badge" id="connBadge">متصل نیست</span></div>
+      <div class="top-actions"><div class="search-wrap"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg><input id="globalSearch" class="search-pill" placeholder="جستجو…"></div><span class="live-badge" id="connBadge">متصل نیست</span><button class="btn-white" id="newPostBtn"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>پست جدید</button></div>
     </div>
 
         <section class="panel active" id="dashboard">
-      <div class="welcome">
-        <div><h2 id="greetTitle">👋 سلام</h2><p>تصویر کلی عملکرد پیج — زنده و به‌روز</p></div>
-        <div class="tool-actions" style="margin:0">
-          <button class="secondary" id="retryStats" style="display:none">تلاش مجدد</button>
-          <button class="secondary" id="snapshotBtn">ثبت اسنپ‌شات</button>
+        <div class="welcome" style="margin-bottom:22px">
+          <h2 id="dashGreet">پنل مدیریت اینستاگرام</h2>
+          <p>نگاهی شفاف به وضعیت اکانت‌ها، محتوا و زمان‌بندی‌ها</p>
         </div>
-      </div>
-      <div class="notice err" id="dashError" style="display:none"></div>
-      <div class="kpi-grid">
-        <div class="card kpi kpi-f"><div class="kpi-top"><span class="kpi-ico">👥</span><span>دنبال‌کننده</span></div><div class="number" id="kFollowers">—</div><div class="delta" id="dFollowers"></div></div>
-        <div class="card kpi kpi-g"><div class="kpi-top"><span class="kpi-ico">📤</span><span>دنبال‌شونده</span></div><div class="number" id="kFollowing">—</div><div class="delta" id="dFollowing"></div></div>
-        <div class="card kpi kpi-p"><div class="kpi-top"><span class="kpi-ico">🖼️</span><span>پست‌ها</span></div><div class="number" id="kPosts">—</div><div class="delta" id="dPosts"></div></div>
-        <div class="card kpi kpi-e"><div class="kpi-top"><span class="kpi-ico">⚡</span><span>نرخ تعامل</span></div><div class="number" id="kEng">—</div><div class="delta">میانگین ۱۲ پست آخر</div></div>
-      </div>
-      <div class="dash-grid" style="margin-top:14px">
-        <article class="card chart-card">
-          <div class="card-title"><div><h2>رشد دنبال‌کننده</h2><p>اسنپ‌شات خودکار هر ۳۰ دقیقه · برای رسم نمودار حداقل ۲ اسنپ‌شات لازم است</p></div></div>
+        <div class="grid kpi-grid" style="margin-bottom:14px">
+          <div class="card kpi kpi-f"><div class="kpi-glow"></div>
+            <div class="kpi-row"><div><p class="kpi-label">فالوور</p><div class="number" id="kFollowers">—</div></div><div class="kpi-ico"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5"/><path d="M16 4.7a3.5 3.5 0 010 6.9M18.5 14.6c2 .8 3 2.4 3 4.4"/></svg></div></div>
+            <span class="delta" id="dFollowers"></span>
+          </div>
+          <div class="card kpi kpi-g"><div class="kpi-glow"></div>
+            <div class="kpi-row"><div><p class="kpi-label">نرخ تعامل</p><div class="number" id="kEng">—</div></div><div class="kpi-ico"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-9.5-9.2C1 7.9 3.3 4.8 6.8 4.8c2 0 3.7 1.1 5.2 3 1.5-1.9 3.2-3 5.2-3 3.5 0 5.8 3.1 4.3 6.5-2 4.6-9.5 9.2-9.5 9.2z"/></svg></div></div>
+            <span class="delta" id="dEng"></span>
+          </div>
+          <div class="card kpi kpi-p"><div class="kpi-glow"></div>
+            <div class="kpi-row"><div><p class="kpi-label">اتصال‌ها</p><div class="number" id="kConn">—</div></div><div class="kpi-ico"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2.5-6 4 12L16 12h5"/></svg></div></div>
+            <span class="delta" id="dConn"></span>
+          </div>
+          <div class="card kpi kpi-e"><div class="kpi-glow"></div>
+            <div class="kpi-row"><div><p class="kpi-label">زمان‌بندی‌شده‌ها</p><div class="number" id="kSched">—</div></div><div class="kpi-ico"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></div></div>
+            <span class="delta" id="dSched"></span>
+          </div>
+        </div>
+        <div class="card tool-card" style="margin-bottom:14px">
+          <div class="card-title"><div><h2>رشد فالوور</h2><p class="muted" style="font-size:12px;margin:4px 0 0">روند رشد حساب در طول زمان</p></div>
+            <div style="display:flex;gap:8px;align-items:center;flex:0 0 auto"><button class="mini-btn" id="snapshotBtn">ثبت اسنپ‌شات</button><div class="seg"><button class="seg-btn active" data-range="week">هفتگی</button><button class="seg-btn" data-range="month">ماهانه</button></div></div>
+          </div>
           <canvas id="growthChart"></canvas>
-          <div class="empty-note" id="chartEmpty" style="display:none">هنوز داده کافی نیست؛ بعد از چند اسنپ‌شات نمودار رسم می‌شود.</div>
-        </article>
-        <article class="card chart-card">
-          <div class="card-title"><div><h2>بهترین پست‌ها</h2><p>۶ پست با بیشترین تعامل (لایک + کامنت)</p></div></div>
-          <div class="best-list" id="bestGrid"><div class="empty-note">—</div></div>
-        </article>
-      </div>
-      <article class="card chart-card" style="margin-top:14px">
-        <div class="card-title"><div><h2>ساعت‌های انتشار</h2><p>توزیع ۳۰ پست آخر در روزهای هفته (به وقت تو) · خانه‌های پررنگ‌تر = پست بیشتر</p></div></div>
-        <div class="heat-scroll"><div id="heatmap"><div class="empty-note">—</div></div></div>
-      </article>
-    </section>
-
-    <section class="panel" id="tasks">
+          <div id="dashError" class="notice err" style="display:none"></div>
+        </div>
+        <div class="dash-grid" style="margin-bottom:14px">
+          <div class="card tool-card">
+            <div class="card-title"><div><h2>پست‌های زمان‌بندی‌شده</h2><p class="muted" style="font-size:12px;margin:4px 0 0">آخرین موارد صف انتشار</p></div>
+              <button class="mini-btn" id="dashSchedAll">مشاهده همه</button></div>
+            <div class="tbl-wrap"><table class="tbl"><thead><tr><th>محتوا</th><th>پلتفرم</th><th>زمان انتشار</th><th>وضعیت</th></tr></thead><tbody id="dashSchedBody"><tr><td colspan="4"><div class="empty-note">…</div></td></tr></tbody></table></div>
+          </div>
+          <div class="card tool-card">
+            <div class="card-title"><div><h2>بهترین پست‌ها</h2><p class="muted" style="font-size:12px;margin:4px 0 0">پربازدیدترین پست‌های اخیر</p></div></div>
+            <div id="bestPosts"></div>
+          </div>
+        </div>
+        <div class="card tool-card">
+          <div class="card-title"><div><h2>تقویم فعالیت</h2><p class="muted" style="font-size:12px;margin:4px 0 0">تراکم پست‌ها در ساعات مختلف شبانه‌روز</p></div></div>
+          <div id="heatMap"></div>
+        </div>
+      </section>
+      <section class="panel" id="tasks">
       <div class="task-layout">
         <aside class="card tool-card task-side">
           <div class="aside-title">کارهای امروز</div>
@@ -736,6 +831,50 @@
     if(id==='comments'){loadAutoreply();}
   }
   document.querySelectorAll('[data-panel]').forEach(function(b){b.addEventListener('click',function(){showPanel(b.dataset.panel)})});
+  /* ---------- داشبورد شیشه‌ای: بازه نمودار، اتصال‌ها، جدول زمان‌بندی ---------- */
+  var dashSnaps=[],chartRange='week';
+  function drawChartRange(){
+    var s=dashSnaps||[];
+    if(chartRange==='week'&&s.length>14)s=s.slice(-14);
+    drawChart(s);
+  }
+  document.querySelectorAll('.seg-btn').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('.seg-btn').forEach(function(x){x.classList.remove('active')});
+      b.classList.add('active');chartRange=b.dataset.range;drawChartRange();
+    });
+  });
+  function updateDashConn(){
+    var kc=document.getElementById('kConn');if(!kc)return;
+    var ig=!!window.__igConn,yt=!!window.__ytConn,n=(ig?1:0)+(yt?1:0);
+    kc.textContent=fa(n)+' / '+fa(2);
+    var dc=document.getElementById('dConn');
+    if(dc){dc.textContent=(ig?'اینستاگرام':'—')+' · '+(yt?'یوتیوب':'—');dc.className='delta'+(n===0?' down':'');}
+  }
+  function updateDashSched(items){
+    items=items||[];
+    var pend=items.filter(function(s){return s.status==='pending'}).length;
+    var ks=document.getElementById('kSched');if(ks)ks.textContent=fa(items.length);
+    var ds=document.getElementById('dSched');
+    if(ds){ds.textContent=pend?fa(pend)+' در انتظار':'صف خالی';ds.className='delta'+(pend?'':' down');}
+    var tb=document.getElementById('dashSchedBody');if(!tb)return;
+    if(!items.length){tb.innerHTML='<tr><td colspan="4"><div class="empty-note">زمان‌بندی فعالی نیست.</div></td></tr>';return}
+    tb.innerHTML=items.slice(0,5).map(function(s){
+      var pf=pfFa[s.platform]||s.platform||'';
+      var cap=String(s.caption||s.title||'بدون عنوان').replace(/\s+/g,' ').trim().slice(0,42);
+      return '<tr><td><b>'+esc(cap)+'</b></td><td><span class="pf-badge">'+esc(pf)+'</span></td>'+
+        '<td class="td-date">'+fmtDT(s.publish_at)+'</td>'+
+        '<td><span class="st st-'+s.status+'">'+(stFa[s.status]||s.status)+'</span></td></tr>';
+    }).join('');
+  }
+  document.getElementById('dashSchedAll').addEventListener('click',function(){showPanel('scheduled')});
+  document.getElementById('newPostBtn').addEventListener('click',function(){showPanel('tasks')});
+  document.getElementById('globalSearch').addEventListener('keydown',function(e){
+    if(e.key!=='Enter')return;
+    var q=this.value.trim();showPanel('followers');
+    var inp=document.getElementById('socialSearch');
+    if(inp){inp.value=q;inp.dispatchEvent(new Event('input',{bubbles:true}));}
+  });
   document.querySelectorAll('#pfTabs .choice').forEach(function(b){
     b.addEventListener('click',function(){
       document.querySelectorAll('#pfTabs .choice').forEach(function(x){x.classList.remove('active')});
@@ -759,6 +898,7 @@
       }
     }).catch(function(){hint.textContent='خطا در بررسی تنظیمات.'});
     api('/api/yt/status').then(function(s){
+      window.__ytConn=!!s.connected;updateDashConn();
       document.getElementById('ytDisconnectBtn').style.display=s.connected?'':'none';
       document.getElementById('ytConnState').innerHTML=s.connected?'<div class="delta">متصل: <b>'+esc(s.channel.title)+'</b></div>':'';
     }).catch(function(){});
@@ -838,10 +978,12 @@
 
   function setBadge(c,username){
     connected=!!c;
+    window.__igConn=connected;
     var b=document.getElementById('connBadge');
     b.classList.toggle('on',connected);
     b.textContent=connected?('متصل: @'+username):'متصل نیست';
     document.getElementById('disconnectBtn').style.display=connected?'':'none';
+    updateDashConn();
   }
   function guard(){if(!connected){toast('اول اکانت اینستاگرام را متصل کن');showPanel('connect');return false}return true}
 
@@ -855,11 +997,12 @@
   }
   function drawChart(snaps){
     var cv=document.getElementById('growthChart'),empty=document.getElementById('chartEmpty');
+    if(!cv)return;
     var ctx=cv.getContext('2d');
     var W=cv.parentElement.clientWidth-40,H=240,dpr=window.devicePixelRatio||1;
     cv.width=W*dpr;cv.height=H*dpr;ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
-    if(!snaps||snaps.length<2){empty.style.display='';return}
-    empty.style.display='none';
+    if(!snaps||snaps.length<2){if(empty)empty.style.display='';return}
+    if(empty)empty.style.display='none';
     var vals=snaps.map(function(s){return s.followers});
     var min=Math.min.apply(null,vals),max=Math.max.apply(null,vals);
     if(max===min)max=min+10;
@@ -877,7 +1020,7 @@
     }
     // area + line
     var grad=ctx.createLinearGradient(0,pad.t,0,H-pad.b);
-    grad.addColorStop(0,'rgba(69,186,80,.22)');grad.addColorStop(1,'rgba(69,186,80,0)');
+    grad.addColorStop(0,'rgba(138,58,185,.25)');grad.addColorStop(1,'rgba(138,58,185,0)');
     ctx.beginPath();ctx.moveTo(X(0),Y(vals[0]));
     vals.forEach(function(v,i){ctx.lineTo(X(i),Y(v))});
     ctx.lineTo(X(vals.length-1),H-pad.b);ctx.lineTo(X(0),H-pad.b);ctx.closePath();
@@ -887,10 +1030,12 @@
     ctx.strokeStyle=blue;ctx.lineWidth=2.5;ctx.lineJoin='round';ctx.stroke();
     // last point
     ctx.beginPath();ctx.arc(X(vals.length-1),Y(vals[vals.length-1]),4,0,7);ctx.fillStyle=blue;ctx.fill();
-    // first/last date labels
-    ctx.fillText(fmtDT(snaps[0].taken_at),pad.l,H-8);
+    // first/last date labels (skip the first one if it would overlap the last)
+    var first=fmtDT(snaps[0].taken_at);
     var last=fmtDT(snaps[snaps.length-1].taken_at);
-    ctx.fillText(last,W-pad.r-ctx.measureText(last).width,H-8);
+    var lastX=W-pad.r-ctx.measureText(last).width;
+    if(pad.l+ctx.measureText(first).width+8<lastX)ctx.fillText(first,pad.l,H-8);
+    ctx.fillText(last,lastX,H-8);
     void ink;
   }
   function renderHeat(recent){
@@ -909,13 +1054,13 @@
       html+='<div class="hday">'+days[d]+'</div>';
       for(h=0;h<24;h++){
         var a=mx?grid[d][h]/mx:0;
-        html+='<div class="hcell" title="'+days[d]+' ساعت '+h+': '+grid[d][h]+' پست" style="background:rgba(69,186,80,'+(0.05+a*0.9).toFixed(2)+')"></div>';
+        html+='<div class="hcell" title="'+days[d]+' ساعت '+h+': '+grid[d][h]+' پست" style="background:rgba(138,58,185,'+(0.05+a*0.9).toFixed(2)+')"></div>';
       }
     }
-    document.getElementById('heatmap').innerHTML=html+'</div>';
+    var hmEl=document.getElementById('heatMap');if(hmEl)hmEl.innerHTML=html+'</div>';
   }
   function renderBest(list){
-    var g=document.getElementById('bestGrid');
+    var g=document.getElementById('bestPosts');if(!g)return;
     if(!list||!list.length){g.innerHTML='<div class="empty-note">پستی پیدا نشد.</div>';return}
     g.innerHTML=list.map(function(m){
       var eng=(m.like_count||0)+(m.comment_count||0);
@@ -928,8 +1073,8 @@
     }).join('');
   }
   function dashLoading(on){
-    ['kFollowers','kFollowing','kPosts','kEng'].forEach(function(id){
-      var el=document.getElementById(id);
+    ['kFollowers','kEng'].forEach(function(id){
+      var el=document.getElementById(id);if(!el)return;
       el.classList.toggle('pulse',on);
       el.textContent=on?'…':'—';
     });
@@ -937,34 +1082,31 @@
   function loadDashboard(){
     if(!guard())return;
     document.getElementById('dashError').style.display='none';
-    document.getElementById('retryStats').style.display='none';
     dashLoading(true);
     api('/api/ig/stats').then(function(j){
       dashLoading(false);
       var s=j.stats;
-      setNum('kFollowers',s.followers);setNum('kFollowing',s.following);setNum('kPosts',s.media_count);
+      setNum('kFollowers',s.followers);
       document.getElementById('kEng').textContent=s.engagement_rate+'٪';
       var snaps=s.snapshots;
+      dashSnaps=snaps||[];
       if(snaps.length>1){
         var f=snaps[0],l=snaps[snaps.length-1];
         setDelta('dFollowers',l.followers-f.followers);
-        setDelta('dFollowing',l.following-f.following);
-        setDelta('dPosts',l.media_count-f.media_count);
-      }else{setDelta('dFollowers',null);setDelta('dFollowing',null);setDelta('dPosts',null)}
-      drawChart(snaps);renderBest(s.best_posts);renderHeat(s.recent);
+      }else{setDelta('dFollowers',null)}
+      drawChartRange();renderBest(s.best_posts);renderHeat(s.recent);
       log('dashboard loaded');
     }).catch(function(e){
       dashLoading(false);
       log('dashboard error: '+e.message);
       if(notConn(e))return;
       var de=document.getElementById('dashError');
-      de.innerHTML='<b>خطا در دریافت آمار:</b> '+esc(e.message)+' — ممکن است اتصال کند باشد؛ دوباره تلاش کن.';
+      de.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span><b>خطا در دریافت آمار:</b> '+esc(e.message)+' — ممکن است اتصال کند باشد؛ دوباره تلاش کن.</span><button class="mini-btn" id="dashRetry">تلاش مجدد</button></div>';
       de.style.display='';
-      document.getElementById('retryStats').style.display='';
+      document.getElementById('dashRetry').onclick=loadDashboard;
       toast(e.message);
     });
   }
-  document.getElementById('retryStats').addEventListener('click',loadDashboard);
   document.getElementById('snapshotBtn').addEventListener('click',function(){
     var b=this;b.disabled=true;
     api('/api/ig/snapshot',{method:'POST'}).then(function(j){toast(j.message);log('snapshot saved');loadDashboard()})
@@ -1483,7 +1625,7 @@
     if(!guard())return;
     api('/api/ig/scheduled').then(function(j){
       var box=document.getElementById('schedList');
-      if(!j.items.length){box.innerHTML='<div class="empty-note">زمان‌بندی فعالی نیست.</div>';return}
+      if(!j.items.length){box.innerHTML='<div class="empty-note">زمان‌بندی فعالی نیست.</div>';updateDashSched([]);return}
       box.innerHTML=j.items.map(function(s){
         var pf=pfFa[s.platform]||s.platform||'';
         var mt=mtFa[s.media_type]||'';
@@ -1496,6 +1638,7 @@
           (s.status==='pending'?'<button class="mini-btn danger" data-del="'+s.id+'">حذف</button>':'')+
           '</div>';
       }).join('');
+      updateDashSched(j.items);
       log('scheduled loaded: '+j.items.length);
     }).catch(function(e){if(!notConn(e))toast(e.message)});
   }
@@ -1547,12 +1690,12 @@
   document.getElementById('adminLink').addEventListener('click',function(){location.href='/admin.html'});
 
   function clearPanels(){
-    ['kFollowers','kFollowing','kPosts'].forEach(function(id){document.getElementById(id).textContent='—'});
-    document.getElementById('kEng').textContent='—';
+    ['kFollowers','kEng','kConn','kSched'].forEach(function(id){var e=document.getElementById(id);if(e)e.textContent='—'});
     document.getElementById('profileCard').innerHTML='<div class="empty-note">هنوز اکانتی متصل نیست.</div>';
     document.getElementById('mediaGrid').innerHTML='<div class="empty-note" style="grid-column:1/-1">هنوز اکانتی متصل نیست.</div>';
-    document.getElementById('bestGrid').innerHTML='<div class="empty-note">—</div>';
-    document.getElementById('heatmap').innerHTML='<div class="empty-note">—</div>';
+    var bp=document.getElementById('bestPosts');if(bp)bp.innerHTML='<div class="empty-note">—</div>';
+    var hm2=document.getElementById('heatMap');if(hm2)hm2.innerHTML='<div class="empty-note">—</div>';
+    var tb=document.getElementById('dashSchedBody');if(tb)tb.innerHTML='<tr><td colspan="4"><div class="empty-note">—</div></td></tr>';
     latestMedias=[];latestMediaId=null;commentMediaId=null;activeThread=null;
     socialCache={followers:null,following:null};
   }
@@ -1560,7 +1703,7 @@
     return api('/api/ig/status').then(function(j){
       setBadge(j.connected,j.username);
       if(j.connected){
-        if(!silent){loadProfile();loadMedias();loadDashboard()}
+        if(!silent){loadProfile();loadMedias();loadDashboard();loadScheduled()}
       }else{
         clearPanels();
       }
@@ -1575,14 +1718,17 @@
     (function(){var h=new Date().getHours();
       var g=h<5?'نیمه‌شب بخیر':h<12?'صبح بخیر':h<17?'ظهر بخیر':h<20?'عصر بخیر':'شب بخیر';
       var gt=document.getElementById('greetTitle');
-      if(gt)gt.textContent='👋 '+g+'، '+(u.name||'دوست عزیز');})();
+      if(gt)gt.textContent='👋 '+g+'، '+(u.name||'دوست عزیز');
+      var dg=document.getElementById('dashGreet');
+      if(dg)dg.textContent='👋 '+g+'، '+(u.name||'دوست عزیز');})();
     if(u.role==='admin')document.getElementById('adminLink').style.display='';
+    ytRefreshConnUI();
     refreshStatus(true).then(function(j){
-      if(j&&j.connected){loadProfile();loadMedias();loadDashboard()}
+      if(j&&j.connected){loadProfile();loadMedias();loadDashboard();loadScheduled()}
       else{clearPanels()}
     });
   });
-  setTimeout(function(){if(!window.__me){refreshStatus(true).then(function(j){if(j&&j.connected){loadProfile();loadMedias();loadDashboard()}})}},2500);
+  setTimeout(function(){if(!window.__me){refreshStatus(true).then(function(j){if(j&&j.connected){loadProfile();loadMedias();loadDashboard();loadScheduled()}})}},2500);
 
   /* ---------- درخواست‌ها و بلاک‌شده‌ها ---------- */
   function ensureReqBlock(tab){

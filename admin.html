@@ -69,56 +69,105 @@
     .empty{padding:26px;text-align:center;color:var(--muted);font-size:12px}
     @media(max-width:900px){.app{display:block}.sidebar{display:none}.kpi-grid{grid-template-columns:1fr 1fr}.content{padding:16px 14px 60px}table,thead,tbody,tr,th,td{display:block}thead{display:none}tr{border-top:1px solid var(--line);padding:8px 0}td{border:0;padding:5px 14px;display:flex;justify-content:space-between;gap:10px}td:before{content:attr(data-l);color:var(--muted)}}
 
-    /* ===== آرام و شفاف (۰۴) — دیزاین‌سیستم ادمین ===== */
+        /* ===== شیشه‌ای تیره (glassmorphism) — دیزاین‌سیستم ادمین ===== */
     :root{
-      --bg:#f5fafb;--paper:#ffffff;--paper-2:#edf3f6;--ink:#17303b;--muted:#5f7d89;--line:#dde8ec;
-      --accent:#0c728b;--accent-soft:#dcebef;--accent-softer:#d9eef2;--chip:#c7e0e6;
-      --blue:#0c728b;--green:#08785d;--amber:#a86a08;--red:#c0392b;
-      --shadow:0 5px 20px rgba(46,79,91,.07);--radius:12px;
+      color-scheme:dark;
+      --bg:#09090b;--paper:rgba(24,24,27,.6);--paper-2:rgba(255,255,255,.03);--ink:#f4f4f5;--muted:#a1a1aa;--line:rgba(255,255,255,.08);
+      --accent:#8a3ab9;--accent-2:#e95950;--blue:#60a5fa;--green:#34d399;--amber:#fbbf24;--red:#f87171;
+      --ig-o:#fbad50;--ig-p:#e95950;--ig-u:#8a3ab9;
+      --grad:linear-gradient(135deg,#fbad50,#e95950,#8a3ab9);
+      --nav:#09090b;--nav-ink:#f4f4f5;
+      --shadow:0 4px 30px rgba(0,0,0,.5);--radius:20px;
     }
-    @media(prefers-color-scheme:dark){
-      :root{--bg:#0e1a20;--paper:#15242b;--paper-2:#1b2e36;--ink:#e9f2f5;--muted:#93a9b3;--line:#24363e;
-        --accent:#3aa7bd;--accent-soft:#16262d;--accent-softer:#1b3038;--chip:#1e343c;
-        --blue:#3aa7bd;--green:#4ade80;--amber:#f0b429;--red:#f87171;
-        --shadow:0 10px 30px rgba(0,0,0,.35)}
-    }
-    body{background:var(--bg)}
-    .sidebar{background:var(--accent-soft);color:var(--ink);padding:26px 14px 18px}
-    .nav-btn{color:#41606c;border-radius:9px;font-size:13px;transition:background .15s}
-    .nav-btn:hover{background:rgba(255,255,255,.65);color:var(--ink);transform:none}
-    .nav-btn.active{background:#fff;color:var(--accent);font-weight:700;box-shadow:0 4px 14px rgba(38,75,89,.08)}
-    .card{border:0;border-radius:var(--radius);box-shadow:var(--shadow)}
+    *{-webkit-font-smoothing:antialiased}
+    body{background:var(--bg);color:var(--ink)}
+    .glow-bg{position:fixed;border-radius:50%;filter:blur(120px);z-index:-1;pointer-events:none}
+    .app{grid-template-columns:minmax(0,1fr) 260px}
+    .sidebar{background:rgba(9,9,11,.55);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-left:1px solid var(--line);padding:0}
+    .profile{height:76px;padding:0 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+    .avatar{width:40px;height:40px;border-radius:13px;background:var(--grad);display:grid;place-items:center;color:#fff;border:0;box-shadow:0 6px 18px rgba(233,89,80,.28);font-size:15px;font-weight:800;flex:0 0 auto}
+    .profile b{font-size:14px;display:block}.profile small{color:var(--muted);font-size:11px;display:block}
+    nav{padding:14px 12px;display:grid;gap:4px}
+    .nav-btn{border:1px solid transparent;background:transparent;color:#a1a1aa;padding:10px 12px;border-radius:11px;text-align:right;display:flex;align-items:center;gap:11px;cursor:pointer;font-size:13.5px;font-weight:500;width:100%;transition:background .15s,color .15s}
+    .nav-btn:hover{background:rgba(255,255,255,.05);color:#fff}
+    .nav-btn.active{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.07);color:#fff;font-weight:600}
+    .nav-ico{width:20px;height:20px;flex:0 0 auto}
+    .badge{background:var(--accent);color:#fff;font-size:10px;font-weight:800;border-radius:99px;padding:2px 9px;margin-right:auto}
+    .side-foot{margin:auto 12px 12px;display:grid;gap:8px}
+    .side-foot a,.side-foot button{border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--muted);padding:10px;border-radius:11px;cursor:pointer;text-align:center;text-decoration:none;font-size:12px;transition:.15s}
+    .side-foot a:hover,.side-foot button:hover{border-color:rgba(255,255,255,.22);color:#fff}
+    .content{min-width:0;padding:24px 28px 54px}
+    .topbar{position:sticky;top:0;z-index:30;background:rgba(9,9,11,.72);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);margin:-24px -28px 24px;padding:14px 28px;display:flex;align-items:center;justify-content:space-between}
+    .page-title h1{font-size:22px;font-weight:700;margin:0}.page-title p{margin:2px 0 0;color:var(--muted);font-size:12.5px}
+    .panel{display:none}.panel.active{display:block}
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+    .card{background:var(--paper);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .kpi{padding:20px;position:relative;overflow:hidden}
     .kpi::before{display:none}
-    .kpi:hover{transform:none}
-    .primary{background:var(--accent);border:0;color:#fff;padding:11px 20px;border-radius:12px;font-weight:700;box-shadow:0 8px 20px rgba(12,114,139,.22);transition:transform .15s}
-    .primary:hover{transform:translateY(-1px);opacity:1}
-    .btn{border-radius:9px;transition:.15s}
-    .btn:hover{border-color:var(--accent);color:var(--accent)}
-    .btn.danger{color:var(--red);border-color:var(--red)}
-    .table-card{border:0;border-radius:var(--radius);box-shadow:var(--shadow)}
-    tbody tr:hover{background:var(--paper-2)}
-    .field input,.field select,.field textarea,.search{border-radius:12px;border:1.5px solid var(--line);transition:border .15s,box-shadow .15s}
-    .field input:focus,.field select:focus,.field textarea:focus,.search:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px rgba(12,114,139,.12)}
-    .page-title h1{font-size:26px;font-weight:800;letter-spacing:-.2px}
-    .toast{border-radius:13px;font-weight:600}
-    .badge{background:var(--accent);color:#fff;border-radius:99px;font-size:10px;padding:2px 9px;font-weight:700}
-    @media(prefers-color-scheme:dark){
-      .sidebar{background:#101e24}
-      .nav-btn{color:#9db4bd}
-      .nav-btn:hover{background:rgba(255,255,255,.06);color:var(--ink)}
-      .nav-btn.active{background:#1c323a;color:var(--accent);box-shadow:none}
-    }
+    .kpi .kico{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;margin-bottom:12px;background:rgba(138,58,185,.14);border:1px solid rgba(138,58,185,.3);color:#a78bfa}
+    .kpi .kico svg{width:22px;height:22px}
+    .kpi small{color:var(--muted);font-size:12px}
+    .number{font-size:28px;font-weight:800;margin-top:6px}
+    .number.amber{color:var(--amber)}.number.green{color:var(--green)}
+    .table-card{margin-top:14px;overflow:hidden}
+    .table-head{padding:18px 20px 10px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+    .table-head h2{font-size:16px;margin:0;font-weight:700}
+    .search{border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--ink);border-radius:999px;padding:9px 16px;min-width:200px;font-size:12px;font-family:inherit;transition:.15s}
+    .search:focus{outline:0;border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.06)}
+    .search::placeholder{color:var(--muted)}
+    table{width:100%;border-collapse:collapse;font-size:12px}
+    th,td{padding:13px 16px;text-align:right;border-top:1px solid var(--line)}
+    th{color:var(--muted);font-size:10.5px;font-weight:600;background:rgba(255,255,255,.02);border-top:0;white-space:nowrap}
+    tbody tr{transition:background .15s}
+    tbody tr:hover{background:rgba(255,255,255,.03)}
+    td .mail{direction:ltr;display:inline-block;color:var(--muted);font-size:11px}
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:99px;font-size:10px;font-weight:700;white-space:nowrap}
+    .pill:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+    .pill.pending{background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.22)}
+    .pill.active{background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.22)}
+    .pill.rejected,.pill.disabled{background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.22)}
+    .pill.admin{background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.25)}
+    .pill.user{background:rgba(255,255,255,.04);color:var(--muted);border:1px solid var(--line)}
+    .row-actions{display:flex;gap:6px;flex-wrap:wrap}
+    .btn{border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--ink);padding:7px 12px;border-radius:9px;cursor:pointer;font-size:11px;transition:.15s}
+    .btn:hover{border-color:rgba(138,58,185,.65);color:#c4b5fd}
+    .btn.ok{background:rgba(52,211,153,.14);border-color:rgba(52,211,153,.35);color:#34d399}
+    .btn.ok:hover{background:rgba(52,211,153,.22);color:#6ee7b7}
+    .btn.no{background:transparent;border-color:rgba(248,113,113,.4);color:var(--red)}
+    .btn.no:hover{border-color:var(--red);background:rgba(248,113,113,.08)}
+    .btn.danger{background:rgba(248,113,113,.14);border-color:transparent;color:#f87171}
+    .btn.danger:hover{background:rgba(248,113,113,.24)}
+    .btn:disabled{opacity:.5;cursor:wait}
+    .form-card{padding:24px;margin-top:14px;max-width:640px}
+    .form-card h2{font-size:16px;margin:0 0 4px;font-weight:700}.form-card p{color:var(--muted);font-size:12px;margin:0 0 14px}
+    .field{margin-bottom:13px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+    .field input,.field textarea{width:100%;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--ink);border-radius:12px;padding:10px 12px;font-family:inherit;transition:.15s}
+    .field textarea{min-height:90px;resize:vertical}
+    .field input:focus,.field textarea:focus{outline:0;border-color:rgba(138,58,185,.7);box-shadow:0 0 0 3px rgba(138,58,185,.18)}
+    .primary{border:0;background:var(--grad);color:#fff;padding:11px 22px;border-radius:12px;cursor:pointer;font-weight:700;box-shadow:0 8px 22px rgba(233,89,80,.22);transition:.15s}
+    .primary:hover{opacity:.93;transform:translateY(-1px)}
+    .primary:disabled{opacity:.55;cursor:wait;transform:none}
+    .toast{position:fixed;left:22px;bottom:22px;background:rgba(24,24,27,.88);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--line);color:var(--ink);padding:11px 15px;border-radius:13px;font-size:12px;font-weight:600;opacity:0;transform:translateY(12px);pointer-events:none;transition:.25s;z-index:120}
+    .toast.show{opacity:1;transform:none}
+    .empty{padding:26px;text-align:center;color:var(--muted);font-size:12px}
+    ::-webkit-scrollbar{width:8px;height:8px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:99px}
+    ::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.2)}
+    @media(max-width:900px){.app{display:block}.sidebar{display:none}.kpi-grid{grid-template-columns:1fr 1fr}.content{padding:16px 14px 60px}.topbar{margin:-16px -14px 20px;padding:12px 14px}}
   </style>
 </head>
 <body>
+<div class="glow-bg" style="width:520px;height:520px;background:rgba(138,58,185,.16);top:-10%;left:-10%"></div>
+<div class="glow-bg" style="width:620px;height:620px;background:rgba(37,99,235,.10);bottom:-20%;right:-10%"></div>
 <div class="app">
   <aside class="sidebar">
     <div class="profile"><div class="avatar" id="avatar">م</div><div><b id="adminName">مدیر</b><small>پنل ادمین</small></div></div>
     <nav>
-      <button class="nav-btn active" data-panel="overview">📊 نمای کلی</button>
-      <button class="nav-btn" data-panel="pending">⏳ درخواست‌های تأیید <span class="badge" id="pendingBadge" style="display:none">۰</span></button>
-      <button class="nav-btn" data-panel="users">👥 کاربران</button>
-      <button class="nav-btn" data-panel="settings">⚙️ تنظیمات سایت</button>
+      <button class="nav-btn active" data-panel="overview"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>نمای کلی</button>
+      <button class="nav-btn" data-panel="pending"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>درخواست‌های تأیید <span class="badge" id="pendingBadge" style="display:none">۰</span></button>
+      <button class="nav-btn" data-panel="users"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5"/><path d="M16 4.7a3.5 3.5 0 010 6.9M18.5 14.6c2 .8 3 2.4 3 4.4"/></svg>کاربران</button>
+      <button class="nav-btn" data-panel="settings"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.6-1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3h.1a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5h.1a1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9v.1a1.7 1.7 0 001.5 1h.1a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>تنظیمات سایت</button>
     </nav>
     <div class="side-foot">
       <a href="/app.html">پنل کاربری</a>
@@ -133,10 +182,10 @@
 
     <section class="panel active" id="p-overview">
       <div class="kpi-grid">
-        <div class="card kpi"><span class="kico">👥</span><small>کل کاربران</small><div class="number" id="stTotal">—</div></div>
-        <div class="card kpi"><span class="kico">⏳</span><small>در انتظار تأیید</small><div class="number amber" id="stPending">—</div></div>
-        <div class="card kpi"><span class="kico">✅</span><small>کاربران فعال</small><div class="number green" id="stActive">—</div></div>
-        <div class="card kpi"><span class="kico">🛡️</span><small>ادمین‌ها</small><div class="number" id="stAdmins">—</div></div>
+        <div class="card kpi"><span class="kico"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5"/><path d="M16 4.7a3.5 3.5 0 010 6.9M18.5 14.6c2 .8 3 2.4 3 4.4"/></svg></span><small>کل کاربران</small><div class="number" id="stTotal">—</div></div>
+        <div class="card kpi"><span class="kico"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span><small>در انتظار تأیید</small><div class="number amber" id="stPending">—</div></div>
+        <div class="card kpi"><span class="kico"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8.5 12.5l2.5 2.5 5-5.5"/></svg></span><small>کاربران فعال</small><div class="number green" id="stActive">—</div></div>
+        <div class="card kpi"><span class="kico"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7.5 3v6c0 4.5-3.2 7.8-7.5 9-4.3-1.2-7.5-4.5-7.5-9V6z"/></svg></span><small>ادمین‌ها</small><div class="number" id="stAdmins">—</div></div>
       </div>
       <div class="card table-card">
         <div class="table-head"><h2>تازه‌ترین عضویت‌ها</h2></div>
