@@ -12,6 +12,7 @@ import os
 import re
 import sqlite3
 import secrets
+import uuid
 from datetime import datetime, timedelta, timezone
 from functools import wraps
 
@@ -119,6 +120,37 @@ def init_db():
     if "enc_password" in cols and "enc_secret" not in cols:
         db.execute("ALTER TABLE ig_accounts RENAME COLUMN enc_password TO enc_secret")
         db.commit()
+    db.executescript(
+        """
+        CREATE TABLE IF NOT EXISTS ig_snapshots (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id     INTEGER NOT NULL,
+            followers   INTEGER NOT NULL DEFAULT 0,
+            following   INTEGER NOT NULL DEFAULT 0,
+            media_count INTEGER NOT NULL DEFAULT 0,
+            taken_at    TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS idx_ig_snapshots_user ON ig_snapshots(user_id, taken_at);
+
+        CREATE TABLE IF NOT EXISTS ig_scheduled (
+            id           INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id      INTEGER NOT NULL,
+            photo_path   TEXT NOT NULL,
+            caption      TEXT NOT NULL DEFAULT '',
+            publish_at   TEXT NOT NULL,
+            status       TEXT NOT NULL DEFAULT 'pending',
+            attempts     INTEGER NOT NULL DEFAULT 0,
+            error        TEXT,
+            media_id     TEXT,
+            created_at   TEXT NOT NULL,
+            published_at TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS idx_ig_scheduled_due ON ig_scheduled(status, publish_at);
+        """
+    )
+    db.commit()
     defaults = {
         "site_name": "پنل مدیریت اینستاگرام",
         "announcement": "",
@@ -735,6 +767,605 @@ def ig_like():
 def ig_unlike():
     data = request.get_json(silent=True) or {}
     return _ig_action((data.get("media_id") or "").strip(), "unlike")
+
+
+# ---------------------------------------------------------------- آنالیز اینستاگرام
+def _ig_record_snapshot(uid, followers, following, media_count):
+    """ثبت اسنپ‌شات رشد؛ اگر کمتر از ۱۰ دقیقه از قبلی گذشته، رد می‌کند."""
+    db = get_db()
+    row = db.execute(
+        "SELECT taken_at FROM ig_snapshots WHERE user_id = ? ORDER BY taken_at DESC LIMIT 1",
+        (uid,),
+    ).fetchone()
+    if row:
+        try:
+            last = datetime.fromisoformat(row["taken_at"])
+            if last.tzinfo is None:
+                last = last.replace(tzinfo=timezone.utc)
+            if datetime.now(timezone.utc) - last < timedelta(minutes=10):
+                return False
+        except (ValueError, TypeError):
+            pass
+    db.execute(
+        "INSERT INTO ig_snapshots(user_id, followers, following, media_count, taken_at)"
+        " VALUES (?, ?, ?, ?, ?)",
+        (uid, followers, following, media_count, now_iso()),
+    )
+    db.commit()
+    return True
+
+
+def _ig_taken_iso(dt):
+    if not dt:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.isoformat()
+
+
+def _ig_media_sum(m):
+    return {
+        "id": str(m.pk),
+        "code": m.code,
+        "thumbnail_url": str(m.thumbnail_url or ""),
+        "like_count": m.like_count or 0,
+        "comment_count": m.comment_count or 0,
+        "caption": (m.caption_text or "")[:140],
+        "taken_at": _ig_taken_iso(m.taken_at),
+    }
+
+
+@app.get("/api/ig/stats")
+@login_required
+def ig_stats():
+    uid = g.me["id"]
+    cl = _ig_client(uid)
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        with _ig_lock:
+            u = cl.user_info(cl.user_id)
+            medias = cl.user_medias(cl.user_id, 30)
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+    followers = u.follower_count or 0
+    _ig_record_snapshot(uid, followers, u.following_count or 0, u.media_count or 0)
+    recent = medias[:12]
+    inter = sum((m.like_count or 0) + (m.comment_count or 0) for m in recent)
+    eng = round(inter / len(recent) / followers * 100, 2) if recent and followers else 0
+    best = sorted(medias, key=lambda m: (m.like_count or 0) + (m.comment_count or 0), reverse=True)[:6]
+    snaps = get_db().execute(
+        "SELECT taken_at, followers, following, media_count FROM ig_snapshots"
+        " WHERE user_id = ? ORDER BY taken_at",
+        (uid,),
+    ).fetchall()
+    return ok(
+        stats={
+            "followers": followers,
+            "following": u.following_count or 0,
+            "media_count": u.media_count or 0,
+            "engagement_rate": eng,
+            "snapshots": [dict(s) for s in snaps],
+            "best_posts": [_ig_media_sum(m) for m in best],
+            "recent": [
+                {
+                    "id": str(m.pk),
+                    "taken_at": _ig_taken_iso(m.taken_at),
+                    "like_count": m.like_count or 0,
+                    "comment_count": m.comment_count or 0,
+                }
+                for m in medias
+            ],
+        }
+    )
+
+
+@app.post("/api/ig/snapshot")
+@login_required
+def ig_snapshot():
+    uid = g.me["id"]
+    cl = _ig_client(uid)
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        with _ig_lock:
+            u = cl.user_info(cl.user_id)
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+    saved = _ig_record_snapshot(uid, u.follower_count or 0, u.following_count or 0, u.media_count or 0)
+    return ok(message="اسنپ‌شات ثبت شد." if saved else "اسنپ‌شات تازه‌ای ثبت شده بود.")
+
+
+# ---------------------------------------------------------------- فالوور / فالووینگ
+def _ig_user_short(u):
+    return {
+        "pk": str(u.pk),
+        "username": u.username,
+        "full_name": u.full_name or "",
+        "profile_pic_url": str(u.profile_pic_url or ""),
+        "is_private": bool(u.is_private),
+        "is_verified": bool(u.is_verified),
+    }
+
+
+def _ig_social(kind):
+    try:
+        amount = min(max(int(request.args.get("amount", 100)), 1), 200)
+    except (TypeError, ValueError):
+        amount = 100
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        with _ig_lock:
+            if kind == "followers":
+                data = cl.user_followers(cl.user_id, amount=amount)
+            else:
+                data = cl.user_following(cl.user_id, amount=amount)
+        return ok(users=[_ig_user_short(u) for u in data.values()], count=len(data))
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+
+
+@app.get("/api/ig/followers")
+@login_required
+def ig_followers():
+    return _ig_social("followers")
+
+
+@app.get("/api/ig/following")
+@login_required
+def ig_following():
+    return _ig_social("following")
+
+
+def _ig_social_action(action):
+    data = request.get_json(silent=True) or {}
+    target = str(data.get("user_id") or "").strip()
+    if not target.isdigit():
+        return err("کاربر مشخص نیست.", "validation")
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        with _ig_lock:
+            res = cl.user_follow(target) if action == "follow" else cl.user_unfollow(target)
+        return ok(result=bool(res), message="انجام شد.")
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+
+
+@app.post("/api/ig/follow")
+@login_required
+def ig_follow():
+    return _ig_social_action("follow")
+
+
+@app.post("/api/ig/unfollow")
+@login_required
+def ig_unfollow():
+    return _ig_social_action("unfollow")
+
+
+# ---------------------------------------------------------------- کامنت‌ها
+@app.get("/api/ig/comments")
+@login_required
+def ig_comments():
+    media_id = (request.args.get("media_id") or "").strip()
+    if not media_id:
+        return err("پست مشخص نیست.", "validation")
+    try:
+        amount = min(max(int(request.args.get("amount", 30)), 1), 100)
+    except (TypeError, ValueError):
+        amount = 30
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        with _ig_lock:
+            comments = cl.media_comments(media_id, amount=amount)
+        out = []
+        for c in comments:
+            usr = c.user
+            out.append(
+                {
+                    "pk": str(c.pk),
+                    "text": c.text or "",
+                    "username": usr.username if usr else "",
+                    "profile_pic_url": str(usr.profile_pic_url) if usr and usr.profile_pic_url else "",
+                    "like_count": c.like_count or 0,
+                    "has_liked": bool(c.has_liked),
+                    "created_at": _ig_taken_iso(c.created_at_utc),
+                }
+            )
+        return ok(comments=out, count=len(out))
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+
+
+@app.post("/api/ig/comment")
+@login_required
+def ig_comment_add():
+    data = request.get_json(silent=True) or {}
+    media_id = (data.get("media_id") or "").strip()
+    text = (data.get("text") or "").strip()
+    if not media_id or not text:
+        return err("متن کامنت و پست مشخص نیست.", "validation")
+    if len(text) > 2200:
+        return err("متن کامنت خیلی طولانی است.", "validation")
+    replied_to = str(data.get("replied_to") or "").strip()
+    replied_to_id = int(replied_to) if replied_to.isdigit() else None
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        with _ig_lock:
+            c = cl.media_comment(media_id, text, replied_to_comment_id=replied_to_id)
+        return ok(comment_id=str(c.pk), message="کامنت ثبت شد.")
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+
+
+@app.post("/api/ig/comment/delete")
+@login_required
+def ig_comment_delete():
+    data = request.get_json(silent=True) or {}
+    media_id = (data.get("media_id") or "").strip()
+    comment_id = str(data.get("comment_id") or "").strip()
+    if not media_id or not comment_id.isdigit():
+        return err("مشخصات کامنت ناقص است.", "validation")
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        with _ig_lock:
+            cl.comment_bulk_delete(media_id, [int(comment_id)])
+        return ok(message="کامنت حذف شد.")
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+
+
+@app.post("/api/ig/comment/like")
+@login_required
+def ig_comment_like():
+    data = request.get_json(silent=True) or {}
+    comment_id = str(data.get("comment_id") or "").strip()
+    like = bool(data.get("like", True))
+    if not comment_id.isdigit():
+        return err("کامنت مشخص نیست.", "validation")
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        with _ig_lock:
+            if like:
+                cl.comment_like(int(comment_id))
+            else:
+                cl.comment_unlike(int(comment_id))
+        return ok(message="انجام شد.")
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+
+
+# ---------------------------------------------------------------- دایرکت
+@app.get("/api/ig/threads")
+@login_required
+def ig_threads():
+    try:
+        amount = min(max(int(request.args.get("amount", 20)), 1), 50)
+    except (TypeError, ValueError):
+        amount = 20
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        with _ig_lock:
+            threads = cl.direct_threads(amount=amount)
+        out = []
+        for t in threads:
+            tid = t.id or t.pk
+            users = [
+                {
+                    "pk": str(x.pk),
+                    "username": x.username,
+                    "profile_pic_url": str(x.profile_pic_url or ""),
+                }
+                for x in (t.users or [])
+            ]
+            title = t.thread_title or ", ".join(x["username"] for x in users[:3])
+            out.append(
+                {
+                    "id": str(tid),
+                    "title": title,
+                    "users": users,
+                    "is_group": bool(t.is_group),
+                    "last_activity_at": _ig_taken_iso(t.last_activity_at),
+                }
+            )
+        return ok(threads=out)
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+
+
+@app.get("/api/ig/thread/messages")
+@login_required
+def ig_thread_messages():
+    thread_id = (request.args.get("thread_id") or "").strip()
+    if not thread_id.isdigit():
+        return err("گفتگو مشخص نیست.", "validation")
+    try:
+        amount = min(max(int(request.args.get("amount", 30)), 1), 100)
+    except (TypeError, ValueError):
+        amount = 30
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        with _ig_lock:
+            msgs = cl.direct_messages(int(thread_id), amount=amount)
+        out = []
+        for m in msgs:
+            out.append(
+                {
+                    "id": str(m.id),
+                    "text": m.text or "",
+                    "user_id": str(m.user_id or ""),
+                    "is_mine": bool(m.is_sent_by_viewer),
+                    "item_type": m.item_type or "text",
+                    "timestamp": _ig_taken_iso(m.timestamp),
+                }
+            )
+        out.sort(key=lambda x: x["timestamp"] or "")
+        return ok(messages=out)
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+
+
+@app.post("/api/ig/thread/send")
+@login_required
+def ig_thread_send():
+    data = request.get_json(silent=True) or {}
+    thread_id = str(data.get("thread_id") or "").strip()
+    text = (data.get("text") or "").strip()
+    if not thread_id.isdigit() or not text:
+        return err("متن پیام و گفتگو مشخص نیست.", "validation")
+    if len(text) > 1000:
+        return err("متن پیام خیلی طولانی است.", "validation")
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        with _ig_lock:
+            m = cl.direct_send(text, thread_ids=[int(thread_id)])
+        return ok(message_id=str(m.id), message="ارسال شد.")
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+
+
+# ---------------------------------------------------------------- انتشار و زمان‌بندی
+def _ig_save_upload(file_storage):
+    if not file_storage or not file_storage.filename:
+        raise ValueError("فایل عکس انتخاب نشده است.")
+    ext = os.path.splitext(file_storage.filename.lower())[1]
+    if ext not in (".jpg", ".jpeg", ".png", ".webp"):
+        raise ValueError("فقط عکس (jpg/png/webp) قابل انتشار است.")
+    data = file_storage.read()
+    if len(data) > 10 * 1024 * 1024:
+        raise ValueError("حجم عکس حداکثر ۱۰ مگابایت باشد.")
+    if len(data) < 1024:
+        raise ValueError("فایل معتبر نیست.")
+    d = os.path.join(DATA_DIR, "ig_uploads")
+    os.makedirs(d, exist_ok=True)
+    p = os.path.join(d, f"{uuid.uuid4().hex}{ext}")
+    with open(p, "wb") as f:
+        f.write(data)
+    return p
+
+
+@app.post("/api/ig/publish")
+@login_required
+def ig_publish():
+    from pathlib import Path
+
+    caption = (request.form.get("caption") or "").strip()
+    if len(caption) > 2200:
+        return err("کپشن خیلی طولانی است.", "validation")
+    try:
+        path = _ig_save_upload(request.files.get("photo"))
+    except ValueError as e:
+        return err(str(e), "validation")
+    cl = _ig_client(g.me["id"])
+    if not cl:
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+        return err("اکانت اینستاگرام متصل نیست.", "not_connected", 404)
+    try:
+        with _ig_lock:
+            media = cl.photo_upload(Path(path), caption)
+        return ok(media_id=str(media.pk), code=media.code, message="پست منتشر شد.")
+    except Exception as e:
+        msg, code_name, http = _ig_errmap(e)
+        return err(msg, code_name, http)
+    finally:
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+
+
+@app.post("/api/ig/schedule")
+@login_required
+def ig_schedule():
+    caption = (request.form.get("caption") or "").strip()
+    publish_at = (request.form.get("publish_at") or "").strip()
+    if len(caption) > 2200:
+        return err("کپشن خیلی طولانی است.", "validation")
+    try:
+        dt = datetime.fromisoformat(publish_at.replace("Z", "+00:00"))
+    except (ValueError, TypeError, AttributeError):
+        return err("زمان انتشار معتبر نیست.", "validation")
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    now = datetime.now(timezone.utc)
+    if dt <= now:
+        return err("زمان انتشار باید در آینده باشد.", "validation")
+    if dt > now + timedelta(days=30):
+        return err("زمان‌بندی حداکثر تا ۳۰ روز آینده.", "validation")
+    try:
+        path = _ig_save_upload(request.files.get("photo"))
+    except ValueError as e:
+        return err(str(e), "validation")
+    db = get_db()
+    cur = db.execute(
+        "INSERT INTO ig_scheduled(user_id, photo_path, caption, publish_at, status, created_at)"
+        " VALUES (?, ?, ?, ?, 'pending', ?)",
+        (g.me["id"], path, caption, dt.astimezone(timezone.utc).isoformat(), now_iso()),
+    )
+    db.commit()
+    return ok(id=cur.lastrowid, message="زمان‌بندی ثبت شد.")
+
+
+@app.get("/api/ig/scheduled")
+@login_required
+def ig_scheduled_list():
+    rows = get_db().execute(
+        "SELECT id, caption, publish_at, status, error, attempts, created_at, published_at, media_id"
+        " FROM ig_scheduled WHERE user_id = ? ORDER BY publish_at",
+        (g.me["id"],),
+    ).fetchall()
+    items = []
+    for r in rows:
+        d = dict(r)
+        d["caption"] = (d["caption"] or "")[:120]
+        items.append(d)
+    return ok(items=items)
+
+
+@app.post("/api/ig/scheduled/delete")
+@login_required
+def ig_scheduled_delete():
+    data = request.get_json(silent=True) or {}
+    sid = data.get("id")
+    if not isinstance(sid, int):
+        return err("مورد مشخص نیست.", "validation")
+    db = get_db()
+    row = db.execute(
+        "SELECT photo_path, status FROM ig_scheduled WHERE id = ? AND user_id = ?",
+        (sid, g.me["id"]),
+    ).fetchone()
+    if not row:
+        return err("یافت نشد.", "not_found", 404)
+    if row["status"] != "pending":
+        return err("فقط زمان‌بندیِ در انتظار حذف می‌شود.", "validation")
+    db.execute("DELETE FROM ig_scheduled WHERE id = ?", (sid,))
+    db.commit()
+    try:
+        os.remove(row["photo_path"])
+    except OSError:
+        pass
+    return ok(message="حذف شد.")
+
+
+# ---------------------------------------------------------------- اندپوینت‌های داخلی (کرون سرور)
+def _ig_internal_token():
+    p = os.path.join(DATA_DIR, ".internal_token")
+    if os.path.exists(p):
+        with open(p) as f:
+            return f.read().strip()
+    tok = secrets.token_hex(32)
+    with open(p, "w") as f:
+        f.write(tok)
+    os.chmod(p, 0o600)
+    return tok
+
+
+def _internal_required(fn):
+    @wraps(fn)
+    def wrapper(*a, **kw):
+        if request.headers.get("X-Internal-Token") != _ig_internal_token():
+            return err("forbidden", "forbidden", 403)
+        return fn(*a, **kw)
+
+    return wrapper
+
+
+@app.post("/api/internal/ig/snapshot-all")
+@_internal_required
+def internal_snapshot_all():
+    from instagrapi import Client
+
+    rows = get_db().execute("SELECT user_id, enc_secret FROM ig_accounts").fetchall()
+    done, failed = 0, 0
+    for r in rows:
+        try:
+            secret = _ig_fernet().decrypt(r["enc_secret"].encode()).decode()
+            cl = Client(request_timeout=15)
+            cl.delay_range = [1, 3]
+            cl.login_by_sessionid(secret)
+            with _ig_lock:
+                u = cl.user_info(cl.user_id)
+            _ig_record_snapshot(
+                r["user_id"], u.follower_count or 0, u.following_count or 0, u.media_count or 0
+            )
+            done += 1
+        except Exception:
+            failed += 1
+    return ok(done=done, failed=failed)
+
+
+@app.post("/api/internal/ig/run-scheduled")
+@_internal_required
+def internal_run_scheduled():
+    from pathlib import Path
+
+    now = now_iso()
+    rows = get_db().execute(
+        "SELECT id, user_id, photo_path, caption, attempts FROM ig_scheduled"
+        " WHERE status = 'pending' AND publish_at <= ?",
+        (now,),
+    ).fetchall()
+    results = []
+    for r in rows:
+        try:
+            cl = _ig_client(r["user_id"])
+            if not cl:
+                raise RuntimeError("اکانت اینستاگرام متصل نیست")
+            if not os.path.exists(r["photo_path"]):
+                raise RuntimeError("فایل عکس پیدا نشد")
+            with _ig_lock:
+                media = cl.photo_upload(Path(r["photo_path"]), r["caption"] or "")
+            get_db().execute(
+                "UPDATE ig_scheduled SET status = 'sent', published_at = ?, media_id = ? WHERE id = ?",
+                (now_iso(), str(media.pk), r["id"]),
+            )
+            try:
+                os.remove(r["photo_path"])
+            except OSError:
+                pass
+            results.append({"id": r["id"], "ok": True})
+        except Exception as e:
+            attempts = (r["attempts"] or 0) + 1
+            status = "failed" if attempts >= 3 else "pending"
+            get_db().execute(
+                "UPDATE ig_scheduled SET attempts = ?, status = ?, error = ? WHERE id = ?",
+                (attempts, status, str(e)[:300], r["id"]),
+            )
+            results.append({"id": r["id"], "ok": False})
+    get_db().commit()
+    return ok(results=results)
 
 
 # ---------------------------------------------------------------- سلامت
