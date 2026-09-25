@@ -241,6 +241,35 @@
     .hl-pick{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
     .hl-pick label{display:flex;align-items:center;gap:7px;background:var(--paper-2);border:1px solid var(--line);border-radius:10px;padding:5px 10px 5px 5px;cursor:pointer;font-size:12px}
     .hl-pick img{width:30px;height:42px;object-fit:cover;border-radius:6px}
+/* ===== داشبورد کارمحور — مدل ۰۴ ===== */
+.task-layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:14px;align-items:start}
+.task-side .aside-title{font-size:15px;font-weight:700;margin:0 0 2px}
+.task-side .aside-sub{font-size:11px;color:var(--muted);margin:0 0 6px}
+.taskrow{display:flex;gap:11px;align-items:center;padding:11px 2px;border-bottom:1px solid var(--line)}
+.taskrow:last-child{border-bottom:0}
+.task-ico{width:37px;height:37px;border-radius:10px;background:var(--paper-2);border:1px solid var(--line);display:grid;place-items:center;font-size:18px;flex:0 0 auto}
+.task-tx{flex:1;min-width:0}
+.task-tx b{display:block;font-size:13px}
+.task-tx span{font-size:11px;color:var(--muted);display:block;margin-top:2px}
+.task-tx span.warn{color:var(--red);font-weight:700}
+.task-tx span.ok{color:var(--green)}
+.wiz-steps{display:flex;align-items:center;margin-bottom:20px;overflow-x:auto;padding-bottom:4px}
+.wiz-step{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px;white-space:nowrap;cursor:pointer;background:none;border:0;padding:0}
+.wiz-step i{width:25px;height:25px;border-radius:50%;display:grid;place-items:center;background:var(--paper-2);border:1px solid var(--line);font-style:normal;font-size:12px;flex:0 0 auto}
+.wiz-step.done{color:var(--accent)}
+.wiz-step.done i{background:var(--accent);border-color:transparent;color:#020203;font-weight:700}
+.wiz-step.cur{color:var(--ink);font-weight:700}
+.wiz-step.cur i{border-color:var(--accent);color:var(--accent)}
+.wiz-track{height:1px;background:var(--line);flex:1;min-width:14px;margin:0 8px}
+.wiz-track.done{background:var(--accent)}
+.wiz-pane{display:none}
+.wiz-pane.cur{display:block;animation:twfade .18s}
+@keyframes twfade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.wiz-nav{display:flex;justify-content:space-between;gap:8px;margin-top:16px}
+.dropzone{border:1.5px dashed var(--line);background:var(--paper-2);border-radius:12px;min-height:110px;display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;color:var(--muted);font-size:13px;cursor:pointer;transition:.15s;padding:16px;text-align:center}
+.dropzone:hover,.dropzone.over{border-color:var(--accent);color:var(--accent)}
+.dropzone input{display:none}
+@media(max-width:1000px){.task-layout{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -263,6 +292,7 @@
     <div class="profile"><div class="avatar">ک</div><div><b id="sbUserName">…</b><small id="sbUserMail" dir="ltr" style="text-align:right"></small></div></div>
     <nav>
       <button class="nav-btn active" data-panel="dashboard">📊 داشبورد</button>
+      <button class="nav-btn" data-panel="tasks">✅ کارمحور</button>
       <button class="nav-btn" data-panel="studio">🎨 تولید محتوا</button>
       <div class="nav-label">اینستاگرام</div>
       <button class="nav-btn" data-panel="connect">🔗 اتصال اکانت‌ها</button>
@@ -322,6 +352,51 @@
         <div class="card-title"><div><h2>ساعت‌های انتشار</h2><p>توزیع ۳۰ پست آخر در روزهای هفته (به وقت تو) · خانه‌های پررنگ‌تر = پست بیشتر</p></div></div>
         <div class="heat-scroll"><div id="heatmap"><div class="empty-note">—</div></div></div>
       </article>
+    </section>
+
+    <section class="panel" id="tasks">
+      <div class="task-layout">
+        <aside class="card tool-card task-side">
+          <div class="aside-title">کارهای امروز</div>
+          <p class="aside-sub" id="taskDateLine">—</p>
+          <div id="taskList"><div class="empty-note">در حال بررسی…</div></div>
+          <div class="tool-actions"><button class="secondary" id="refreshTasks">به‌روزرسانی</button></div>
+        </aside>
+        <div class="card tool-card">
+          <div class="card-title"><div><h2>انتشار محتوای جدید</h2><p>یک مسیر مرحله‌به‌مرحله — بدون اطلاعات نامرتبط</p></div></div>
+        <div id="twRoot">
+          <div class="wiz-steps"><button type="button" class="wiz-step" data-s="1"><i>۱</i>رسانه</button><div class="wiz-track"></div><button type="button" class="wiz-step" data-s="2"><i>۲</i>متن</button><div class="wiz-track"></div><button type="button" class="wiz-step" data-s="3"><i>۳</i>شبکه‌ها</button><div class="wiz-track"></div><button type="button" class="wiz-step" data-s="4"><i>۴</i>انتشار</button></div>
+          <div class="wiz-pane" data-pane="1">
+            <label class="dropzone" id="twDrop">📁<span>فایل را اینجا رها کن یا کلیک کن (عکس/ویدیو)</span><input type="file" id="twFile" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,.mkv"></label>
+            <div style="margin-top:10px"><img id="twPreview" class="preview-img" style="display:none" alt=""><video id="twPreviewV" class="preview-img" style="display:none" controls playsinline></video></div>
+          </div>
+          <div class="wiz-pane" data-pane="2">
+            <div class="field" style="margin-top:0"><label for="twCaption">کپشن / توضیح</label><textarea id="twCaption" placeholder="کپشن اینستاگرام / توضیح یوتیوب…"></textarea></div>
+          </div>
+          <div class="wiz-pane" data-pane="3">
+              <div class="field" style="margin-top:0"><label>کجا منتشر شود؟</label>
+                <div class="cmp-pf-grid">
+                  <label class="cmp-pf-card"><input type="checkbox" id="twPfIg" checked><span class="pf-ico">📸</span><span class="pf-tx"><b>اینستاگرام</b><small>پست عکس / ریلز</small></span></label>
+                  <label class="cmp-pf-card"><input type="checkbox" id="twPfYt"><span class="pf-ico">▶️</span><span class="pf-tx"><b>یوتیوب</b><small>آپلود ویدیو</small></span></label>
+                  <label class="cmp-pf-card disabled"><input type="checkbox" disabled><span class="pf-ico">🎵</span><span class="pf-tx"><b>تیک‌تاک</b><small>به‌زودی</small></span></label>
+                </div>
+              </div>
+              <div id="twYtFields" style="display:none">
+                <div class="field"><label for="twTitle">عنوان یوتیوب</label><input type="text" id="twTitle" maxlength="100" placeholder="عنوان ویدیو…"></div>
+                <div class="field"><label for="twPrivacy">حریم خصوصی ویدیو</label><select id="twPrivacy"><option value="public">عمومی</option><option value="unlisted">غیرفهرست‌شده (فقط با لینک)</option><option value="private">خصوصی</option></select></div>
+                <div class="helper">⚠️ برای آپلود در یوتیوب، در Google Cloud اسکوپ <kbd>youtube.upload</kbd> را به Data Access اضافه کن و بعد دوباره «اتصال با گوگل» را بزن.</div>
+              </div>
+          </div>
+          <div class="wiz-pane" data-pane="4">
+            <div class="tool-actions" style="margin-top:0"><button class="primary" id="twNow">🚀 انتشار فوری</button></div>
+            <div class="field"><label for="twWhen">یا زمان‌بندی برای آینده</label><input type="datetime-local" id="twWhen"></div>
+            <div class="tool-actions"><button class="secondary" id="twSched">⏰ ثبت زمان‌بندی</button></div>
+            <div class="helper">زمان‌بندی حداکثر ۳۰ روز آینده. سرور هر ۱۵ دقیقه زمان‌بندی‌های رسیده را خودکار منتشر می‌کند. «انتشار فوری» هم از همان صف امن استفاده می‌کند — وضعیت را در «زمان‌بندی» ببین.</div>
+          </div>
+          <div class="wiz-nav"><button class="secondary" data-prev>→ قبلی</button><button class="secondary" data-next>بعدی ←</button></div>
+        </div>
+        </div>
+      </div>
     </section>
 
     <section class="panel" id="studio">
@@ -554,36 +629,58 @@
       <article class="card tool-card" style="margin-top:14px">
         <h3>✨ هایلایت‌ها</h3>
         <div id="hlList" style="margin-top:8px"><div class="empty-note">—</div></div>
-        <div class="field" style="margin-top:14px"><label for="hlTitle">ساخت هایلایت جدید</label><input type="text" id="hlTitle" maxlength="50" placeholder="عنوان هایلایت…"></div>
-        <div class="helper">استوری‌هایی که در این هایلایت باشند را انتخاب کن:</div>
-        <div class="hl-pick" id="hlStoryPick"><div class="empty-note">—</div></div>
-        <div class="tool-actions"><button class="primary" id="hlCreateBtn">ساخت هایلایت</button></div>
+        <div class="section-head" style="margin:16px 0 0"><div><h3 style="font-size:15px;margin:0">ساخت هایلایت جدید</h3></div></div>
+        <div id="hlRoot" style="margin-top:10px">
+          <div class="wiz-steps"><button type="button" class="wiz-step" data-s="1"><i>۱</i>استوری‌ها</button><div class="wiz-track"></div><button type="button" class="wiz-step" data-s="2"><i>۲</i>نام</button><div class="wiz-track"></div><button type="button" class="wiz-step" data-s="3"><i>۳</i>ساخت</button></div>
+          <div class="wiz-pane" data-pane="1">
+            <div class="helper" style="margin:0 0 8px">استوری‌هایی که در این هایلایت باشند را انتخاب کن:</div>
+            <div class="hl-pick" id="hlStoryPick"><div class="empty-note">—</div></div>
+          </div>
+          <div class="wiz-pane" data-pane="2">
+            <div class="field" style="margin-top:0"><label for="hlTitle">عنوان هایلایت</label><input type="text" id="hlTitle" maxlength="50" placeholder="عنوان هایلایت…"></div>
+          </div>
+          <div class="wiz-pane" data-pane="3">
+            <p style="font-size:13px;color:var(--muted)" id="hlSummary">—</p>
+            <div class="tool-actions" style="margin-top:4px"><button class="primary" id="hlCreateBtn">✨ ساخت هایلایت</button></div>
+          </div>
+          <div class="wiz-nav"><button class="secondary" data-prev>→ قبلی</button><button class="secondary" data-next>بعدی ←</button></div>
+        </div>
       </article>
     </section>
 
     <section class="panel" id="publish">
       <div class="section-head"><div><h2>انتشار چندپلتفرمه</h2><p>یک فایل آماده کن، انتخاب کن کجا برود — فوری یا زمان‌بندی</p></div></div>
       <article class="card tool-card">
-        <div class="form-stack">
-          <div class="field" style="margin-top:0"><label for="cmpFile">فایل (عکس: jpg/png/webp تا ۱۰ مگ — ویدیو: mp4/mov/webm تا ۲۵۶ مگ)</label><input type="file" id="cmpFile" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,.mkv"></div>
-          <div><img id="cmpPreview" class="preview-img" style="display:none" alt=""><video id="cmpPreviewV" class="preview-img" style="display:none" controls playsinline></video></div>
-          <div class="field"><label>کجا منتشر شود؟</label>
-            <div class="cmp-pf-grid">
-              <label class="cmp-pf-card"><input type="checkbox" id="pfIg" checked><span class="pf-ico">📸</span><span class="pf-tx"><b>اینستاگرام</b><small>پست عکس / ریلز</small></span></label>
-              <label class="cmp-pf-card"><input type="checkbox" id="pfYt"><span class="pf-ico">▶️</span><span class="pf-tx"><b>یوتیوب</b><small>آپلود ویدیو</small></span></label>
-              <label class="cmp-pf-card disabled"><input type="checkbox" disabled><span class="pf-ico">🎵</span><span class="pf-tx"><b>تیک‌تاک</b><small>به‌زودی</small></span></label>
-            </div>
+                <div id="cmpRoot">
+          <div class="wiz-steps"><button type="button" class="wiz-step" data-s="1"><i>۱</i>رسانه</button><div class="wiz-track"></div><button type="button" class="wiz-step" data-s="2"><i>۲</i>متن</button><div class="wiz-track"></div><button type="button" class="wiz-step" data-s="3"><i>۳</i>شبکه‌ها</button><div class="wiz-track"></div><button type="button" class="wiz-step" data-s="4"><i>۴</i>انتشار</button></div>
+          <div class="wiz-pane" data-pane="1">
+            <label class="dropzone" id="cmpDrop">📁<span>فایل را اینجا رها کن یا کلیک کن (عکس: jpg/png/webp تا ۱۰ مگ — ویدیو: mp4/mov/webm تا ۲۵۶ مگ)</span><input type="file" id="cmpFile" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,.mkv"></label>
+            <div style="margin-top:10px"><img id="cmpPreview" class="preview-img" style="display:none" alt=""><video id="cmpPreviewV" class="preview-img" style="display:none" controls playsinline></video></div>
           </div>
-          <div id="ytFields" style="display:none">
-            <div class="field"><label for="cmpTitle">عنوان یوتیوب</label><input type="text" id="cmpTitle" maxlength="100" placeholder="عنوان ویدیو…"></div>
-            <div class="field"><label for="cmpPrivacy">حریم خصوصی ویدیو</label><select id="cmpPrivacy"><option value="public">عمومی</option><option value="unlisted">غیرفهرست‌شده (فقط با لینک)</option><option value="private">خصوصی</option></select></div>
-            <div class="helper" id="ytScopeHint">⚠️ برای آپلود در یوتیوب، در Google Cloud اسکوپ <kbd>youtube.upload</kbd> را به Data Access اضافه کن و بعد دوباره «اتصال با گوگل» را بزن.</div>
+          <div class="wiz-pane" data-pane="2">
+            <div class="field" style="margin-top:0"><label for="cmpCaption">کپشن / توضیح</label><textarea id="cmpCaption" placeholder="کپشن اینستاگرام / توضیح یوتیوب…"></textarea></div>
           </div>
-          <div class="field"><label for="cmpCaption">کپشن / توضیح</label><textarea id="cmpCaption" placeholder="کپشن اینستاگرام / توضیح یوتیوب…"></textarea></div>
-          <div class="tool-actions"><button class="primary" id="composeNow">🚀 انتشار فوری</button></div>
-          <div class="field"><label for="cmpWhen">یا زمان‌بندی برای آینده</label><input type="datetime-local" id="cmpWhen"></div>
-          <div class="tool-actions"><button class="secondary" id="composeSched">⏰ ثبت زمان‌بندی</button></div>
-          <div class="helper">زمان‌بندی حداکثر ۳۰ روز آینده. سرور هر ۱۵ دقیقه زمان‌بندی‌های رسیده را خودکار منتشر می‌کند. «انتشار فوری» هم از همان صف امن استفاده می‌کند — وضعیت را در «زمان‌بندی» ببین.</div>
+          <div class="wiz-pane" data-pane="3">
+              <div class="field" style="margin-top:0"><label>کجا منتشر شود؟</label>
+                <div class="cmp-pf-grid">
+                  <label class="cmp-pf-card"><input type="checkbox" id="pfIg" checked><span class="pf-ico">📸</span><span class="pf-tx"><b>اینستاگرام</b><small>پست عکس / ریلز</small></span></label>
+                  <label class="cmp-pf-card"><input type="checkbox" id="pfYt"><span class="pf-ico">▶️</span><span class="pf-tx"><b>یوتیوب</b><small>آپلود ویدیو</small></span></label>
+                  <label class="cmp-pf-card disabled"><input type="checkbox" disabled><span class="pf-ico">🎵</span><span class="pf-tx"><b>تیک‌تاک</b><small>به‌زودی</small></span></label>
+                </div>
+              </div>
+              <div id="ytFields" style="display:none">
+                <div class="field"><label for="cmpTitle">عنوان یوتیوب</label><input type="text" id="cmpTitle" maxlength="100" placeholder="عنوان ویدیو…"></div>
+                <div class="field"><label for="cmpPrivacy">حریم خصوصی ویدیو</label><select id="cmpPrivacy"><option value="public">عمومی</option><option value="unlisted">غیرفهرست‌شده (فقط با لینک)</option><option value="private">خصوصی</option></select></div>
+                <div class="helper" id="ytScopeHint">⚠️ برای آپلود در یوتیوب، در Google Cloud اسکوپ <kbd>youtube.upload</kbd> را به Data Access اضافه کن و بعد دوباره «اتصال با گوگل» را بزن.</div>
+              </div>
+          </div>
+          <div class="wiz-pane" data-pane="4">
+            <div class="tool-actions" style="margin-top:0"><button class="primary" id="composeNow">🚀 انتشار فوری</button></div>
+            <div class="field"><label for="cmpWhen">یا زمان‌بندی برای آینده</label><input type="datetime-local" id="cmpWhen"></div>
+            <div class="tool-actions"><button class="secondary" id="composeSched">⏰ ثبت زمان‌بندی</button></div>
+            <div class="helper">زمان‌بندی حداکثر ۳۰ روز آینده. سرور هر ۱۵ دقیقه زمان‌بندی‌های رسیده را خودکار منتشر می‌کند. «انتشار فوری» هم از همان صف امن استفاده می‌کند — وضعیت را در «زمان‌بندی» ببین.</div>
+          </div>
+          <div class="wiz-nav"><button class="secondary" data-prev>→ قبلی</button><button class="secondary" data-next>بعدی ←</button></div>
         </div>
       </article>
     </section>
@@ -611,6 +708,7 @@
 (function(){
   var titles={
     dashboard:['داشبورد','نمای زنده عملکرد پیج'],
+    tasks:['کارمحور','کارهای امروز و انتشار مرحله‌ای'],
     studio:['تولید محتوا','کپشن، هشتگ و ایده پست'],
     connect:['اتصال اکانت‌ها','اینستاگرام، تیک‌تاک و یوتیوب'],
     profile:['پروفایل','اطلاعات زنده از اکانت متصل'],
@@ -632,6 +730,7 @@
     document.getElementById('pageSub').textContent=titles[id][1];
     window.scrollTo(0,0);
     if(id==='youtube')loadYouTube();
+    if(id==='tasks')loadTasks();
     if(id==='connect')ytRefreshConnUI();
     if(id==='stories'){loadStories();loadHighlights();}
     if(id==='comments'){loadAutoreply();}
@@ -1270,54 +1369,111 @@
       .catch(function(e){toast(e.message);b.disabled=false});
   });
 
-  /* ---------- کامپوزر انتشار چندپلتفرمه ---------- */
-  var cmpFile=null;
-  var cmpFileEl=document.getElementById('cmpFile');
-  cmpFileEl.addEventListener('change',function(){
-    cmpFile=this.files[0]||null;
-    var img=document.getElementById('cmpPreview'),vid=document.getElementById('cmpPreviewV');
-    img.style.display='none';vid.style.display='none';img.src='';vid.src='';
-    if(!cmpFile)return;
-    var url=URL.createObjectURL(cmpFile);
-    if(cmpFile.type.indexOf('video')===0){vid.src=url;vid.style.display=''}
-    else{img.src=url;img.style.display=''}
-  });
-  document.getElementById('pfYt').addEventListener('change',function(){
-    document.getElementById('ytFields').style.display=this.checked?'':'none';
-  });
-  function composeSubmit(scheduled){
-    var pfs=[];
-    if(document.getElementById('pfIg').checked)pfs.push('instagram');
-    if(document.getElementById('pfYt').checked)pfs.push('youtube');
-    if(!pfs.length){toast('حداقل یک پلتفرم انتخاب کن');return}
-    if(!cmpFile){toast('اول فایل انتخاب کن');return}
-    var fd=new FormData();
-    fd.append('file',cmpFile);
-    fd.append('platforms',pfs.join(','));
-    fd.append('caption',document.getElementById('cmpCaption').value.trim());
-    fd.append('title',document.getElementById('cmpTitle').value.trim());
-    fd.append('privacy',document.getElementById('cmpPrivacy').value);
-    if(scheduled){
-      var w=document.getElementById('cmpWhen').value;
-      if(!w){toast('زمان انتشار را مشخص کن');return}
-      fd.append('publish_at',new Date(w).toISOString());
+  /* ---------- ویزارد مرحله‌ای مشترک (مدل کارمحور ۰۴) ---------- */
+  function gid(id){return document.getElementById(id)}
+  function initStepper(rootId,guardFn,onStep){
+    var root=gid(rootId);
+    var steps=Array.prototype.slice.call(root.querySelectorAll('.wiz-step'));
+    var panes=Array.prototype.slice.call(root.querySelectorAll('.wiz-pane'));
+    var tracks=Array.prototype.slice.call(root.querySelectorAll('.wiz-track'));
+    var prevs=Array.prototype.slice.call(root.querySelectorAll('[data-prev]'));
+    var nexts=Array.prototype.slice.call(root.querySelectorAll('[data-next]'));
+    var cur=1,max=steps.length;
+    function paint(){
+      steps.forEach(function(s){var n=parseInt(s.getAttribute('data-s'),10);
+        s.classList.toggle('done',n<cur);s.classList.toggle('cur',n===cur)});
+      tracks.forEach(function(t,i){t.classList.toggle('done',i+1<cur)});
+      panes.forEach(function(p){p.classList.toggle('cur',parseInt(p.getAttribute('data-pane'),10)===cur)});
+      prevs.forEach(function(b){b.style.display=cur>1?'':'none'});
+      nexts.forEach(function(b){b.style.display=cur<max?'':'none'});
+      if(onStep)onStep(cur);
     }
-    var b=scheduled?document.getElementById('composeSched'):document.getElementById('composeNow');
-    b.disabled=true;toast(scheduled?'در حال ثبت زمان‌بندی…':'در صف انتشار قرار گرفت…');
-    api('/api/publish/compose',{method:'POST',body:fd}).then(function(j){
-      toast(j.message);log('compose: '+j.ids.join(','));
-      document.getElementById('cmpCaption').value='';document.getElementById('cmpTitle').value='';
-      cmpFileEl.value='';cmpFile=null;
-      var img=document.getElementById('cmpPreview'),vid=document.getElementById('cmpPreviewV');
-      img.style.display='none';vid.style.display='none';img.src='';vid.src='';
-      document.getElementById('cmpWhen').value='';
-      loadScheduled();
-    }).catch(function(e){toast(e.message)}).then(function(){b.disabled=false});
+    prevs.forEach(function(b){b.addEventListener('click',function(){if(cur>1){cur--;paint()}})});
+    nexts.forEach(function(b){b.addEventListener('click',function(){
+      if(guardFn&&guardFn(cur)===false)return;
+      if(cur<max){cur++;paint()}
+    })});
+    steps.forEach(function(s){s.addEventListener('click',function(){
+      var n=parseInt(s.getAttribute('data-s'),10);
+      if(n>cur&&guardFn&&guardFn(cur)===false)return;
+      cur=n;paint();
+    })});
+    paint();
+    return {go:function(n){cur=n;paint()}};
   }
-  document.getElementById('composeNow').addEventListener('click',function(){composeSubmit(false)});
-  document.getElementById('composeSched').addEventListener('click',function(){composeSubmit(true)});
-  var cmpWhen=document.getElementById('cmpWhen');
-  cmpWhen.min=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16);
+
+  /* ---------- کامپوزر انتشار (نمونه مشترک برای «انتشار» و «کارمحور») ---------- */
+  function initComposer(cfg){
+    var fileEl=gid(cfg.file),img=gid(cfg.img),vid=gid(cfg.vid);
+    var pfIg=gid(cfg.pfIg),pfYt=gid(cfg.pfYt),ytFields=gid(cfg.ytFields);
+    var title=gid(cfg.title),privacy=gid(cfg.privacy),caption=gid(cfg.caption),when=gid(cfg.when);
+    var drop=cfg.drop?gid(cfg.drop):null;
+    var file=null;
+    function setPreview(){
+      img.style.display='none';vid.style.display='none';img.src='';vid.src='';
+      if(!file)return;
+      var url=URL.createObjectURL(file);
+      if(file.type.indexOf('video')===0){vid.src=url;vid.style.display=''}
+      else{img.src=url;img.style.display=''}
+    }
+    fileEl.addEventListener('change',function(){file=this.files[0]||null;setPreview()});
+    if(drop){
+      drop.addEventListener('dragover',function(e){e.preventDefault();drop.classList.add('over')});
+      drop.addEventListener('dragleave',function(){drop.classList.remove('over')});
+      drop.addEventListener('drop',function(e){
+        e.preventDefault();drop.classList.remove('over');
+        if(e.dataTransfer.files&&e.dataTransfer.files[0]){fileEl.files=e.dataTransfer.files;file=fileEl.files[0]||null;setPreview()}
+      });
+    }
+    pfYt.addEventListener('change',function(){ytFields.style.display=this.checked?'':'none'});
+    function submit(scheduled){
+      var pfs=[];
+      if(pfIg.checked)pfs.push('instagram');
+      if(pfYt.checked)pfs.push('youtube');
+      if(!pfs.length){toast('حداقل یک پلتفرم انتخاب کن');return}
+      if(!file){toast('اول فایل انتخاب کن');return}
+      var fd=new FormData();
+      fd.append('file',file);
+      fd.append('platforms',pfs.join(','));
+      fd.append('caption',caption.value.trim());
+      fd.append('title',title.value.trim());
+      fd.append('privacy',privacy.value);
+      if(scheduled){
+        var w=when.value;
+        if(!w){toast('زمان انتشار را مشخص کن');return}
+        fd.append('publish_at',new Date(w).toISOString());
+      }
+      var b=scheduled?gid(cfg.btnSched):gid(cfg.btnNow);
+      b.disabled=true;toast(scheduled?'در حال ثبت زمان‌بندی…':'در صف انتشار قرار گرفت…');
+      api('/api/publish/compose',{method:'POST',body:fd}).then(function(j){
+        toast(j.message);log('compose: '+j.ids.join(','));
+        caption.value='';title.value='';
+        fileEl.value='';file=null;
+        img.style.display='none';vid.style.display='none';img.src='';vid.src='';
+        when.value='';
+        loadScheduled();
+      }).catch(function(e){toast(e.message)}).then(function(){b.disabled=false});
+    }
+    gid(cfg.btnNow).addEventListener('click',function(){submit(false)});
+    gid(cfg.btnSched).addEventListener('click',function(){submit(true)});
+    when.min=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16);
+    return {hasFile:function(){return !!file}};
+  }
+  var cmpComposer=initComposer({file:'cmpFile',img:'cmpPreview',vid:'cmpPreviewV',pfIg:'pfIg',pfYt:'pfYt',ytFields:'ytFields',title:'cmpTitle',privacy:'cmpPrivacy',caption:'cmpCaption',when:'cmpWhen',btnNow:'composeNow',btnSched:'composeSched',drop:'cmpDrop'});
+  var twComposer=initComposer({file:'twFile',img:'twPreview',vid:'twPreviewV',pfIg:'twPfIg',pfYt:'twPfYt',ytFields:'twYtFields',title:'twTitle',privacy:'twPrivacy',caption:'twCaption',when:'twWhen',btnNow:'twNow',btnSched:'twSched',drop:'twDrop'});
+  initStepper('cmpRoot',function(st){if(st===1&&!cmpComposer.hasFile()){toast('اول فایل انتخاب کن');return false}});
+  initStepper('twRoot',function(st){if(st===1&&!twComposer.hasFile()){toast('اول فایل انتخاب کن');return false}});
+  var hlStepper=initStepper('hlRoot',
+    function(st){
+      if(st===1&&!document.querySelectorAll('#hlStoryPick input:checked').length){toast('حداقل یک استوری انتخاب کن');return false}
+      if(st===2&&!gid('hlTitle').value.trim()){toast('عنوان هایلایت را بنویس');return false}
+    },
+    function(n){
+      if(n===3){
+        var cnt=document.querySelectorAll('#hlStoryPick input:checked').length;
+        gid('hlSummary').textContent=cnt+' استوری انتخاب شده · عنوان: «'+gid('hlTitle').value.trim()+'»';
+      }
+    });
 
   /* ---------- زمان‌بندی‌شده‌ها ---------- */
   var stFa={pending:'در انتظار',sent:'منتشر شد',failed:'ناموفق'};
@@ -1550,7 +1706,10 @@
     if(!ids.length){toast('حداقل یک استوری انتخاب کن');return}
     var b=this;b.disabled=true;
     api('/api/ig/highlight/create',{method:'POST',body:JSON.stringify({title:title,story_ids:ids})})
-      .then(function(j){toast(j.message);document.getElementById('hlTitle').value='';loadHighlights()})
+      .then(function(j){toast(j.message);document.getElementById('hlTitle').value='';
+        document.querySelectorAll('#hlStoryPick input:checked').forEach(function(c){c.checked=false});
+        if(typeof hlStepper!=='undefined'&&hlStepper)hlStepper.go(1);
+        loadHighlights()})
       .catch(function(e){toast(e.message)}).then(function(){b.disabled=false});
   });
 
@@ -1600,6 +1759,88 @@
     api('/api/ig/profile/photo',{method:'POST',body:fd})
       .then(function(j){toast(j.message);document.getElementById('pePhoto').value='';loadProfile()})
       .catch(function(e){toast(e.message)}).then(function(){b.disabled=false});
+  });
+
+  /* ---------- داشبورد کارمحور: کارهای امروز ---------- */
+  function taskRow(ico,title,sub,cls,btn,go){
+    return '<div class="taskrow"><span class="task-ico">'+ico+'</span>'+
+      '<div class="task-tx"><b>'+title+'</b><span class="'+(cls||'')+'">'+sub+'</span></div>'+
+      (btn?'<button class="mini-btn" data-go="'+go+'">'+btn+'</button>':'')+'</div>';
+  }
+  var tasksCacheAt=0;
+  function loadTasks(force){
+    var now=Date.now();
+    if(!force&&now-tasksCacheAt<90000)return;
+    tasksCacheAt=now;
+    var box=gid('taskList');
+    box.innerHTML='<div class="empty-note">در حال بررسی…</div>';
+    gid('taskDateLine').textContent=new Date().toLocaleDateString('fa-IR',{weekday:'long',day:'numeric',month:'long'});
+    api('/api/ig/status').then(function(st){
+      if(!st.connected){
+        box.innerHTML=
+          taskRow('📸','اتصال اینستاگرام','هنوز متصل نیست — برای همه کارها اول وصل شو','warn','اتصال','connect')+
+          taskRow('▶️','کانال یوتیوب','بعد از اتصال اینستاگرام بررسی می‌شود','','اتصال','connect');
+        return;
+      }
+      var me=st.username||'';
+      return Promise.all([
+        api('/api/ig/scheduled').catch(function(){return {items:[]}}),
+        api('/api/yt/status').catch(function(){return {}}),
+        api('/api/ig/autoreply').catch(function(){return {}}),
+        api('/api/ig/stats').catch(function(){return null}),
+        api('/api/ig/medias?limit=12').catch(function(){return {medias:[]}})
+      ]).then(function(r){
+        var sched=r[0],yt=r[1],ar=r[2],stats=r[3],med=r[4];
+        var rows=[];
+        var items=sched.items||[];
+        var pend=items.filter(function(s){return s.status==='pending'});
+        var fail=items.filter(function(s){return s.status==='failed'});
+        var sub,cls='';
+        if(fail.length){sub=fail.length+' انتشار ناموفق — بررسی کن';cls='warn'}
+        else if(pend.length){
+          var nxt=pend.slice().sort(function(a,b){return a.publish_at<b.publish_at?-1:1})[0];
+          sub=pend.length+' در انتظار · بعدی: '+fmtDT(nxt.publish_at);
+        }else{sub='صف خالی است — چیزی برای انتشار نداری';cls='ok'}
+        rows.push(taskRow('⏰','زمان‌بندی انتشار',sub,cls,'مشاهده','scheduled'));
+        var medias=med.medias||[];
+        var top=medias.slice().sort(function(a,b){return (b.comment_count||0)-(a.comment_count||0)})[0];
+        var cP=(top&&top.comment_count)?api('/api/ig/comments?media_id='+encodeURIComponent(top.id)+'&amount=50').catch(function(){return null}):Promise.resolve(null);
+        return cP.then(function(cj){
+          var others=0;
+          if(cj&&cj.comments){
+            others=cj.comments.filter(function(c){return c.username&&c.username.toLowerCase()!==(me||'').toLowerCase()}).length;
+          }
+          rows.push(taskRow('💬','کامنت‌های بی‌پاسخ',
+            others?others+' کامنت از دیگران روی پست‌های اخیر':'کامنت تازه‌ای از دیگران نیست',
+            others?'warn':'ok','مدیریت','comments'));
+          rows.push(taskRow('🤖','پاسخ خودکار',
+            ar.enabled?'فعال است — هر ۱۵ دقیقه بررسی می‌شود':'غیرفعال است',
+            ar.enabled?'ok':'','تنظیم','comments'));
+          rows.push(taskRow('▶️','کانال یوتیوب',
+            yt.connected?('متصل: '+((yt.channel&&yt.channel.title)||'')):'متصل نیست',
+            yt.connected?'ok':'warn','اتصال','connect'));
+          var fsub='—',fcls='';
+          if(stats&&stats.stats&&stats.stats.snapshots&&stats.stats.snapshots.length){
+            var snaps=stats.stats.snapshots;
+            var day=String(snaps[snaps.length-1].taken_at||'').slice(0,10);
+            var td=snaps.filter(function(x){return String(x.taken_at||'').slice(0,10)===day});
+            var a=td.length>1?td[0]:snaps[0],b=td.length>1?td[td.length-1]:snaps[snaps.length-1];
+            var d=(b.followers||0)-(a.followers||0);
+            fsub=(td.length>1?'امروز: ':'کل دوره: ')+(d>0?'+':'')+fa(d)+' فالوور';
+            fcls=d>0?'ok':(d<0?'warn':'');
+          }
+          rows.push(taskRow('👥','رشد فالوور',fsub,fcls,'داشبورد','dashboard'));
+          rows.push(taskRow('📸','اکانت اینستاگرام','متصل: @'+me,'ok','پروفایل','profile'));
+          box.innerHTML=rows.join('');
+          log('tasks loaded');
+        });
+      });
+    }).catch(function(e){box.innerHTML='<div class="empty-note">'+esc(e.message||'خطا در بررسی')+'</div>'});
+  }
+  gid('refreshTasks').addEventListener('click',function(){loadTasks(true)});
+  gid('taskList').addEventListener('click',function(ev){
+    var b=ev.target.closest('[data-go]');if(!b)return;
+    showPanel(b.getAttribute('data-go'));
   });
 })();
 </script>
