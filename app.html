@@ -95,6 +95,18 @@
     .sched-row .sbody{flex:1;min-width:0;font-size:12px}
     .sched-row .sbody small{color:var(--muted);display:block;font-size:10px;margin-top:3px}
     .sched-err{color:var(--accent);font-size:10px;margin-top:4px;direction:ltr;text-align:left}
+    .sched-badges{display:flex;gap:6px;margin-bottom:4px;flex-wrap:wrap}
+    .pf-badge{background:var(--paper-2);border:1px solid var(--line);border-radius:99px;padding:2px 10px;font-size:10px;color:var(--muted)}
+    .sched-title{display:block;font-size:12px;margin-top:4px}
+    .cmp-pf-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:6px}
+    .cmp-pf-card{display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:13px;padding:11px 12px;cursor:pointer;background:var(--paper-2);transition:.15s}
+    .cmp-pf-card:hover{border-color:var(--accent)}
+    .cmp-pf-card.disabled{opacity:.5;cursor:not-allowed}
+    .cmp-pf-card input{accent-color:var(--accent);width:16px;height:16px;flex:0 0 auto}
+    .pf-ico{font-size:22px}
+    .pf-tx b{display:block;font-size:12px}
+    .pf-tx small{color:var(--muted);font-size:10px}
+    @media(max-width:640px){.cmp-pf-grid{grid-template-columns:1fr}}
     #growthChart{width:100%;height:240px;direction:ltr;display:block}
     .heat-scroll{overflow-x:auto}
     .heat{display:grid;grid-template-columns:46px repeat(24,minmax(14px,1fr));gap:2px;align-items:center;font-size:9px;color:var(--muted);min-width:620px}
@@ -123,6 +135,8 @@
     .tagchip{background:var(--paper-2);border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-size:11px;direction:ltr;cursor:pointer}
     .tagchip:hover{border-color:var(--blue)}
     .hook{border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin-top:10px;font-size:13px}
+    .gen-out{border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin-top:10px;background:var(--paper-2)}
+    .gen-out pre{white-space:pre-wrap;font-family:inherit;font-size:12px;margin:0 0 10px;line-height:1.8}
     .hook .hfmt{font-size:10px;color:var(--blue);font-weight:700}
     .hook p{margin:6px 0 10px;line-height:1.9}
     .pf-card{display:none}
@@ -134,6 +148,53 @@
     @media(max-width:1000px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.dash-grid{grid-template-columns:1fr}.dm-layout{grid-template-columns:1fr}}
     @media(max-width:720px){.app{display:block}.sidebar{display:none}.content{padding:14px 14px 90px}.topbar{align-items:flex-start}.page-title h1{font-size:21px}.kpi-grid{grid-template-columns:1fr 1fr;gap:9px}.kpi{padding:14px}.number{font-size:21px}.ig-grid{grid-template-columns:repeat(2,1fr)}.tool-card{padding:16px}.toast{left:14px;right:14px;bottom:22px;text-align:center}}
     @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+    /* ===== پولیش UI (نسخه ۲) ===== */
+    :root{
+      --bg:#eef1f6;--paper:#ffffff;--paper-2:#f6f8fb;--ink:#101a26;--muted:#64707e;--line:#e2e8f0;
+      --accent:#e23b68;--accent-2:#ff7a45;--violet:#7a4bc9;
+      --grad:linear-gradient(120deg,#ff7a45,#e23b68 55%,#7a4bc9);
+      --blue:#2477e3;--green:#078765;--amber:#c97411;--nav:#0f1620;--nav-ink:#edf2f6;
+      --shadow:0 18px 46px rgba(23,32,46,.10);--radius:20px;
+    }
+    @media(prefers-color-scheme:dark){
+      :root{--bg:#0b1016;--paper:#141c26;--paper-2:#182130;--ink:#eef3f8;--muted:#9aa6b4;--line:#26313f;
+        --nav:#070b10;--shadow:0 20px 50px rgba(0,0,0,.35)}
+    }
+    body{background:radial-gradient(1200px 400px at 80% -10%,rgba(226,59,104,.06),transparent),var(--bg)}
+    .sidebar{background:linear-gradient(180deg,#101826 0%,#0b111b 100%);padding:26px 14px 18px}
+    .profile{padding:0 10px 20px}
+    .avatar{box-shadow:0 6px 18px rgba(226,59,104,.35)}
+    .nav-btn{padding:11px 13px;border-radius:12px;font-size:13px;transition:background .15s,transform .15s}
+    .nav-btn:hover{background:#1a2431;transform:translateX(-2px)}
+    .nav-btn.active{background:linear-gradient(120deg,rgba(226,59,104,.22),rgba(122,75,201,.22));color:#fff;box-shadow:inset -3px 0 var(--accent),0 8px 20px rgba(226,59,104,.15)}
+    .nav-label{font-size:10px;letter-spacing:1px;color:#7d8a99;padding:14px 12px 6px}
+    .side-note{background:linear-gradient(150deg,#1b2634,#141c28);border:1px solid rgba(255,255,255,.07);border-radius:14px}
+    .card{border-radius:var(--radius);box-shadow:var(--shadow);transition:transform .18s,box-shadow .18s}
+    .kpi{position:relative;overflow:hidden}
+    .kpi:hover{transform:translateY(-3px)}
+    .kpi::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:var(--grad);opacity:.9}
+    .number{font-size:30px}
+    .primary{background:var(--grad);color:#fff;border:0;padding:11px 20px;border-radius:12px;font-weight:700;box-shadow:0 8px 22px rgba(226,59,104,.28);transition:transform .15s,box-shadow .15s}
+    .primary:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(226,59,104,.38);opacity:1}
+    .primary:active{transform:translateY(0)}
+    .secondary{border-radius:12px;padding:10px 16px;transition:.15s}
+    .secondary:hover{background:var(--paper-2);border-color:var(--accent)}
+    .mini-btn{border-radius:9px;transition:.15s}
+    .mini-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .choice{border-radius:11px;padding:8px 15px}
+    .choice.active{background:var(--grad);border-color:transparent;color:#fff;box-shadow:0 6px 16px rgba(226,59,104,.25)}
+    .field input,.field select,.field textarea{border-radius:12px;padding:11px 13px;border:1.5px solid var(--line);transition:border .15s,box-shadow .15s}
+    .field input:focus,.field select:focus,.field textarea:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px rgba(226,59,104,.12)}
+    .page-title h1{font-size:28px;font-weight:800;letter-spacing:-.3px}
+    .section-head h2{font-size:24px;font-weight:800}
+    .card-title h2{font-size:17px;font-weight:700}
+    .ig-card{transition:transform .18s}
+    .ig-card:hover{transform:translateY(-3px)}
+    .toast{border-radius:13px;font-weight:600}
+    ::-webkit-scrollbar{width:9px;height:9px}
+    ::-webkit-scrollbar-thumb{background:#c3ccd6;border-radius:99px;border:2px solid transparent;background-clip:content-box}
+    @media(prefers-color-scheme:dark){::-webkit-scrollbar-thumb{background:#33404f;border:2px solid transparent;background-clip:content-box;border-radius:99px}}
   </style>
 </head>
 <body>
@@ -155,19 +216,19 @@
   <aside class="sidebar">
     <div class="profile"><div class="avatar">ک</div><div><b id="sbUserName">…</b><small id="sbUserMail" dir="ltr" style="text-align:right"></small></div></div>
     <nav>
-      <button class="nav-btn active" data-panel="dashboard">داشبورد</button>
-      <button class="nav-btn" data-panel="studio">تولید محتوا</button>
+      <button class="nav-btn active" data-panel="dashboard">📊 داشبورد</button>
+      <button class="nav-btn" data-panel="studio">🎨 تولید محتوا</button>
       <div class="nav-label">اینستاگرام</div>
-      <button class="nav-btn" data-panel="connect">اتصال اکانت‌ها</button>
-      <button class="nav-btn" data-panel="profile">پروفایل</button>
-      <button class="nav-btn" data-panel="medias">پست‌ها</button>
-      <button class="nav-btn" data-panel="comments">کامنت‌ها</button>
-      <button class="nav-btn" data-panel="direct">دایرکت</button>
-      <button class="nav-btn" data-panel="followers">فالوور</button>
-      <button class="nav-btn" data-panel="publish">انتشار</button>
-      <button class="nav-btn" data-panel="scheduled">زمان‌بندی</button>
+      <button class="nav-btn" data-panel="connect">🔗 اتصال اکانت‌ها</button>
+      <button class="nav-btn" data-panel="profile">👤 پروفایل</button>
+      <button class="nav-btn" data-panel="medias">🖼️ پست‌ها</button>
+      <button class="nav-btn" data-panel="comments">💬 کامنت‌ها</button>
+      <button class="nav-btn" data-panel="direct">✉️ دایرکت</button>
+      <button class="nav-btn" data-panel="followers">👥 فالوور</button>
+      <button class="nav-btn" data-panel="publish">🚀 انتشار</button>
+      <button class="nav-btn" data-panel="scheduled">⏰ زمان‌بندی</button>
       <div class="nav-label">یوتیوب</div>
-      <button class="nav-btn" data-panel="youtube">کانال یوتیوب</button>
+      <button class="nav-btn" data-panel="youtube">▶️ کانال یوتیوب</button>
       <div class="nav-label">ابزار</div>
       <button class="nav-btn" data-panel="test">تست اکشن</button>
     </nav>
@@ -258,6 +319,39 @@
           <div class="tool-actions"><button class="primary" id="genHooks">۵ ایده بده</button></div>
         </div>
         <div id="hookOut"></div>
+      </article>
+      <article class="card tool-card">
+        <h3>🎬 سناریوساز ویدیو</h3>
+        <p>سناریوی آماده برای ریلز / شورتس / تیک‌تاک: قلاب ۳ ثانیه‌ای + بدنه + CTA.</p>
+        <div class="form-stack">
+          <div class="field" style="margin-top:0"><label for="scTopic">موضوع ویدیو</label><input id="scTopic" placeholder="مثلاً: ۳ اشتباه رایج در سئو"></div>
+          <div class="field"><label>مدت</label><div class="tabs" id="scDur">
+            <button class="choice active" data-d="15">۱۵ ثانیه</button>
+            <button class="choice" data-d="30">۳۰ ثانیه</button>
+            <button class="choice" data-d="60">۶۰ ثانیه</button>
+          </div></div>
+          <div class="tool-actions"><button class="primary" id="genScript">سناریو بساز</button></div>
+        </div>
+        <div id="scriptOut"></div>
+      </article>
+      <article class="card tool-card">
+        <h3>▶️ عنوان‌ساز یوتیوب</h3>
+        <p>۵ عنوان کلیک‌خور با الگوهای تست‌شده — عدد، سؤال، براکت.</p>
+        <div class="form-stack">
+          <div class="field" style="margin-top:0"><label for="ytTopic">موضوع ویدیو</label><input id="ytTopic" placeholder="مثلاً: آموزش اکسل برای مبتدیان"></div>
+          <div class="tool-actions"><button class="primary" id="genYtTitles">۵ عنوان بده</button></div>
+        </div>
+        <div id="ytTitleOut"></div>
+      </article>
+      <article class="card tool-card">
+        <h3>📝 دیسکریپشن‌ساز یوتیوب</h3>
+        <p>توضیح کامل با تایم‌استمپ و هشتگ — آماده کپی.</p>
+        <div class="form-stack">
+          <div class="field" style="margin-top:0"><label for="dsTopic">موضوع ویدیو</label><input id="dsTopic" placeholder="مثلاً: آموزش اکسل برای مبتدیان"></div>
+          <div class="field"><label for="dsPoints">نکات اصلی (هر خط یکی)</label><textarea id="dsPoints" style="min-height:70px" placeholder="معرفی محیط اکسل&#10;فرمول‌های پایه&#10;ترفندهای سرعت"></textarea></div>
+          <div class="tool-actions"><button class="primary" id="genDesc">دیسکریپشن بساز</button></div>
+        </div>
+        <div id="descOut"></div>
       </article>
     </section>
 
@@ -368,16 +462,28 @@
     </section>
 
     <section class="panel" id="publish">
-      <div class="section-head"><div><h2>انتشار</h2><p>پست عکس جدید — فوری یا زمان‌بندی‌شده</p></div></div>
+      <div class="section-head"><div><h2>انتشار چندپلتفرمه</h2><p>یک فایل آماده کن، انتخاب کن کجا برود — فوری یا زمان‌بندی</p></div></div>
       <article class="card tool-card">
         <div class="form-stack">
-          <div class="field" style="margin-top:0"><label for="pubPhoto">عکس (jpg/png/webp تا ۱۰ مگ)</label><input type="file" id="pubPhoto" accept="image/jpeg,image/png,image/webp"></div>
-          <div><img id="pubPreview" class="preview-img" style="display:none" alt=""></div>
-          <div class="field"><label for="pubCaption">کپشن</label><textarea id="pubCaption" placeholder="کپشن پست…"></textarea></div>
-          <div class="tool-actions"><button class="primary" id="publishNow">انتشار فوری</button></div>
-          <div class="field"><label for="pubWhen">زمان انتشار (زمان‌بندی)</label><input type="datetime-local" id="pubWhen"></div>
-          <div class="tool-actions"><button class="secondary" id="scheduleBtn">ثبت زمان‌بندی</button></div>
-          <div class="helper">زمان‌بندی حداکثر ۳۰ روز آینده. سرور هر ۱۵ دقیقه زمان‌بندی‌های رسیده را خودکار منتشر می‌کند.</div>
+          <div class="field" style="margin-top:0"><label for="cmpFile">فایل (عکس: jpg/png/webp تا ۱۰ مگ — ویدیو: mp4/mov/webm تا ۲۵۶ مگ)</label><input type="file" id="cmpFile" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,.mkv"></div>
+          <div><img id="cmpPreview" class="preview-img" style="display:none" alt=""><video id="cmpPreviewV" class="preview-img" style="display:none" controls playsinline></video></div>
+          <div class="field"><label>کجا منتشر شود؟</label>
+            <div class="cmp-pf-grid">
+              <label class="cmp-pf-card"><input type="checkbox" id="pfIg" checked><span class="pf-ico">📸</span><span class="pf-tx"><b>اینستاگرام</b><small>پست عکس / ریلز</small></span></label>
+              <label class="cmp-pf-card"><input type="checkbox" id="pfYt"><span class="pf-ico">▶️</span><span class="pf-tx"><b>یوتیوب</b><small>آپلود ویدیو</small></span></label>
+              <label class="cmp-pf-card disabled"><input type="checkbox" disabled><span class="pf-ico">🎵</span><span class="pf-tx"><b>تیک‌تاک</b><small>به‌زودی</small></span></label>
+            </div>
+          </div>
+          <div id="ytFields" style="display:none">
+            <div class="field"><label for="cmpTitle">عنوان یوتیوب</label><input type="text" id="cmpTitle" maxlength="100" placeholder="عنوان ویدیو…"></div>
+            <div class="field"><label for="cmpPrivacy">حریم خصوصی ویدیو</label><select id="cmpPrivacy"><option value="public">عمومی</option><option value="unlisted">غیرفهرست‌شده (فقط با لینک)</option><option value="private">خصوصی</option></select></div>
+            <div class="helper" id="ytScopeHint">⚠️ برای آپلود در یوتیوب، در Google Cloud اسکوپ <kbd>youtube.upload</kbd> را به Data Access اضافه کن و بعد دوباره «اتصال با گوگل» را بزن.</div>
+          </div>
+          <div class="field"><label for="cmpCaption">کپشن / توضیح</label><textarea id="cmpCaption" placeholder="کپشن اینستاگرام / توضیح یوتیوب…"></textarea></div>
+          <div class="tool-actions"><button class="primary" id="composeNow">🚀 انتشار فوری</button></div>
+          <div class="field"><label for="cmpWhen">یا زمان‌بندی برای آینده</label><input type="datetime-local" id="cmpWhen"></div>
+          <div class="tool-actions"><button class="secondary" id="composeSched">⏰ ثبت زمان‌بندی</button></div>
+          <div class="helper">زمان‌بندی حداکثر ۳۰ روز آینده. سرور هر ۱۵ دقیقه زمان‌بندی‌های رسیده را خودکار منتشر می‌کند. «انتشار فوری» هم از همان صف امن استفاده می‌کند — وضعیت را در «زمان‌بندی» ببین.</div>
         </div>
       </article>
     </section>
@@ -412,8 +518,8 @@
     comments:['کامنت‌ها','مدیریت کامنت‌های پست‌ها'],
     direct:['دایرکت','گفتگوهای اینستاگرام'],
     followers:['فالوور','مدیریت دنبال‌کننده‌ها'],
-    publish:['انتشار','پست عکس جدید'],
-    scheduled:['زمان‌بندی‌شده‌ها','پست‌های در انتظار انتشار'],
+    publish:['انتشار چندپلتفرمه','یک فایل، چند مقصد: اینستاگرام و یوتیوب'],
+    scheduled:['زمان‌بندی‌شده‌ها','صف انتشار چندپلتفرمه'],
     youtube:['یوتیوب','آمار کانال و ویدیوها'],
     test:['تست اکشن','اکشن واقعی روی اکانت اینستاگرام']
   };
@@ -754,6 +860,76 @@
     });
   });
 
+  /* ---------- سناریوساز ویدیو ---------- */
+  var scDur='15';
+  document.getElementById('scDur').addEventListener('click',function(ev){
+    var b=ev.target.closest('[data-d]');if(!b)return;
+    scDur=b.getAttribute('data-d');
+    this.querySelectorAll('.choice').forEach(function(c){c.classList.toggle('active',c===b)});
+  });
+  var scHooks=[
+    '۳ ثانیه صبر کن، این ویدیو {t} رو برات عوض می‌کنه…',
+    'اگه {t} رو اشتباه انجام می‌دی، این ویدیو رو ببین!',
+    'هیچ‌کس درباره {t} اینو بهت نگفته…',
+    'توی {d} ثانیه {t} رو یاد بگیر!'
+  ];
+  var scBodies={
+    '15':['نکته ۱ (۰-۵ ثانیه): اصل مطلب را مستقیم بگو','نکته ۲ (۵-۱۰ ثانیه): یک مثال ملموس','CTA (۱۰-۱۵ ثانیه): فالو کن تا قسمت بعد'],
+    '30':['مقدمه (۰-۵ ثانیه): مشکل مخاطب را نام ببر','نکته ۱ (۵-۱۲ ثانیه)','نکته ۲ (۱۲-۲۰ ثانیه)','نکته ۳ (۲۰-۲۵ ثانیه)','CTA (۲۵-۳۰ ثانیه): کامنت + فالو'],
+    '60':['قلاب (۰-۵ ثانیه)','پیش‌زمینه (۵-۱۵ ثانیه): چرا این موضوع مهم است','نکته ۱ (۱۵-۲۵ ثانیه)','نکته ۲ (۲۵-۳۵ ثانیه)','نکته ۳ (۳۵-۴۵ ثانیه)','جمع‌بندی (۴۵-۵۵ ثانیه)','CTA (۵۵-۶۰ ثانیه): سابسکرایب / فالو + کامنت']
+  };
+  document.getElementById('genScript').addEventListener('click',function(){
+    var t=document.getElementById('scTopic').value.trim()||'موضوع ویدیوت';
+    var hk=scHooks[Math.floor(Math.random()*scHooks.length)].replace(/\{t\}/g,t).replace(/\{d\}/g,scDur);
+    var body=scBodies[scDur].map(function(s,i){return (i+1)+'. '+s.replace(/\{t\}/g,t)});
+    var txt='🎬 سناریو ('+scDur+' ثانیه)\n\n📌 قلاب:\n'+hk+'\n\n📝 بدنه:\n'+body.join('\n');
+    document.getElementById('scriptOut').innerHTML=
+      '<div class="gen-out"><pre>'+esc(txt)+'</pre><button class="mini-btn" id="copyScript">کپی سناریو</button></div>';
+    document.getElementById('copyScript').addEventListener('click',function(){copyText(txt)});
+  });
+
+  /* ---------- عنوان‌ساز یوتیوب ---------- */
+  var ytTpl=[
+    '{t} در {n} دقیقه (راهنمای کامل {y})',
+    '۵ اشتباه مرگبار در {t} که همه می‌کنند!',
+    'چطور {t} را از صفر یاد بگیریم؟ (قدم‌به‌قدم)',
+    '{t}: هرچیزی که باید بدانی [آپدیت {y}]',
+    'چرا {t} برای تو جواب نمی‌دهد؟ (و راه حلش)',
+    'از صفر تا صد {t} — بدون حرف اضافه',
+    '{t} در برابر روش سنتی: کدام بهتر است؟'
+  ];
+  document.getElementById('genYtTitles').addEventListener('click',function(){
+    var t=document.getElementById('ytTopic').value.trim()||'موضوع ویدیوت';
+    var y=new Date().getFullYear();
+    var idx=ytTpl.map(function(_,i){return i}).sort(function(){return Math.random()-.5}).slice(0,5);
+    var box=document.getElementById('ytTitleOut');
+    box.innerHTML=idx.map(function(i){
+      var txt=ytTpl[i].replace(/\{t\}/g,t).replace(/\{y\}/g,y).replace(/\{n\}/g,10+Math.floor(Math.random()*20));
+      return '<div class="hook"><span class="hfmt">▶️</span><p>'+esc(txt)+'</p><button class="mini-btn" data-yt="'+i+'">کپی</button></div>';
+    }).join('');
+    var made=idx.map(function(i){return ytTpl[i].replace(/\{t\}/g,t).replace(/\{y\}/g,y).replace(/\{n\}/g,'۱۵')});
+    box.querySelectorAll('[data-yt]').forEach(function(b,bi){
+      b.addEventListener('click',function(){copyText(made[bi])});
+    });
+  });
+
+  /* ---------- دیسکریپشن‌ساز یوتیوب ---------- */
+  document.getElementById('genDesc').addEventListener('click',function(){
+    var t=document.getElementById('dsTopic').value.trim()||'موضوع ویدیو';
+    var pts=document.getElementById('dsPoints').value.split('\n').map(function(s){return s.trim()}).filter(Boolean);
+    var ts=['00:00 مقدمه'];
+    pts.forEach(function(p,i){ts.push('0'+(i+1)+':00 '+p)});
+    var tags=t.split(/\s+/).slice(0,3).map(function(w){return '#'+w.replace(/[^\u0600-\u06FFa-zA-Z0-9]/g,'')}).filter(function(w){return w.length>1});
+    var txt='🎬 '+t+'\n\nدر این ویدیو درباره «'+t+'» صحبت می‌کنیم.'+
+      (pts.length?'\n\n📌 سرفصل‌ها:\n'+pts.map(function(p){return '• '+p}).join('\n'):'')+
+      '\n\n⏱️ تایم‌استمپ:\n'+ts.join('\n')+
+      '\n\n🔔 اگه مفید بود سابسکرایب کن و زنگوله رو بزن!'+
+      (tags.length?'\n\n'+tags.join(' '):'');
+    document.getElementById('descOut').innerHTML=
+      '<div class="gen-out"><pre>'+esc(txt)+'</pre><button class="mini-btn" id="copyDesc">کپی دیسکریپشن</button></div>';
+    document.getElementById('copyDesc').addEventListener('click',function(){copyText(txt)});
+  });
+
   /* ---------- پروفایل و پست‌ها ---------- */
   function renderProfile(p){
     var card=document.getElementById('profileCard');
@@ -977,58 +1153,71 @@
       .catch(function(e){toast(e.message);b.disabled=false});
   });
 
-  /* ---------- انتشار و زمان‌بندی ---------- */
-  var pubFile=null;
-  document.getElementById('pubPhoto').addEventListener('change',function(){
-    pubFile=this.files[0]||null;
-    var img=document.getElementById('pubPreview');
-    if(pubFile){img.src=URL.createObjectURL(pubFile);img.style.display=''}
-    else{img.src='';img.style.display='none'}
+  /* ---------- کامپوزر انتشار چندپلتفرمه ---------- */
+  var cmpFile=null;
+  var cmpFileEl=document.getElementById('cmpFile');
+  cmpFileEl.addEventListener('change',function(){
+    cmpFile=this.files[0]||null;
+    var img=document.getElementById('cmpPreview'),vid=document.getElementById('cmpPreviewV');
+    img.style.display='none';vid.style.display='none';img.src='';vid.src='';
+    if(!cmpFile)return;
+    var url=URL.createObjectURL(cmpFile);
+    if(cmpFile.type.indexOf('video')===0){vid.src=url;vid.style.display=''}
+    else{img.src=url;img.style.display=''}
   });
-  function pubFormData(withWhen){
-    var cap=document.getElementById('pubCaption').value.trim();
-    if(!pubFile){toast('اول عکس انتخاب کن');return null}
-    var fd=new FormData();fd.append('photo',pubFile);fd.append('caption',cap);
-    if(withWhen){
-      var w=document.getElementById('pubWhen').value;
-      if(!w){toast('زمان انتشار را مشخص کن');return null}
+  document.getElementById('pfYt').addEventListener('change',function(){
+    document.getElementById('ytFields').style.display=this.checked?'':'none';
+  });
+  function composeSubmit(scheduled){
+    var pfs=[];
+    if(document.getElementById('pfIg').checked)pfs.push('instagram');
+    if(document.getElementById('pfYt').checked)pfs.push('youtube');
+    if(!pfs.length){toast('حداقل یک پلتفرم انتخاب کن');return}
+    if(!cmpFile){toast('اول فایل انتخاب کن');return}
+    var fd=new FormData();
+    fd.append('file',cmpFile);
+    fd.append('platforms',pfs.join(','));
+    fd.append('caption',document.getElementById('cmpCaption').value.trim());
+    fd.append('title',document.getElementById('cmpTitle').value.trim());
+    fd.append('privacy',document.getElementById('cmpPrivacy').value);
+    if(scheduled){
+      var w=document.getElementById('cmpWhen').value;
+      if(!w){toast('زمان انتشار را مشخص کن');return}
       fd.append('publish_at',new Date(w).toISOString());
     }
-    return fd;
-  }
-  document.getElementById('publishNow').addEventListener('click',function(){
-    var fd=pubFormData(false);if(!fd)return;
-    var b=this;b.disabled=true;toast('در حال انتشار…');
-    api('/api/ig/publish',{method:'POST',body:fd}).then(function(j){
-      toast(j.message);log('published: '+j.media_id);
-      document.getElementById('pubCaption').value='';document.getElementById('pubPhoto').value='';
-      pubFile=null;var img=document.getElementById('pubPreview');img.src='';img.style.display='none';
-      loadMedias();loadDashboard();
-    }).catch(function(e){toast(e.message)}).then(function(){b.disabled=false});
-  });
-  document.getElementById('scheduleBtn').addEventListener('click',function(){
-    var fd=pubFormData(true);if(!fd)return;
-    var b=this;b.disabled=true;
-    api('/api/ig/schedule',{method:'POST',body:fd}).then(function(j){
-      toast(j.message);log('scheduled: '+j.id);
-      document.getElementById('pubCaption').value='';document.getElementById('pubPhoto').value='';
-      pubFile=null;var img=document.getElementById('pubPreview');img.src='';img.style.display='none';
+    var b=scheduled?document.getElementById('composeSched'):document.getElementById('composeNow');
+    b.disabled=true;toast(scheduled?'در حال ثبت زمان‌بندی…':'در صف انتشار قرار گرفت…');
+    api('/api/publish/compose',{method:'POST',body:fd}).then(function(j){
+      toast(j.message);log('compose: '+j.ids.join(','));
+      document.getElementById('cmpCaption').value='';document.getElementById('cmpTitle').value='';
+      cmpFileEl.value='';cmpFile=null;
+      var img=document.getElementById('cmpPreview'),vid=document.getElementById('cmpPreviewV');
+      img.style.display='none';vid.style.display='none';img.src='';vid.src='';
+      document.getElementById('cmpWhen').value='';
       loadScheduled();
     }).catch(function(e){toast(e.message)}).then(function(){b.disabled=false});
-  });
-  var pubWhen=document.getElementById('pubWhen');
-  pubWhen.min=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16);
+  }
+  document.getElementById('composeNow').addEventListener('click',function(){composeSubmit(false)});
+  document.getElementById('composeSched').addEventListener('click',function(){composeSubmit(true)});
+  var cmpWhen=document.getElementById('cmpWhen');
+  cmpWhen.min=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16);
 
   /* ---------- زمان‌بندی‌شده‌ها ---------- */
   var stFa={pending:'در انتظار',sent:'منتشر شد',failed:'ناموفق'};
+  var pfFa={instagram:'📸 اینستاگرام',youtube:'▶️ یوتیوب',tiktok:'🎵 تیک‌تاک'};
+  var mtFa={photo:'🖼️ عکس',video:'🎬 ویدیو'};
   function loadScheduled(){
     if(!guard())return;
     api('/api/ig/scheduled').then(function(j){
       var box=document.getElementById('schedList');
       if(!j.items.length){box.innerHTML='<div class="empty-note">زمان‌بندی فعالی نیست.</div>';return}
       box.innerHTML=j.items.map(function(s){
+        var pf=pfFa[s.platform]||s.platform||'';
+        var mt=mtFa[s.media_type]||'';
+        var ttl=s.title?'<b class="sched-title">'+esc(s.title)+'</b>':'';
         return '<div class="sched-row"><span class="st st-'+s.status+'">'+(stFa[s.status]||s.status)+'</span>'+
-          '<div class="sbody"><b>'+fmtDT(s.publish_at)+'</b><small>'+esc(s.caption||'بدون کپشن')+'</small>'+
+          '<div class="sbody"><div class="sched-badges"><span class="pf-badge">'+pf+'</span><span class="pf-badge">'+mt+'</span></div>'+
+          '<b>'+fmtDT(s.publish_at)+'</b>'+ttl+'<small>'+esc(s.caption||'بدون کپشن')+'</small>'+
           (s.status==='failed'&&s.error?'<div class="sched-err">تلاش '+fa(s.attempts)+': '+esc(s.error)+'</div>':'')+
           '</div>'+
           (s.status==='pending'?'<button class="mini-btn danger" data-del="'+s.id+'">حذف</button>':'')+
