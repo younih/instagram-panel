@@ -166,6 +166,8 @@
       <button class="nav-btn" data-panel="followers">فالوور</button>
       <button class="nav-btn" data-panel="publish">انتشار</button>
       <button class="nav-btn" data-panel="scheduled">زمان‌بندی</button>
+      <div class="nav-label">یوتیوب</div>
+      <button class="nav-btn" data-panel="youtube">کانال یوتیوب</button>
       <div class="nav-label">ابزار</div>
       <button class="nav-btn" data-panel="test">تست اکشن</button>
     </nav>
@@ -291,11 +293,29 @@
         اگر می‌خواهی فعالش کنم، بگو تا قدم‌به‌قدم راهنماییت کنم؛ بعد از گرفتن کلید، لاگین و آمار پیج را همین‌جا اضافه می‌کنم.</div>
       </div>
       <div class="pf-card" id="pf-youtube">
-        <div class="soon"><b>یوتیوب — به‌زودی</b>
-        اتصال یوتیوب با <span dir="ltr">Google Cloud OAuth</span> انجام می‌شود (آمار کانال، ویدیوها، کامنت‌ها).
-        اگر می‌خواهی فعالش کنم، بگو تا راهنمای ساخت کلید را بدهم؛ بعدش همین پنل چندپلتفرمه می‌شود.</div>
+        <article class="card tool-card">
+          <h3>اتصال کانال یوتیوب</h3>
+          <p>با حساب گوگلت وارد می‌شوی. دسترسی فقط <b>خواندنی</b> است: آمار کانال، ویدیوها و اطلاعات عمومی.</p>
+          <div class="notice" id="ytCfgHint">در حال بررسی تنظیمات…</div>
+          <div id="ytConnState" style="margin-bottom:10px"></div>
+          <div class="tool-actions">
+            <button class="primary" id="ytConnectBtn">اتصال با گوگل</button>
+            <button class="secondary" id="ytDisconnectBtn" style="display:none">قطع اتصال</button>
+          </div>
+          <div class="helper">بعد از اتصال، آمار کانال را در بخش «کانال یوتیوب» می‌بینی. توکن‌ها رمزنگاری‌شده فقط روی همین سرور ذخیره می‌شوند و هر وقت خواستی می‌توانی قطعشان کنی.</div>
+        </article>
       </div>
       <article class="card tool-card" style="margin-top:14px"><h3>لاگ</h3><div class="log-box" id="logBox">ready.</div></article>
+    </section>
+
+    <section class="panel" id="youtube">
+      <div class="section-head">
+        <div><h2>یوتیوب</h2><p>آمار کانال و ویدیوهای اخیر</p></div>
+        <div class="tool-actions" style="margin:0"><button class="secondary" id="ytRefresh">به‌روزرسانی</button></div>
+      </div>
+      <div class="notice err" id="ytError" style="display:none"></div>
+      <div class="notice" id="ytNotConn" style="display:none">کانال یوتیوب وصل نیست. از بخش «اتصال اکانت‌ها ← یوتیوب» وصلش کن.</div>
+      <div id="ytBody"></div>
     </section>
 
     <section class="panel" id="profile">
@@ -394,6 +414,7 @@
     followers:['فالوور','مدیریت دنبال‌کننده‌ها'],
     publish:['انتشار','پست عکس جدید'],
     scheduled:['زمان‌بندی‌شده‌ها','پست‌های در انتظار انتشار'],
+    youtube:['یوتیوب','آمار کانال و ویدیوها'],
     test:['تست اکشن','اکشن واقعی روی اکانت اینستاگرام']
   };
   function showPanel(id){
@@ -403,6 +424,8 @@
     document.getElementById('pageHeading').textContent=titles[id][0];
     document.getElementById('pageSub').textContent=titles[id][1];
     window.scrollTo(0,0);
+    if(id==='youtube')loadYouTube();
+    if(id==='connect')ytRefreshConnUI();
   }
   document.querySelectorAll('[data-panel]').forEach(function(b){b.addEventListener('click',function(){showPanel(b.dataset.panel)})});
   document.querySelectorAll('#pfTabs .choice').forEach(function(b){
@@ -412,6 +435,73 @@
       var pf=b.dataset.pf;
       document.querySelectorAll('.pf-card').forEach(function(c){c.classList.toggle('active',c.id==='pf-'+pf)});
     });
+  });
+
+  /* ---------- یوتیوب ---------- */
+  function ytRefreshConnUI(){
+    var hint=document.getElementById('ytCfgHint');
+    if(!hint)return;
+    api('/api/yt/config-hint').then(function(h){
+      if(!h.configured){
+        hint.innerHTML='<b>هنوز کلید گوگل وارد نشده.</b><br>ادمین باید در پنل ادمین ← تنظیمات، Client ID و Client Secret را وارد کند و این آدرس را دقیقاً به‌عنوان Redirect URI در Google Cloud ثبت کند:<br><span dir="ltr" style="font-family:monospace;word-break:break-all">'+esc(h.redirect_uri)+'</span>';
+        document.getElementById('ytConnectBtn').disabled=true;
+      }else{
+        hint.innerHTML='کلید گوگل تنظیم شده ✅<br>Redirect URI ثبت‌شده در گوگل باید دقیقاً این باشد:<br><span dir="ltr" style="font-family:monospace;word-break:break-all">'+esc(h.redirect_uri)+'</span>';
+        document.getElementById('ytConnectBtn').disabled=false;
+      }
+    }).catch(function(){hint.textContent='خطا در بررسی تنظیمات.'});
+    api('/api/yt/status').then(function(s){
+      document.getElementById('ytDisconnectBtn').style.display=s.connected?'':'none';
+      document.getElementById('ytConnState').innerHTML=s.connected?'<div class="delta">متصل: <b>'+esc(s.channel.title)+'</b></div>':'';
+    }).catch(function(){});
+  }
+  function loadYouTube(){
+    var body=document.getElementById('ytBody'),nc=document.getElementById('ytNotConn'),er=document.getElementById('ytError');
+    er.style.display='none';
+    api('/api/yt/status').then(function(s){
+      if(!s.connected){nc.style.display='';body.innerHTML='';return null}
+      nc.style.display='none';
+      body.innerHTML='<div class="empty-note">در حال دریافت…</div>';
+      return api('/api/yt/channel');
+    }).then(function(c){
+      if(!c)return null;
+      var ch=c.channel,st=ch.stats||{};
+      body.innerHTML=
+        '<article class="card tool-card"><div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">'+
+        (ch.thumb?'<img src="'+esc(ch.thumb)+'" style="width:64px;height:64px;border-radius:50%" referrerpolicy="no-referrer" alt="">':'')+
+        '<div><h3 style="margin:0 0 6px">'+esc(ch.title)+'</h3>'+
+        '<div class="delta">سابسکرایبر: <b>'+fa(st.subscriberCount)+'</b> · بازدید کل: <b>'+fa(st.viewCount)+'</b> · ویدیو: <b>'+fa(st.videoCount)+'</b></div>'+
+        (ch.description?'<p style="color:var(--muted);font-size:12px;margin:8px 0 0;line-height:1.9">'+esc(ch.description)+'</p>':'')+
+        '</div></div></article>'+
+        '<div class="section-head" style="margin-top:18px"><div><h2>ویدیوهای اخیر</h2><p>۱۲ ویدیوی آخر کانال</p></div></div>'+
+        '<div class="ig-grid" id="ytVids"><div class="empty-note" style="grid-column:1/-1">در حال دریافت…</div></div>';
+      return api('/api/yt/videos');
+    }).then(function(v){
+      if(!v)return;
+      var g=document.getElementById('ytVids');
+      if(!g)return;
+      g.innerHTML=(v.videos||[]).map(function(m){
+        return '<article class="card ig-card"><div class="ig-thumb">'+(m.thumb?'<img src="'+esc(m.thumb)+'" loading="lazy" referrerpolicy="no-referrer" alt="">':'')+'</div>'+
+        '<div class="ig-meta"><div class="row"><span>👁 '+fa(m.views)+'</span><span>❤ '+fa(m.likes)+'</span><span>💬 '+fa(m.comments)+'</span></div>'+
+        '<div class="ig-cap">'+esc(m.title||'')+'</div>'+
+        '<div class="row"><span>'+fmtDT(m.published_at)+'</span><a href="https://www.youtube.com/watch?v='+m.id+'" target="_blank" rel="noopener">مشاهده</a></div></div></article>';
+      }).join('')||'<div class="empty-note" style="grid-column:1/-1">ویدیویی پیدا نشد.</div>';
+    }).catch(function(e){
+      if(notConn(e))return;
+      er.innerHTML='<b>خطا:</b> '+esc(e.message||'نامشخص');er.style.display='';
+      body.innerHTML='';
+    });
+  }
+  document.getElementById('ytConnectBtn').addEventListener('click',function(){
+    window.open('/api/yt/oauth/start','ytconnect','width=520,height=680');
+  });
+  document.getElementById('ytDisconnectBtn').addEventListener('click',function(){
+    api('/api/yt/disconnect',{method:'POST'}).then(function(j){toast(j.message||'قطع شد');ytRefreshConnUI();loadYouTube()}).catch(function(e){toast(e.message)});
+  });
+  document.getElementById('ytRefresh').addEventListener('click',loadYouTube);
+  window.addEventListener('message',function(e){
+    if(e.data==='yt-connected'){toast('یوتیوب وصل شد 🎉');ytRefreshConnUI();loadYouTube()}
+    else if(e.data==='yt-failed'){toast('اتصال یوتیوب ناموفق بود')}
   });
 
   function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},3000)}
