@@ -195,7 +195,7 @@ ufw allow 22/tcp comment 'SSH' >/dev/null
 ufw allow 80/tcp comment 'HTTP' >/dev/null
 ufw allow 443/tcp comment 'HTTPS' >/dev/null
 
-echo "==> [7/7] گواهی HTTPS ..."
+echo "==> [7/8] گواهی HTTPS ..."
 # مرحله ۶ بلاک 443 را خودش می‌نویسد؛ certbot فقط در نصب اول (نبود گواهی) لازم است،
 # و بعدش کانفیگ دوباره نوشته می‌شود تا بلاک 443 با گواهی تازه همراه شود.
 if [[ ! -d /etc/letsencrypt/live/$DOMAIN ]]; then
@@ -215,3 +215,15 @@ echo "   پنل ادمین:       https://${DOMAIN}/admin.html"
 echo "   وضعیت بک‌اند:    systemctl status ${SERVICE}"
 echo ""
 echo "   فلو کار: کاربر ثبت‌نام می‌کند ← در «درخواست‌های تأیید» پنل ادمین تأیید می‌کنید ← وارد پنل کاربری می‌شود."
+echo ""
+echo "==> [8/8] کرون‌جاب‌های داخلی اینستاگرام (اسنپ‌شات رشد + انتشار زمان‌بندی‌شده) ..."
+TOKEN_FILE="${DATADIR}/.internal_token"
+if [[ ! -f "$TOKEN_FILE" ]]; then
+  openssl rand -hex 32 > "$TOKEN_FILE"
+  chmod 600 "$TOKEN_FILE"
+fi
+ITOKEN=$(cat "$TOKEN_FILE")
+CRON_SNAP="*/30 * * * * curl -s -m 50 -X POST http://127.0.0.1:${PANEL_PORT}/api/internal/ig/snapshot-all -H \"X-Internal-Token: ${ITOKEN}\" >/dev/null 2>&1"
+CRON_RUN="*/15 * * * * curl -s -m 100 -X POST http://127.0.0.1:${PANEL_PORT}/api/internal/ig/run-scheduled -H \"X-Internal-Token: ${ITOKEN}\" >/dev/null 2>&1"
+( crontab -l 2>/dev/null | grep -v "/api/internal/ig/" ; echo "$CRON_SNAP" ; echo "$CRON_RUN" ) | crontab -
+echo "   کرون‌ها نصب شدند: اسنپ‌شات هر ۳۰ دقیقه، اجرای زمان‌بندی هر ۱۵ دقیقه."
