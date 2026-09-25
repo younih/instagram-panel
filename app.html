@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <title>پنل خام اینستاگرام</title>
+  <title>پنل اینستاگرام</title>
   <style>
     :root{
       color-scheme:light dark;--bg:#f5f6f8;--paper:#fff;--paper-2:#f9fafb;--ink:#16202a;--muted:#68737f;--line:#e4e8ec;
@@ -21,27 +21,14 @@
     .app{min-height:100vh;display:grid;grid-template-columns:minmax(0,1fr) 248px;grid-template-areas:"main side";direction:ltr}.sidebar,.content{direction:rtl}.sidebar{grid-area:side}.content{grid-area:main}
     .sidebar{position:sticky;top:0;height:100vh;background:var(--nav);color:var(--nav-ink);padding:28px 16px 20px;display:flex;flex-direction:column;z-index:20}
     .profile{display:flex;align-items:center;gap:11px;padding:0 8px 22px;border-bottom:1px solid rgba(255,255,255,.1)}.avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(145deg,#ffbc4a,#ed3c70 55%,#7a4bc9);display:grid;place-items:center;font-weight:800;border:2px solid rgba(255,255,255,.35)}.profile b{font-size:14px}.profile small{display:block;color:#9eabb7;font-size:11px;direction:ltr;text-align:right}
-    nav{display:grid;gap:5px;margin-top:22px}.sidebar nav{overflow:auto;padding-left:2px}.nav-btn{border:0;background:transparent;color:#aeb9c3;padding:11px 12px;border-radius:10px;text-align:right;display:flex;align-items:center;gap:10px;cursor:pointer}.nav-btn:hover,.nav-btn.active{background:#202b35;color:#fff}.nav-btn.active{box-shadow:inset -3px 0 var(--accent)}.nav-btn svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8}.nav-divider{height:1px;background:rgba(255,255,255,.09);margin:7px 8px}.side-note{margin-top:auto;background:#1c2730;padding:13px;border-radius:13px;color:#bdc8d1;font-size:11px}.side-note b{color:#fff;display:block;margin-bottom:3px}
-    .content{min-width:0;padding:24px 28px 54px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}.page-title h1{font-size:25px;margin:0 0 2px}.page-title p{margin:0;color:var(--muted);font-size:13px}.top-actions{display:flex;align-items:center;gap:9px}.chip,.primary,.icon-btn{border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:9px 13px;border-radius:10px;cursor:pointer}.primary{border-color:transparent;background:var(--ink);color:var(--paper);font-weight:700}.primary:hover{opacity:.9}.demo-badge{display:inline-flex;align-items:center;gap:7px;background:#fff0f3;color:#ae294d;padding:7px 10px;border-radius:999px;font-size:11px;font-weight:700}.demo-badge:before{content:"";width:7px;height:7px;background:var(--accent);border-radius:50%}
-    .mobile-head,.mobile-nav{display:none}.panel{display:none}.panel.active{display:block}.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 1px 0 rgba(20,30,40,.02)}.kpi{padding:18px}.kpi-head{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px}.kpi-icon{width:32px;height:32px;border-radius:9px;background:var(--paper-2);display:grid;place-items:center}.kpi-icon svg{width:17px;height:17px;stroke:var(--accent);fill:none;stroke-width:1.9}.number{font-size:26px;font-weight:800;direction:ltr;text-align:right;margin:13px 0 3px;letter-spacing:-.5px}.delta{font-size:11px;color:var(--green)}.delta.down{color:var(--accent)}
-    .dash-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,.72fr);gap:14px;margin-top:14px;align-items:start}.chart-card{padding:20px}.card-title{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}.card-title h2{font-size:16px;margin:0}.card-title p{font-size:11px;color:var(--muted);margin:3px 0 0}.segmented{display:flex;background:var(--paper-2);padding:3px;border-radius:9px}.segmented button{border:0;background:transparent;color:var(--muted);padding:5px 10px;border-radius:7px;font-size:11px;cursor:pointer}.segmented button.active{background:var(--paper);color:var(--ink);box-shadow:0 1px 5px rgba(0,0,0,.08)}
-    .chart-wrap{position:relative;height:260px;direction:ltr}.chart-wrap svg{width:100%;height:100%;overflow:visible}.grid-line{stroke:var(--chart-grid);stroke-width:1}.axis-label{fill:var(--muted);font-size:10px;font-family:Vazirmatn}.line{fill:none;stroke:var(--blue);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.area{fill:var(--area)}.point{fill:var(--paper);stroke:var(--blue);stroke-width:2}.legend{display:flex;gap:14px;color:var(--muted);font-size:11px;margin-top:5px}.legend i{width:9px;height:9px;border-radius:3px;background:var(--blue);display:inline-block;margin-left:5px}
-    .best-times{padding:20px}.time-spot{display:grid;grid-template-columns:47px 1fr 36px;align-items:center;gap:9px;margin:12px 0;font-size:12px}.bar{height:8px;background:var(--paper-2);border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;background:var(--accent);border-radius:99px}.time-spot em{font-style:normal;color:var(--muted);font-size:10px}.recommend{background:var(--paper-2);padding:12px;border-radius:11px;margin-top:16px;font-size:11px;color:var(--muted)}.recommend b{display:block;color:var(--ink);font-size:12px;margin-bottom:3px}
-    .bottom-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:14px;margin-top:14px;align-items:start}.table-card{overflow:hidden}.table-head{padding:18px 20px 10px}.post-row{display:grid;grid-template-columns:minmax(150px,1fr) repeat(3,75px);gap:8px;align-items:center;padding:12px 20px;border-top:1px solid var(--line);font-size:12px}.post-row.head{color:var(--muted);font-size:10px;background:var(--paper-2)}.post-info{display:flex;align-items:center;gap:10px}.thumb{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;color:#fff;font-weight:800;flex:0 0 auto}.thumb.t1{background:linear-gradient(140deg,#ca5b3b,#2e312d)}.thumb.t2{background:linear-gradient(140deg,#19668d,#ddbd78)}.thumb.t3{background:linear-gradient(140deg,#a43a65,#542453)}.post-info span{display:block;color:var(--muted);font-size:10px}.metric{text-align:center;direction:ltr}.metric.good{color:var(--green);font-weight:700}
-    .audience{padding:20px}.gender{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:15px 0}.gender div{background:var(--paper-2);padding:12px;border-radius:11px}.gender b{font-size:19px;display:block}.city{display:grid;grid-template-columns:70px 1fr 35px;align-items:center;gap:8px;margin:10px 0;font-size:11px}.city .bar i{background:var(--blue)}
-    .section-head{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:16px}.section-head h2{margin:0;font-size:22px}.section-head p{color:var(--muted);font-size:12px;margin:3px 0 0}.calendar-shell{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:14px;align-items:start}.calendar-card{padding:18px}.cal-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.cal-toolbar h3{margin:0;font-size:17px}.cal-nav{display:flex;gap:6px}.cal-nav button{border:1px solid var(--line);background:var(--paper);color:var(--ink);width:32px;height:32px;border-radius:8px;cursor:pointer}.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;direction:rtl}.dayname{text-align:center;color:var(--muted);font-size:10px;padding:6px}.day{min-height:105px;background:var(--paper-2);border:1px solid transparent;border-radius:11px;padding:7px;font-size:11px}.day.today{border-color:var(--accent)}.day .date{color:var(--muted);font-size:10px}.scheduled{margin-top:7px;border-radius:8px;padding:7px;color:#fff;min-height:54px;cursor:pointer}.scheduled.reel{background:#206a84}.scheduled.story{background:#b14268}.scheduled.post{background:#3c7255}.scheduled small{display:block;opacity:.78;font-size:9px}.queue{padding:18px}.queue-item{display:flex;gap:9px;padding:11px 0;border-bottom:1px solid var(--line);font-size:11px}.queue-dot{width:9px;height:9px;border-radius:50%;background:var(--green);margin-top:5px;flex:0 0 auto}.queue-item b{display:block;font-size:12px}.queue-item span{color:var(--muted)}
-    .content-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.media-card{overflow:hidden}.media-cover{aspect-ratio:1.35;background:linear-gradient(135deg,#d4a063,#6c3a2a);display:flex;align-items:flex-end;padding:14px;color:#fff}.media-cover.c2{background:linear-gradient(135deg,#7facc0,#21343d)}.media-cover.c3{background:linear-gradient(135deg,#b04b75,#47254d)}.media-cover.c4{background:linear-gradient(135deg,#759660,#263e27)}.media-cover b{font-size:18px}.media-body{padding:14px}.media-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:10px}.statline{display:flex;gap:15px;margin-top:10px;font-size:11px;direction:ltr;justify-content:flex-end}
-    .hashtags{display:grid;grid-template-columns:1fr .75fr;gap:14px;align-items:start}.hash-card{padding:19px}.tagrow{display:grid;grid-template-columns:minmax(0,1fr) 100px 65px;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);font-size:12px}.tagrow:last-child{border:0}.score{height:7px;background:var(--paper-2);border-radius:99px}.score i{height:100%;display:block;background:var(--accent-2);border-radius:99px}.source-card{padding:20px}.source-card h3{margin:0 0 8px}.source-card p,.source-card li{font-size:12px;color:var(--muted)}.source-card ul{padding-right:18px}.source-card a{color:var(--blue);text-decoration:none}.source-card a:hover{text-decoration:underline}.notice{padding:13px 15px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-size:11px;margin-bottom:14px}.notice b{color:var(--ink)}
-    .tool-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr);gap:14px;align-items:start}.tool-card{padding:20px}.tool-card h3{margin:0;font-size:16px}.tool-card>p{margin:4px 0 14px;color:var(--muted);font-size:12px}.form-stack{display:grid;gap:12px}.choice-row{display:flex;gap:8px;flex-wrap:wrap}.choice{border:1px solid var(--line);background:var(--paper-2);color:var(--muted);padding:7px 11px;border-radius:9px;cursor:pointer;font-size:11px}.choice.active{background:var(--ink);border-color:var(--ink);color:var(--paper)}.output-box{background:var(--paper-2);border:1px solid var(--line);border-radius:13px;padding:15px;min-height:180px;white-space:pre-wrap;font-size:13px;line-height:1.9}.output-box.empty{color:var(--muted);display:grid;place-items:center;text-align:center}.tool-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.helper{font-size:10px;color:var(--muted);margin-top:8px}.steps{margin:6px 0 12px;padding-right:20px;font-size:12px;line-height:2.1;color:var(--muted)}.steps b{color:var(--ink)}kbd{background:var(--paper-2);border:1px solid var(--line);border-radius:5px;padding:1px 7px;font-size:11px;font-family:inherit}.provider-list{display:grid;gap:9px;margin-top:12px}.provider{display:flex;align-items:center;gap:11px;padding:11px;background:var(--paper-2);border-radius:11px}.provider-mark{width:34px;height:34px;border-radius:9px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-weight:800}.provider div{min-width:0}.provider b,.provider span{display:block}.provider span{font-size:10px;color:var(--muted)}
-    .competitor-form{display:grid;grid-template-columns:minmax(180px,1fr) auto;gap:8px}.competitor-form input{min-width:0;border:1px solid var(--line);background:var(--paper-2);color:var(--ink);border-radius:10px;padding:10px 12px;direction:ltr;text-align:left}.watch-list{display:grid;gap:8px;margin-top:14px}.watch-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 13px;background:var(--paper-2);border-radius:11px}.watch-item b{direction:ltr}.status{display:inline-flex;align-items:center;gap:6px;font-size:10px;color:var(--amber)}.status:before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}.compare-table{width:100%;border-collapse:collapse;font-size:12px}.compare-table th,.compare-table td{padding:12px 10px;text-align:right;border-bottom:1px solid var(--line)}.compare-table th{color:var(--muted);font-size:10px;background:var(--paper-2)}.compare-table td:not(:first-child),.compare-table th:not(:first-child){direction:ltr;text-align:center}.compare-table tr:last-child td{border-bottom:0}.sample-tag{font-size:9px;color:var(--muted);display:block}.metric-up{color:var(--green);font-weight:700}.metric-down{color:var(--accent);font-weight:700}
-    .report-layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);gap:14px;align-items:start}.report-preview{padding:22px}.report-date{font-size:11px;color:var(--muted);margin-bottom:15px}.report-lead{font-size:17px;font-weight:800;margin:0 0 14px}.report-list{display:grid;gap:9px}.report-line{display:grid;grid-template-columns:90px 1fr auto;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding:10px 0;font-size:12px}.report-line:last-child{border:0}.report-line span{color:var(--muted)}.flow{display:grid;gap:0;margin-top:12px}.flow-step{display:grid;grid-template-columns:30px 1fr;gap:10px;position:relative;padding-bottom:16px}.flow-step:not(:last-child):before{content:"";position:absolute;right:14px;top:27px;bottom:0;width:1px;background:var(--line)}.flow-num{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--paper-2);font-size:11px;font-weight:700;z-index:1}.flow-step b{font-size:12px;display:block}.flow-step p{font-size:10px;color:var(--muted);margin:2px 0}.security-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.security-item{padding:16px}.security-item strong{display:flex;align-items:center;gap:8px;font-size:13px}.security-item strong:before{content:"✓";width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--green) 13%,transparent);color:var(--green)}.security-item p{font-size:11px;color:var(--muted);margin:7px 0 0}.security-item.warn strong:before{content:"!";background:color-mix(in srgb,var(--amber) 14%,transparent);color:var(--amber)}.mobile-more{display:none}.small-link{color:var(--blue);text-decoration:none;font-size:10px}.small-link:hover{text-decoration:underline}
-    .modal{position:fixed;inset:0;background:rgba(6,10,14,.62);display:none;align-items:center;justify-content:center;padding:18px;z-index:100}.modal.open{display:flex}.modal-box{width:min(570px,100%);max-height:92vh;overflow:auto;background:var(--paper);border-radius:22px;box-shadow:var(--shadow);padding:22px}.modal-head{display:flex;justify-content:space-between;align-items:center}.modal-head h2{font-size:18px;margin:0}.close{border:0;background:var(--paper-2);color:var(--ink);width:34px;height:34px;border-radius:50%;cursor:pointer}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{margin-top:13px}.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);background:var(--paper-2);color:var(--ink);border-radius:10px;padding:10px}.field textarea{min-height:105px;resize:vertical}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.secondary{border:1px solid var(--line);background:transparent;color:var(--ink);padding:9px 13px;border-radius:10px;cursor:pointer}.toast{position:fixed;left:22px;bottom:22px;background:var(--ink);color:var(--paper);padding:11px 15px;border-radius:11px;box-shadow:var(--shadow);font-size:12px;opacity:0;transform:translateY(12px);pointer-events:none;transition:.25s;z-index:120}.toast.show{opacity:1;transform:none}
-    @media(max-width:1000px){.app{grid-template-columns:minmax(0,1fr) 210px}.kpi-grid{grid-template-columns:repeat(2,1fr)}.dash-grid,.tool-grid,.report-layout{grid-template-columns:1fr}.bottom-grid{grid-template-columns:1fr}.content-grid{grid-template-columns:repeat(2,1fr)}.hashtags{grid-template-columns:1fr}.calendar-shell{grid-template-columns:1fr}}
-    @media(max-width:720px){.app{display:block}.sidebar{display:none}.content{padding:14px 14px 90px}.mobile-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}.mobile-head .avatar{width:37px;height:37px}.topbar{align-items:flex-start}.top-actions .chip,.top-actions .demo-badge{display:none}.page-title h1{font-size:21px}.primary{padding:8px 10px;font-size:12px}.kpi-grid{grid-template-columns:1fr 1fr;gap:9px}.kpi{padding:14px}.number{font-size:21px}.dash-grid,.bottom-grid{gap:10px;margin-top:10px}.chart-card,.best-times,.audience{padding:15px}.chart-wrap{height:230px}.post-row{grid-template-columns:minmax(130px,1fr) 58px 58px;padding:11px 14px}.post-row>*:nth-child(4){display:none}.post-row.head>*:nth-child(4){display:none}.content-grid{grid-template-columns:1fr}.week{grid-template-columns:repeat(2,1fr)}.dayname{display:none}.day{min-height:90px}.calendar-card{padding:12px}.calendar-shell{gap:10px}.form-row{grid-template-columns:1fr}.mobile-nav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;bottom:0;left:0;right:0;background:var(--paper);border-top:1px solid var(--line);z-index:50;padding:7px 5px calc(7px + env(safe-area-inset-bottom))}.mobile-nav button{border:0;background:transparent;color:var(--muted);font-size:9px;padding:4px 0}.mobile-nav button.active{color:var(--accent);font-weight:700}.mobile-nav svg{display:block;margin:auto;width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8}.section-head{align-items:flex-start}.section-head h2{font-size:19px}.hashtags{gap:10px}.tagrow{grid-template-columns:1fr 75px 45px}.competitor-form{grid-template-columns:1fr}.compare-table,.compare-table tbody,.compare-table tr,.compare-table td{display:block}.compare-table thead{display:none}.compare-table tr{padding:10px 0;border-bottom:1px solid var(--line)}.compare-table tr:last-child{border:0}.compare-table td{border:0;padding:4px 10px;display:flex;justify-content:space-between;gap:12px}.compare-table td:before{content:attr(data-label);color:var(--muted);direction:rtl}.report-line{grid-template-columns:1fr auto}.report-line span{grid-column:1/-1}.security-grid{grid-template-columns:1fr}.tool-card,.report-preview{padding:16px}.mobile-more{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.toast{left:14px;right:14px;bottom:82px;text-align:center}}
-    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
-  </style>
-
-  <style>
+    nav{display:grid;gap:5px;margin-top:22px}.sidebar nav{overflow:auto;padding-left:2px}.nav-btn{border:0;background:transparent;color:#aeb9c3;padding:11px 12px;border-radius:10px;text-align:right;display:flex;align-items:center;gap:10px;cursor:pointer}.nav-btn:hover,.nav-btn.active{background:#202b35;color:#fff}.nav-btn.active{box-shadow:inset -3px 0 var(--accent)}.nav-divider{height:1px;background:rgba(255,255,255,.09);margin:7px 8px}.side-note{margin-top:auto;background:#1c2730;padding:13px;border-radius:13px;color:#bdc8d1;font-size:11px}.side-note b{color:#fff;display:block;margin-bottom:3px}
+    .content{min-width:0;padding:24px 28px 54px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}.page-title h1{font-size:25px;margin:0 0 2px}.page-title p{margin:0;color:var(--muted);font-size:13px}.top-actions{display:flex;align-items:center;gap:9px}.chip,.primary,.icon-btn{border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:9px 13px;border-radius:10px;cursor:pointer}.primary{border-color:transparent;background:var(--ink);color:var(--paper);font-weight:700}.primary:hover{opacity:.9}.primary:disabled,.secondary:disabled{opacity:.55;cursor:wait}
+    .panel{display:none}.panel.active{display:block}.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 1px 0 rgba(20,30,40,.02)}.kpi{padding:18px}.kpi-head{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px}.number{font-size:26px;font-weight:800;direction:ltr;text-align:right;margin:13px 0 3px;letter-spacing:-.5px}.delta{font-size:11px;color:var(--green)}.delta.down{color:var(--accent)}
+    .dash-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,.72fr);gap:14px;margin-top:14px;align-items:start}.chart-card{padding:20px}.card-title{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}.card-title h2{font-size:16px;margin:0}.card-title p{font-size:11px;color:var(--muted);margin:3px 0 0}
+    .section-head{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:16px}.section-head h2{margin:0;font-size:22px}.section-head p{color:var(--muted);font-size:12px;margin:3px 0 0}
+    .tool-card{padding:20px}.tool-card h3{margin:0;font-size:16px}.tool-card>p{margin:4px 0 14px;color:var(--muted);font-size:12px}.form-stack{display:grid;gap:12px}.tool-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.helper{font-size:10px;color:var(--muted);margin-top:8px}.steps{margin:6px 0 12px;padding-right:20px;font-size:12px;line-height:2.1;color:var(--muted)}.steps b{color:var(--ink)}kbd{background:var(--paper-2);border:1px solid var(--line);border-radius:5px;padding:1px 7px;font-size:11px;font-family:inherit}
+    .field{margin-top:13px}.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);background:var(--paper-2);color:var(--ink);border-radius:10px;padding:10px}.field textarea{min-height:105px;resize:vertical}
+    .secondary{border:1px solid var(--line);background:transparent;color:var(--ink);padding:9px 13px;border-radius:10px;cursor:pointer}.toast{position:fixed;left:22px;bottom:22px;background:var(--ink);color:var(--paper);padding:11px 15px;border-radius:11px;box-shadow:var(--shadow);font-size:12px;opacity:0;transform:translateY(12px);pointer-events:none;transition:.25s;z-index:120;max-width:80vw}.toast.show{opacity:1;transform:none}
     .live-badge{display:inline-flex;align-items:center;gap:7px;background:#eef4ef;color:#5c6b62;padding:7px 12px;border-radius:999px;font-size:11px;font-weight:700}
     .live-badge:before{content:"";width:8px;height:8px;border-radius:50%;background:#9aa5a0}
     .live-badge.on{background:#e7f6ec;color:#0b7a3e}
@@ -64,9 +51,61 @@
     .ig-cap{font-size:11px;color:var(--ink);margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
     .log-box{background:#0d1117;color:#c9d4dc;border-radius:12px;padding:14px;font-family:monospace;font-size:11px;max-height:220px;overflow:auto;direction:ltr;text-align:left;white-space:pre-wrap}
     .empty-note{padding:34px 18px;text-align:center;color:var(--muted);font-size:13px}
-    @media(max-width:720px){.ig-grid{grid-template-columns:repeat(2,1fr)}}
+    /* --- بخش‌های جدید --- */
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+    .choice{border:1px solid var(--line);background:var(--paper-2);color:var(--muted);padding:7px 13px;border-radius:9px;cursor:pointer;font-size:12px}
+    .choice.active{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+    .social-row{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--line)}
+    .social-row:last-child{border:0}
+    .social-row img{width:44px;height:44px;border-radius:50%;object-fit:cover;background:var(--paper-2);flex:0 0 auto}
+    .social-row .who{flex:1;min-width:0}
+    .social-row .who b{font-size:13px;direction:ltr;display:block;text-align:right}
+    .social-row .who span{font-size:11px;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .mini-btn{border:1px solid var(--line);background:var(--paper-2);color:var(--ink);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:11px;white-space:nowrap}
+    .mini-btn.danger{color:var(--accent);border-color:var(--accent)}
+    .mini-btn:disabled{opacity:.5;cursor:wait}
+    .dm-layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:14px;align-items:start}
+    .thread-item{display:flex;gap:10px;align-items:center;padding:10px;border-radius:11px;cursor:pointer;border:1px solid transparent}
+    .thread-item:hover{background:var(--paper-2)}
+    .thread-item.active{background:var(--paper-2);border-color:var(--line)}
+    .thread-item img{width:42px;height:42px;border-radius:50%;object-fit:cover;background:var(--paper-2);flex:0 0 auto}
+    .thread-item .twho{flex:1;min-width:0}
+    .thread-item b{font-size:12px;display:block;direction:ltr;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .thread-item span{font-size:10px;color:var(--muted)}
+    .msg-list{display:grid;gap:8px;max-height:380px;overflow:auto;padding:6px 2px;margin:10px 0;align-content:start}
+    .msg{max-width:80%;background:var(--paper-2);border:1px solid var(--line);padding:9px 12px;border-radius:13px;font-size:12px;justify-self:start;overflow-wrap:anywhere}
+    .msg.mine{justify-self:end;background:var(--ink);color:var(--paper);border-color:transparent}
+    .msg small{display:block;font-size:9px;opacity:.65;margin-top:4px}
+    .dm-send{display:flex;gap:8px;margin-top:8px}
+    .dm-send input{flex:1;min-width:0;border:1px solid var(--line);background:var(--paper-2);color:var(--ink);border-radius:10px;padding:10px}
+    .comment-row{display:flex;gap:10px;padding:11px 2px;border-bottom:1px solid var(--line);align-items:flex-start}
+    .comment-row:last-child{border:0}
+    .comment-row img{width:38px;height:38px;border-radius:50%;object-fit:cover;background:var(--paper-2);flex:0 0 auto}
+    .comment-row .cbody{flex:1;min-width:0}
+    .comment-row .cbody b{font-size:12px}
+    .comment-row .ctext{font-size:12px;margin:3px 0;overflow-wrap:anywhere}
+    .comment-row .cmeta{font-size:10px;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}
+    .preview-img{max-width:100%;max-height:280px;border-radius:12px;border:1px solid var(--line);object-fit:cover}
+    .st{font-size:10px;padding:3px 10px;border-radius:99px;font-weight:700;white-space:nowrap}
+    .st-pending{background:#fff4e0;color:#a86a08}
+    .st-sent{background:#e7f6ec;color:#0b7a3e}
+    .st-failed{background:#fdecec;color:#b3261e}
+    .sched-row{display:flex;gap:12px;align-items:center;padding:12px 2px;border-bottom:1px solid var(--line)}
+    .sched-row:last-child{border:0}
+    .sched-row .sbody{flex:1;min-width:0;font-size:12px}
+    .sched-row .sbody small{color:var(--muted);display:block;font-size:10px;margin-top:3px}
+    .sched-err{color:var(--accent);font-size:10px;margin-top:4px;direction:ltr;text-align:left}
+    #growthChart{width:100%;height:240px;direction:ltr;display:block}
+    .heat-scroll{overflow-x:auto}
+    .heat{display:grid;grid-template-columns:46px repeat(24,minmax(14px,1fr));gap:2px;align-items:center;font-size:9px;color:var(--muted);min-width:620px}
+    .heat .hcell{aspect-ratio:1;border-radius:3px;background:var(--paper-2);min-width:14px}
+    .heat .hday{font-size:10px;white-space:nowrap}
+    .heat .hh{font-size:8px;text-align:center}
+    @media(prefers-color-scheme:dark){.st-pending{background:#3a2c10;color:#f0b429}.st-sent{background:#123a24;color:#4ade80}.st-failed{background:#3d1512;color:#f87171}}
+    @media(max-width:1000px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.dash-grid{grid-template-columns:1fr}.dm-layout{grid-template-columns:1fr}}
+    @media(max-width:720px){.app{display:block}.sidebar{display:none}.content{padding:14px 14px 90px}.topbar{align-items:flex-start}.page-title h1{font-size:21px}.kpi-grid{grid-template-columns:1fr 1fr;gap:9px}.kpi{padding:14px}.number{font-size:21px}.ig-grid{grid-template-columns:repeat(2,1fr)}.tool-card{padding:16px}.toast{left:14px;right:14px;bottom:22px;text-align:center}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
   </style>
-
 </head>
 <body>
 <script>
@@ -87,9 +126,15 @@
   <aside class="sidebar">
     <div class="profile"><div class="avatar">ک</div><div><b id="sbUserName">…</b><small id="sbUserMail" dir="ltr" style="text-align:right"></small></div></div>
     <nav>
-      <button class="nav-btn active" data-panel="connect">اتصال اینستاگرام</button>
+      <button class="nav-btn active" data-panel="dashboard">داشبورد</button>
+      <button class="nav-btn" data-panel="connect">اتصال اینستاگرام</button>
       <button class="nav-btn" data-panel="profile">پروفایل</button>
       <button class="nav-btn" data-panel="medias">پست‌ها</button>
+      <button class="nav-btn" data-panel="comments">کامنت‌ها</button>
+      <button class="nav-btn" data-panel="direct">دایرکت</button>
+      <button class="nav-btn" data-panel="followers">فالوور</button>
+      <button class="nav-btn" data-panel="publish">انتشار</button>
+      <button class="nav-btn" data-panel="scheduled">زمان‌بندی</button>
       <button class="nav-btn" data-panel="test">تست اکشن</button>
     </nav>
     <div class="nav-divider"></div>
@@ -97,15 +142,31 @@
       <button class="nav-btn" id="adminLink" style="display:none">پنل ادمین</button>
       <button class="nav-btn" id="logoutBtn">خروج</button>
     </nav>
-    <div class="side-note"><b>پنل خام</b><span>اتصال واقعی اینستاگرام برای تست. بدون داده نمونه.</span></div>
+    <div class="side-note"><b>پنل اینستاگرام</b><span>اتصال واقعی · آنالیز · انتشار · تعامل</span></div>
   </aside>
   <main class="content">
     <div class="topbar">
-      <div class="page-title"><h1 id="pageHeading">اتصال اینستاگرام</h1><p id="pageSub">اکانت واقعی‌ات را وصل کن و تست واقعی بزن</p></div>
+      <div class="page-title"><h1 id="pageHeading">داشبورد</h1><p id="pageSub">نمای زنده عملکرد پیج</p></div>
       <div class="top-actions"><span class="live-badge" id="connBadge">متصل نیست</span></div>
     </div>
 
-    <section class="panel active" id="connect">
+    <section class="panel active" id="dashboard">
+      <div class="section-head"><div><h2>داشبورد</h2><p>نمای زنده عملکرد پیج</p></div><button class="secondary" id="snapshotBtn">ثبت اسنپ‌شات</button></div>
+      <div class="kpi-grid">
+        <div class="card kpi"><div class="kpi-head"><span>دنبال‌کننده</span></div><div class="number" id="kFollowers">—</div><div class="delta" id="dFollowers"></div></div>
+        <div class="card kpi"><div class="kpi-head"><span>دنبال‌شونده</span></div><div class="number" id="kFollowing">—</div><div class="delta" id="dFollowing"></div></div>
+        <div class="card kpi"><div class="kpi-head"><span>پست‌ها</span></div><div class="number" id="kPosts">—</div><div class="delta" id="dPosts"></div></div>
+        <div class="card kpi"><div class="kpi-head"><span>نرخ تعامل</span></div><div class="number" id="kEng">—</div><div class="delta">میانگین ۱۲ پست آخر</div></div>
+      </div>
+      <div class="dash-grid">
+        <article class="card chart-card"><div class="card-title"><div><h2>رشد دنبال‌کننده</h2><p>اسنپ‌شات خودکار هر ۳۰ دقیقه</p></div></div><canvas id="growthChart"></canvas><div class="empty-note" id="chartEmpty" style="display:none">هنوز داده کافی نیست؛ بعد از چند اسنپ‌شات نمودار رسم می‌شود.</div></article>
+        <article class="card chart-card"><div class="card-title"><div><h2>ساعت‌های انتشار</h2><p>توزیع ۳۰ پست آخر در هفته (به وقت تو)</p></div></div><div class="heat-scroll"><div id="heatmap"><div class="empty-note">—</div></div></div></article>
+      </div>
+      <div class="section-head" style="margin-top:22px"><div><h2>بهترین پست‌ها</h2><p>۶ پست با بیشترین تعامل</p></div></div>
+      <div class="ig-grid" id="bestGrid"><div class="empty-note" style="grid-column:1/-1">—</div></div>
+    </section>
+
+    <section class="panel" id="connect">
       <article class="card tool-card">
         <h3>اتصال اکانت اینستاگرام</h3>
         <p>با <b>sessionid</b> (کوکی نشست) وصل می‌شوی — بدون گذرواژه، بدون کد تأیید، بدون بلاک شدن:</p>
@@ -136,6 +197,65 @@
       <div class="ig-grid" id="mediaGrid"><div class="empty-note" style="grid-column:1/-1">هنوز اکانتی متصل نیست.</div></div>
     </section>
 
+    <section class="panel" id="comments">
+      <div class="section-head"><div><h2>کامنت‌ها</h2><p>مدیریت کامنت‌های پست‌ها</p></div></div>
+      <article class="card tool-card">
+        <div class="field" style="margin-top:0"><label for="commentMedia">انتخاب پست</label><select id="commentMedia"></select></div>
+        <div id="commentList" style="margin-top:6px"><div class="empty-note">پستی انتخاب کن.</div></div>
+        <div class="field"><label for="commentText">کامنت جدید <span id="replyToTag" style="color:var(--accent)"></span></label><textarea id="commentText" placeholder="متن کامنت…"></textarea></div>
+        <div class="tool-actions">
+          <button class="primary" id="sendComment">ارسال کامنت</button>
+          <button class="secondary" id="cancelReply" style="display:none">لغو پاسخ</button>
+        </div>
+      </article>
+    </section>
+
+    <section class="panel" id="direct">
+      <div class="section-head"><div><h2>دایرکت</h2><p>گفتگوهای اینستاگرام</p></div><button class="secondary" id="refreshThreads">به‌روزرسانی</button></div>
+      <div class="dm-layout">
+        <article class="card tool-card"><h3>گفتگوها</h3><div id="threadList" style="margin-top:10px"><div class="empty-note">—</div></div></article>
+        <article class="card tool-card">
+          <h3 id="dmTitle">پیام‌ها</h3>
+          <div class="msg-list" id="msgList"><div class="empty-note">گفتگویی انتخاب کن.</div></div>
+          <div class="dm-send"><input id="dmText" placeholder="پیام بنویس…" maxlength="1000"><button class="primary" id="dmSend">ارسال</button></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel" id="followers">
+      <div class="section-head"><div><h2>فالوور</h2><p>مدیریت دنبال‌کننده‌ها</p></div><button class="secondary" id="refreshSocial">به‌روزرسانی</button></div>
+      <article class="card tool-card">
+        <div class="tabs">
+          <button class="choice active" data-tab="followers">فالوورها</button>
+          <button class="choice" data-tab="following">فالووینگ‌ها</button>
+          <button class="choice" data-tab="notback">فالوبک نکرده‌ها</button>
+        </div>
+        <div class="field"><input id="socialSearch" placeholder="جستجو در نام کاربری…"></div>
+        <div id="socialList" style="margin-top:8px"><div class="empty-note">—</div></div>
+        <div class="helper">دریافت لیست‌ها ممکن است چند ثانیه طول بکشد.</div>
+      </article>
+    </section>
+
+    <section class="panel" id="publish">
+      <div class="section-head"><div><h2>انتشار</h2><p>پست عکس جدید — فوری یا زمان‌بندی‌شده</p></div></div>
+      <article class="card tool-card">
+        <div class="form-stack">
+          <div class="field" style="margin-top:0"><label for="pubPhoto">عکس (jpg/png/webp تا ۱۰ مگ)</label><input type="file" id="pubPhoto" accept="image/jpeg,image/png,image/webp"></div>
+          <div><img id="pubPreview" class="preview-img" style="display:none" alt=""></div>
+          <div class="field"><label for="pubCaption">کپشن</label><textarea id="pubCaption" placeholder="کپشن پست…"></textarea></div>
+          <div class="tool-actions"><button class="primary" id="publishNow">انتشار فوری</button></div>
+          <div class="field"><label for="pubWhen">زمان انتشار (زمان‌بندی)</label><input type="datetime-local" id="pubWhen"></div>
+          <div class="tool-actions"><button class="secondary" id="scheduleBtn">ثبت زمان‌بندی</button></div>
+          <div class="helper">زمان‌بندی حداکثر ۳۰ روز آینده. سرور هر ۱۵ دقیقه زمان‌بندی‌های رسیده را خودکار منتشر می‌کند.</div>
+        </div>
+      </article>
+    </section>
+
+    <section class="panel" id="scheduled">
+      <div class="section-head"><div><h2>زمان‌بندی‌شده‌ها</h2><p>پست‌های در انتظار انتشار</p></div><button class="secondary" id="refreshScheduled">به‌روزرسانی</button></div>
+      <article class="card tool-card"><div id="schedList"><div class="empty-note">—</div></div></article>
+    </section>
+
     <section class="panel" id="test">
       <article class="card tool-card">
         <h3>تست اکشن واقعی</h3>
@@ -144,7 +264,7 @@
           <button class="primary" id="likeLatest">لایک آخرین پست</button>
           <button class="secondary" id="unlikeLatest">حذف لایک آخرین پست</button>
         </div>
-        <div class="helper">فعلاً فقط لایک/آنلایک. بگو چه اکشنی می‌خواهی تا اضافه کنم (کامنت، فالو، انتشار پست…).</div>
+        <div class="helper">فعلاً فقط لایک/آنلایک. بگو چه اکشنی می‌خواهی تا اضافه کنم (استوری، ریلز، نظرسنجی…).</div>
       </article>
     </section>
   </main>
@@ -152,16 +272,36 @@
 <div class="toast" id="toast" role="status"></div>
 <script>
 (function(){
-  var titles={connect:['اتصال اینستاگرام','اکانت واقعی‌ات را وصل کن و تست واقعی بزن'],profile:['پروفایل','اطلاعات زنده از اکانت متصل'],medias:['پست‌ها','پست‌های اخیر اکانت متصل'],test:['تست اکشن','اکشن واقعی روی اکانت اینستاگرام']};
-  function showPanel(id){if(!titles[id])return;document.querySelectorAll('.panel').forEach(function(p){p.classList.toggle('active',p.id===id)});document.querySelectorAll('[data-panel]').forEach(function(b){b.classList.toggle('active',b.dataset.panel===id)});document.getElementById('pageHeading').textContent=titles[id][0];document.getElementById('pageSub').textContent=titles[id][1];window.scrollTo(0,0)}
+  var titles={
+    dashboard:['داشبورد','نمای زنده عملکرد پیج'],
+    connect:['اتصال اینستاگرام','اکانت واقعی‌ات را وصل کن و تست واقعی بزن'],
+    profile:['پروفایل','اطلاعات زنده از اکانت متصل'],
+    medias:['پست‌ها','پست‌های اخیر اکانت متصل'],
+    comments:['کامنت‌ها','مدیریت کامنت‌های پست‌ها'],
+    direct:['دایرکت','گفتگوهای اینستاگرام'],
+    followers:['فالوور','مدیریت دنبال‌کننده‌ها'],
+    publish:['انتشار','پست عکس جدید'],
+    scheduled:['زمان‌بندی‌شده‌ها','پست‌های در انتظار انتشار'],
+    test:['تست اکشن','اکشن واقعی روی اکانت اینستاگرام']
+  };
+  function showPanel(id){
+    if(!titles[id])return;
+    document.querySelectorAll('.panel').forEach(function(p){p.classList.toggle('active',p.id===id)});
+    document.querySelectorAll('[data-panel]').forEach(function(b){b.classList.toggle('active',b.dataset.panel===id)});
+    document.getElementById('pageHeading').textContent=titles[id][0];
+    document.getElementById('pageSub').textContent=titles[id][1];
+    window.scrollTo(0,0);
+  }
   document.querySelectorAll('[data-panel]').forEach(function(b){b.addEventListener('click',function(){showPanel(b.dataset.panel)})});
 
-  function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2800)}
-  function log(msg){var b=document.getElementById('logBox');var line=new Date().toLocaleTimeString('en-GB')+'  '+msg;b.textContent=b.textContent+'\n'+line;b.scrollTop=b.scrollHeight}
+  function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},3000)}
+  function log(msg){var b=document.getElementById('logBox');if(!b)return;var line=new Date().toLocaleTimeString('en-GB')+'  '+msg;b.textContent=b.textContent+'\n'+line;b.scrollTop=b.scrollHeight}
 
   function api(path,opts){
     opts=opts||{};
-    opts.headers=Object.assign({'Content-Type':'application/json'},opts.headers||{});
+    var headers=opts.headers||{};
+    if(!(opts.body instanceof FormData))headers['Content-Type']='application/json';
+    opts.headers=headers;
     return fetch(path,opts).then(function(r){
       return r.json().catch(function(){return null}).then(function(j){
         if(!j)throw new Error('پاسخ نامعتبر از سرور');
@@ -173,16 +313,124 @@
   function fa(n){return Number(n||0).toLocaleString('en-US')}
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
   function mediaType(t){return t===2?'ویدیو':(t===8?'آلبوم':'عکس')}
+  function fmtDT(iso){if(!iso)return '—';try{return new Date(iso).toLocaleString('fa-IR',{dateStyle:'medium',timeStyle:'short'})}catch(e){return iso}}
+  function notConn(e){return e&&e.code==='not_connected'}
 
-  var latestMediaId=null;
+  var connected=false, latestMedias=[], latestMediaId=null;
 
-  function setBadge(connected,username){
+  function setBadge(c,username){
+    connected=!!c;
     var b=document.getElementById('connBadge');
-    b.classList.toggle('on',!!connected);
+    b.classList.toggle('on',connected);
     b.textContent=connected?('متصل: @'+username):'متصل نیست';
     document.getElementById('disconnectBtn').style.display=connected?'':'none';
   }
+  function guard(){if(!connected){toast('اول اکانت اینستاگرام را متصل کن');showPanel('connect');return false}return true}
 
+  /* ---------- داشبورد ---------- */
+  function setNum(id,v){document.getElementById(id).textContent=fa(v)}
+  function setDelta(id,d){
+    var el=document.getElementById(id);
+    if(d==null||d===0){el.textContent=d===0?'بدون تغییر':'';el.className='delta';return}
+    el.textContent=(d>0?'+':'')+fa(d)+' از اول';
+    el.className='delta'+(d<0?' down':'');
+  }
+  function drawChart(snaps){
+    var cv=document.getElementById('growthChart'),empty=document.getElementById('chartEmpty');
+    var ctx=cv.getContext('2d');
+    var W=cv.parentElement.clientWidth-40,H=240,dpr=window.devicePixelRatio||1;
+    cv.width=W*dpr;cv.height=H*dpr;ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
+    if(!snaps||snaps.length<2){empty.style.display='';return}
+    empty.style.display='none';
+    var vals=snaps.map(function(s){return s.followers});
+    var min=Math.min.apply(null,vals),max=Math.max.apply(null,vals);
+    if(max===min)max=min+10;
+    var pad={l:52,r:12,t:14,b:26};
+    function X(i){return pad.l+(W-pad.l-pad.r)*i/(vals.length-1)}
+    function Y(v){return pad.t+(H-pad.t-pad.b)*(1-(v-min)/(max-min))}
+    var grid=getComputedStyle(document.documentElement).getPropertyValue('--chart-grid').trim()||'#e8ebef';
+    var ink=getComputedStyle(document.documentElement).getPropertyValue('--ink').trim()||'#16202a';
+    var blue=getComputedStyle(document.documentElement).getPropertyValue('--blue').trim()||'#2477e3';
+    ctx.font='10px Vazirmatn';ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--muted').trim()||'#68737f';
+    for(var gLine=0;gLine<=4;gLine++){
+      var v=min+(max-min)*gLine/4,y=Y(v);
+      ctx.strokeStyle=grid;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();
+      ctx.fillText(fa(Math.round(v)),6,y+3);
+    }
+    // area + line
+    var grad=ctx.createLinearGradient(0,pad.t,0,H-pad.b);
+    grad.addColorStop(0,'rgba(36,119,227,.25)');grad.addColorStop(1,'rgba(36,119,227,0)');
+    ctx.beginPath();ctx.moveTo(X(0),Y(vals[0]));
+    vals.forEach(function(v,i){ctx.lineTo(X(i),Y(v))});
+    ctx.lineTo(X(vals.length-1),H-pad.b);ctx.lineTo(X(0),H-pad.b);ctx.closePath();
+    ctx.fillStyle=grad;ctx.fill();
+    ctx.beginPath();ctx.moveTo(X(0),Y(vals[0]));
+    vals.forEach(function(v,i){ctx.lineTo(X(i),Y(v))});
+    ctx.strokeStyle=blue;ctx.lineWidth=2.5;ctx.lineJoin='round';ctx.stroke();
+    // last point
+    ctx.beginPath();ctx.arc(X(vals.length-1),Y(vals[vals.length-1]),4,0,7);ctx.fillStyle=blue;ctx.fill();
+    // first/last date labels
+    ctx.fillText(fmtDT(snaps[0].taken_at),pad.l,H-8);
+    var last=fmtDT(snaps[snaps.length-1].taken_at);
+    ctx.fillText(last,W-pad.r-ctx.measureText(last).width,H-8);
+    void ink;
+  }
+  function renderHeat(recent){
+    var days=['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه'];
+    var grid=[],mx=0,d,h;
+    for(d=0;d<7;d++)grid.push(new Array(24).fill(0));
+    (recent||[]).forEach(function(m){
+      if(!m.taken_at)return;
+      var dt=new Date(m.taken_at);if(isNaN(dt))return;
+      var pd=(dt.getDay()+1)%7,hh=dt.getHours();
+      grid[pd][hh]++;if(grid[pd][hh]>mx)mx=grid[pd][hh];
+    });
+    var html='<div class="heat"><div></div>';
+    for(h=0;h<24;h++)html+='<div class="hh">'+h+'</div>';
+    for(d=0;d<7;d++){
+      html+='<div class="hday">'+days[d]+'</div>';
+      for(h=0;h<24;h++){
+        var a=mx?grid[d][h]/mx:0;
+        html+='<div class="hcell" title="'+days[d]+' ساعت '+h+': '+grid[d][h]+' پست" style="background:rgba(36,119,227,'+(0.05+a*0.9).toFixed(2)+')"></div>';
+      }
+    }
+    document.getElementById('heatmap').innerHTML=html+'</div>';
+  }
+  function renderBest(list){
+    var g=document.getElementById('bestGrid');
+    if(!list||!list.length){g.innerHTML='<div class="empty-note" style="grid-column:1/-1">پستی پیدا نشد.</div>';return}
+    g.innerHTML=list.map(function(m){
+      return '<article class="card ig-card"><div class="ig-thumb">'+
+        (m.thumbnail_url?'<img src="'+esc(m.thumbnail_url)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'')+
+        '</div><div class="ig-meta"><div class="row"><span>❤ '+fa(m.like_count)+'</span><span>💬 '+fa(m.comment_count)+'</span></div>'+
+        '<div class="row"><span>'+fmtDT(m.taken_at)+'</span></div>'+
+        (m.caption?'<div class="ig-cap">'+esc(m.caption)+'</div>':'')+'</div></article>';
+    }).join('');
+  }
+  function loadDashboard(){
+    if(!guard())return;
+    api('/api/ig/stats').then(function(j){
+      var s=j.stats;
+      setNum('kFollowers',s.followers);setNum('kFollowing',s.following);setNum('kPosts',s.media_count);
+      document.getElementById('kEng').textContent=s.engagement_rate+'٪';
+      var snaps=s.snapshots;
+      if(snaps.length>1){
+        var f=snaps[0],l=snaps[snaps.length-1];
+        setDelta('dFollowers',l.followers-f.followers);
+        setDelta('dFollowing',l.following-f.following);
+        setDelta('dPosts',l.media_count-f.media_count);
+      }else{setDelta('dFollowers',null);setDelta('dFollowing',null);setDelta('dPosts',null)}
+      drawChart(snaps);renderBest(s.best_posts);renderHeat(s.recent);
+      log('dashboard loaded');
+    }).catch(function(e){log('dashboard error: '+e.message);if(!notConn(e))toast(e.message)});
+  }
+  document.getElementById('snapshotBtn').addEventListener('click',function(){
+    var b=this;b.disabled=true;
+    api('/api/ig/snapshot',{method:'POST'}).then(function(j){toast(j.message);log('snapshot saved');loadDashboard()})
+      .catch(function(e){toast(e.message)}).then(function(){b.disabled=false});
+  });
+
+  /* ---------- پروفایل و پست‌ها ---------- */
   function renderProfile(p){
     var card=document.getElementById('profileCard');
     card.innerHTML=
@@ -198,88 +446,354 @@
       (p.biography?'<div class="ig-bio">'+esc(p.biography)+'</div>':'')+
       '<div class="helper">'+(p.is_private?'حساب خصوصی':'حساب عمومی')+(p.is_verified?' · تیک آبی':'')+'</div>';
   }
-
   function renderMedias(list){
-    latestMediaId=list.length?list[0].id:null;
+    latestMedias=list;latestMediaId=list.length?list[0].id:null;
+    fillCommentSelect();
     var g=document.getElementById('mediaGrid');
-    if(!list.length){g.innerHTML='<div class="empty-note" style="grid-column:1/-1">پستی پیدا نشد.</div>';return;}
+    if(!list.length){g.innerHTML='<div class="empty-note" style="grid-column:1/-1">پستی پیدا نشد.</div>';return}
     g.innerHTML=list.map(function(m){
       return '<article class="card ig-card"><div class="ig-thumb">'+
         (m.thumbnail_url?'<img src="'+esc(m.thumbnail_url)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'')+
         '<span class="ig-type">'+mediaType(m.media_type)+(m.has_liked?' · ❤':'')+'</span></div>'+
         '<div class="ig-meta"><div class="row"><span>❤ '+fa(m.like_count)+'</span><span>💬 '+fa(m.comment_count)+'</span></div>'+
-        (m.caption?'<div class="ig-cap">'+esc(m.caption)+'</div>':'')+'</div></article>';
+        (m.caption?'<div class="ig-cap">'+esc(m.caption)+'</div>':'')+
+        '<div class="tool-actions" style="margin-top:8px"><button class="mini-btn" data-cid="'+m.id+'">کامنت‌ها ('+fa(m.comment_count)+')</button></div>'+
+        '</div></article>';
     }).join('');
   }
-
+  document.getElementById('mediaGrid').addEventListener('click',function(ev){
+    var b=ev.target.closest('[data-cid]');if(!b)return;
+    openComments(b.getAttribute('data-cid'));
+  });
   function loadProfile(){
-    api('/api/ig/profile').then(function(j){renderProfile(j.profile);log('profile loaded @'+j.profile.username);})
-      .catch(function(e){log('profile error: '+e.message);if(e.code!=='not_connected')toast(e.message);});
+    api('/api/ig/profile').then(function(j){renderProfile(j.profile);log('profile loaded @'+j.profile.username)})
+      .catch(function(e){log('profile error: '+e.message);if(!notConn(e))toast(e.message)});
   }
   function loadMedias(){
-    api('/api/ig/medias?limit=12').then(function(j){renderMedias(j.medias);log('medias loaded: '+j.medias.length);})
-      .catch(function(e){log('medias error: '+e.message);if(e.code!=='not_connected')toast(e.message);});
+    api('/api/ig/medias?limit=12').then(function(j){renderMedias(j.medias);log('medias loaded: '+j.medias.length)})
+      .catch(function(e){log('medias error: '+e.message);if(!notConn(e))toast(e.message)});
+  }
+
+  /* ---------- کامنت‌ها ---------- */
+  var commentMediaId=null,replyToId=null,replyToName='';
+  function fillCommentSelect(){
+    var sel=document.getElementById('commentMedia');
+    sel.innerHTML=latestMedias.map(function(m,i){
+      return '<option value="'+m.id+'">'+(i+1)+'. '+esc((m.caption||'بدون کپشن').slice(0,42))+' ('+fa(m.comment_count)+' کامنت)</option>';
+    }).join('');
+    if(commentMediaId)sel.value=commentMediaId;
+  }
+  document.getElementById('commentMedia').addEventListener('change',function(){
+    commentMediaId=this.value;replyToId=null;updateReplyTag();loadComments();
+  });
+  function openComments(mediaId){
+    commentMediaId=mediaId;replyToId=null;updateReplyTag();
+    fillCommentSelect();showPanel('comments');loadComments();
+  }
+  function updateReplyTag(){
+    document.getElementById('replyToTag').textContent=replyToId?('← پاسخ به @'+replyToName):'';
+    document.getElementById('cancelReply').style.display=replyToId?'':'none';
+  }
+  document.getElementById('cancelReply').addEventListener('click',function(){replyToId=null;updateReplyTag()});
+  function renderComments(list){
+    var box=document.getElementById('commentList');
+    if(!list.length){box.innerHTML='<div class="empty-note">کامنتی نیست.</div>';return}
+    box.innerHTML=list.map(function(c){
+      return '<div class="comment-row">'+
+        (c.profile_pic_url?'<img src="'+esc(c.profile_pic_url)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'<img alt="">')+
+        '<div class="cbody"><b dir="ltr">@'+esc(c.username)+'</b>'+
+        '<div class="ctext">'+esc(c.text)+'</div>'+
+        '<div class="cmeta"><span>'+fmtDT(c.created_at)+'</span><span>❤ '+fa(c.like_count)+'</span>'+
+        '<button class="mini-btn" data-act="reply" data-id="'+c.pk+'" data-user="'+esc(c.username)+'">پاسخ</button>'+
+        '<button class="mini-btn" data-act="like" data-id="'+c.pk+'" data-liked="'+(c.has_liked?1:0)+'">'+(c.has_liked?'آنلایک':'لایک')+'</button>'+
+        '<button class="mini-btn danger" data-act="del" data-id="'+c.pk+'">حذف</button>'+
+        '</div></div></div>';
+    }).join('');
+  }
+  function loadComments(){
+    if(!commentMediaId){document.getElementById('commentList').innerHTML='<div class="empty-note">پستی انتخاب کن.</div>';return}
+    if(!guard())return;
+    api('/api/ig/comments?media_id='+commentMediaId+'&amount=40').then(function(j){
+      renderComments(j.comments);log('comments loaded: '+j.count);
+    }).catch(function(e){log('comments error: '+e.message);if(!notConn(e))toast(e.message)});
+  }
+  document.getElementById('commentList').addEventListener('click',function(ev){
+    var b=ev.target.closest('[data-act]');if(!b)return;
+    var act=b.getAttribute('data-act'),id=b.getAttribute('data-id');
+    if(act==='reply'){
+      replyToId=id;replyToName=b.getAttribute('data-user');updateReplyTag();
+      document.getElementById('commentText').focus();
+    }else if(act==='like'){
+      var like=b.getAttribute('data-liked')!=='1';b.disabled=true;
+      api('/api/ig/comment/like',{method:'POST',body:JSON.stringify({comment_id:id,like:like})})
+        .then(function(){loadComments()}).catch(function(e){toast(e.message);b.disabled=false});
+    }else if(act==='del'){
+      if(!confirm('این کامنت حذف شود؟'))return;b.disabled=true;
+      api('/api/ig/comment/delete',{method:'POST',body:JSON.stringify({media_id:commentMediaId,comment_id:id})})
+        .then(function(){toast('حذف شد');log('comment deleted '+id);loadComments();loadMedias()})
+        .catch(function(e){toast(e.message);b.disabled=false});
+    }
+  });
+  document.getElementById('sendComment').addEventListener('click',function(){
+    var t=document.getElementById('commentText').value.trim();
+    if(!t){toast('متن کامنت را بنویس');return}
+    if(!commentMediaId){toast('اول پستی انتخاب کن');return}
+    var b=this;b.disabled=true;
+    api('/api/ig/comment',{method:'POST',body:JSON.stringify({media_id:commentMediaId,text:t,replied_to:replyToId})})
+      .then(function(){document.getElementById('commentText').value='';replyToId=null;updateReplyTag();toast('کامنت ثبت شد');log('comment sent');loadComments();loadMedias()})
+      .catch(function(e){toast(e.message)}).then(function(){b.disabled=false});
+  });
+
+  /* ---------- دایرکت ---------- */
+  var activeThread=null,activeThreadTitle='';
+  function loadThreads(){
+    if(!guard())return;
+    api('/api/ig/threads?amount=25').then(function(j){
+      var box=document.getElementById('threadList');
+      if(!j.threads.length){box.innerHTML='<div class="empty-note">گفتگویی نیست.</div>';return}
+      box.innerHTML=j.threads.map(function(t){
+        var pic=t.users.length===1?t.users[0].profile_pic_url:'';
+        return '<div class="thread-item'+(t.id===activeThread?' active':'')+'" data-tid="'+t.id+'" data-title="'+esc(t.title)+'">'+
+          (pic?'<img src="'+esc(pic)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'<img alt="">')+
+          '<div class="twho"><b>'+esc(t.title)+'</b><span>'+fmtDT(t.last_activity_at)+'</span></div></div>';
+      }).join('');
+      log('threads loaded: '+j.threads.length);
+    }).catch(function(e){log('threads error: '+e.message);if(!notConn(e))toast(e.message)});
+  }
+  document.getElementById('threadList').addEventListener('click',function(ev){
+    var el=ev.target.closest('[data-tid]');if(!el)return;
+    activeThread=el.getAttribute('data-tid');activeThreadTitle=el.getAttribute('data-title');
+    document.querySelectorAll('.thread-item').forEach(function(x){x.classList.toggle('active',x===el)});
+    document.getElementById('dmTitle').textContent=activeThreadTitle;
+    loadMessages();
+  });
+  function loadMessages(){
+    if(!activeThread)return;
+    api('/api/ig/thread/messages?thread_id='+activeThread+'&amount=40').then(function(j){
+      var box=document.getElementById('msgList');
+      if(!j.messages.length){box.innerHTML='<div class="empty-note">پیامی نیست.</div>';return}
+      box.innerHTML=j.messages.map(function(m){
+        var txt=m.text||('['+m.item_type+']');
+        return '<div class="msg'+(m.is_mine?' mine':'')+'">'+esc(txt)+'<small>'+fmtDT(m.timestamp)+'</small></div>';
+      }).join('');
+      box.scrollTop=box.scrollHeight;
+    }).catch(function(e){if(!notConn(e))toast(e.message)});
+  }
+  function sendDM(){
+    var inp=document.getElementById('dmText'),t=inp.value.trim();
+    if(!t)return;
+    if(!activeThread){toast('اول گفتگویی انتخاب کن');return}
+    inp.disabled=true;
+    api('/api/ig/thread/send',{method:'POST',body:JSON.stringify({thread_id:activeThread,text:t})})
+      .then(function(){inp.value='';log('dm sent');loadMessages()})
+      .catch(function(e){toast(e.message)}).then(function(){inp.disabled=false;inp.focus()});
+  }
+  document.getElementById('dmSend').addEventListener('click',sendDM);
+  document.getElementById('dmText').addEventListener('keydown',function(ev){if(ev.key==='Enter')sendDM()});
+  document.getElementById('refreshThreads').addEventListener('click',function(){loadThreads();if(activeThread)loadMessages()});
+
+  /* ---------- فالوور ---------- */
+  var socialCache={followers:null,following:null},socialTab='followers',socialLoading=false;
+  document.querySelectorAll('#followers .choice').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('#followers .choice').forEach(function(x){x.classList.remove('active')});
+      b.classList.add('active');socialTab=b.dataset.tab;renderSocial();
+    });
+  });
+  document.getElementById('socialSearch').addEventListener('input',renderSocial);
+  function notBackList(){
+    if(!socialCache.followers||!socialCache.following)return [];
+    var fset={};socialCache.followers.forEach(function(u){fset[u.pk]=1});
+    return socialCache.following.filter(function(u){return !fset[u.pk]});
+  }
+  function renderSocial(){
+    var box=document.getElementById('socialList');
+    var list=socialTab==='followers'?socialCache.followers:(socialTab==='following'?socialCache.following:notBackList());
+    if(!list){box.innerHTML='<div class="empty-note">«به‌روزرسانی» را بزن.</div>';return}
+    var q=document.getElementById('socialSearch').value.trim().toLowerCase();
+    var fset={};(socialCache.following||[]).forEach(function(u){fset[u.pk]=1});
+    var items=list.filter(function(u){return !q||u.username.toLowerCase().indexOf(q)>-1||(u.full_name||'').toLowerCase().indexOf(q)>-1});
+    if(!items.length){box.innerHTML='<div class="empty-note">موردی پیدا نشد.</div>';return}
+    box.innerHTML='<div class="helper" style="margin:0 0 6px">'+fa(items.length)+' نفر</div>'+items.map(function(u){
+      var btn;
+      if(socialTab==='followers'){
+        btn=fset[u.pk]
+          ?'<button class="mini-btn danger" data-act="unfollow" data-id="'+u.pk+'">آنفالو</button>'
+          :'<button class="mini-btn" data-act="follow" data-id="'+u.pk+'">فالو</button>';
+      }else{
+        btn='<button class="mini-btn danger" data-act="unfollow" data-id="'+u.pk+'">آنفالو</button>';
+      }
+      return '<div class="social-row">'+
+        (u.profile_pic_url?'<img src="'+esc(u.profile_pic_url)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'<img alt="">')+
+        '<div class="who"><b>@'+esc(u.username)+'</b><span>'+esc(u.full_name||'')+(u.is_verified?' ✓':'')+'</span></div>'+btn+'</div>';
+    }).join('');
+  }
+  function loadSocial(){
+    if(!guard())return;
+    if(socialLoading)return;
+    socialLoading=true;
+    document.getElementById('socialList').innerHTML='<div class="empty-note">در حال دریافت…</div>';
+    Promise.all([
+      api('/api/ig/followers?amount=200').catch(function(e){return{users:[]}}),
+      api('/api/ig/following?amount=200').catch(function(e){return{users:[]}})
+    ]).then(function(rs){
+      socialCache.followers=rs[0].users;socialCache.following=rs[1].users;
+      socialLoading=false;renderSocial();
+      log('social loaded: '+rs[0].users.length+' followers, '+rs[1].users.length+' following');
+    });
+  }
+  document.getElementById('refreshSocial').addEventListener('click',loadSocial);
+  document.getElementById('socialList').addEventListener('click',function(ev){
+    var b=ev.target.closest('[data-act]');if(!b)return;
+    var act=b.getAttribute('data-act'),id=b.getAttribute('data-id');
+    if(act==='unfollow'&&!confirm('آنفالو شود؟'))return;
+    b.disabled=true;
+    api('/api/ig/'+act,{method:'POST',body:JSON.stringify({user_id:id})})
+      .then(function(){toast('انجام شد');log(act+' '+id);loadSocial()})
+      .catch(function(e){toast(e.message);b.disabled=false});
+  });
+
+  /* ---------- انتشار و زمان‌بندی ---------- */
+  var pubFile=null;
+  document.getElementById('pubPhoto').addEventListener('change',function(){
+    pubFile=this.files[0]||null;
+    var img=document.getElementById('pubPreview');
+    if(pubFile){img.src=URL.createObjectURL(pubFile);img.style.display=''}
+    else{img.src='';img.style.display='none'}
+  });
+  function pubFormData(withWhen){
+    var cap=document.getElementById('pubCaption').value.trim();
+    if(!pubFile){toast('اول عکس انتخاب کن');return null}
+    var fd=new FormData();fd.append('photo',pubFile);fd.append('caption',cap);
+    if(withWhen){
+      var w=document.getElementById('pubWhen').value;
+      if(!w){toast('زمان انتشار را مشخص کن');return null}
+      fd.append('publish_at',new Date(w).toISOString());
+    }
+    return fd;
+  }
+  document.getElementById('publishNow').addEventListener('click',function(){
+    var fd=pubFormData(false);if(!fd)return;
+    var b=this;b.disabled=true;toast('در حال انتشار…');
+    api('/api/ig/publish',{method:'POST',body:fd}).then(function(j){
+      toast(j.message);log('published: '+j.media_id);
+      document.getElementById('pubCaption').value='';document.getElementById('pubPhoto').value='';
+      pubFile=null;var img=document.getElementById('pubPreview');img.src='';img.style.display='none';
+      loadMedias();loadDashboard();
+    }).catch(function(e){toast(e.message)}).then(function(){b.disabled=false});
+  });
+  document.getElementById('scheduleBtn').addEventListener('click',function(){
+    var fd=pubFormData(true);if(!fd)return;
+    var b=this;b.disabled=true;
+    api('/api/ig/schedule',{method:'POST',body:fd}).then(function(j){
+      toast(j.message);log('scheduled: '+j.id);
+      document.getElementById('pubCaption').value='';document.getElementById('pubPhoto').value='';
+      pubFile=null;var img=document.getElementById('pubPreview');img.src='';img.style.display='none';
+      loadScheduled();
+    }).catch(function(e){toast(e.message)}).then(function(){b.disabled=false});
+  });
+  var pubWhen=document.getElementById('pubWhen');
+  pubWhen.min=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16);
+
+  /* ---------- زمان‌بندی‌شده‌ها ---------- */
+  var stFa={pending:'در انتظار',sent:'منتشر شد',failed:'ناموفق'};
+  function loadScheduled(){
+    if(!guard())return;
+    api('/api/ig/scheduled').then(function(j){
+      var box=document.getElementById('schedList');
+      if(!j.items.length){box.innerHTML='<div class="empty-note">زمان‌بندی فعالی نیست.</div>';return}
+      box.innerHTML=j.items.map(function(s){
+        return '<div class="sched-row"><span class="st st-'+s.status+'">'+(stFa[s.status]||s.status)+'</span>'+
+          '<div class="sbody"><b>'+fmtDT(s.publish_at)+'</b><small>'+esc(s.caption||'بدون کپشن')+'</small>'+
+          (s.status==='failed'&&s.error?'<div class="sched-err">تلاش '+fa(s.attempts)+': '+esc(s.error)+'</div>':'')+
+          '</div>'+
+          (s.status==='pending'?'<button class="mini-btn danger" data-del="'+s.id+'">حذف</button>':'')+
+          '</div>';
+      }).join('');
+      log('scheduled loaded: '+j.items.length);
+    }).catch(function(e){if(!notConn(e))toast(e.message)});
+  }
+  document.getElementById('schedList').addEventListener('click',function(ev){
+    var b=ev.target.closest('[data-del]');if(!b)return;
+    if(!confirm('این زمان‌بندی حذف شود؟'))return;
+    b.disabled=true;
+    api('/api/ig/scheduled/delete',{method:'POST',body:JSON.stringify({id:parseInt(b.getAttribute('data-del'),10)})})
+      .then(function(){toast('حذف شد');loadScheduled()})
+      .catch(function(e){toast(e.message);b.disabled=false});
+  });
+  document.getElementById('refreshScheduled').addEventListener('click',loadScheduled);
+
+  /* ---------- اتصال / تست / وضعیت ---------- */
+  document.getElementById('connectBtn').addEventListener('click',function(){
+    var sid=document.getElementById('igSession').value.trim();
+    if(!sid){toast('اول sessionid را وارد کن');return}
+    var b=this;b.disabled=true;
+    api('/api/ig/connect',{method:'POST',body:JSON.stringify({sessionid:sid})})
+      .then(function(j){
+        document.getElementById('igSession').value='';
+        toast('متصل شد: @'+j.username);log('connected @'+j.username);
+        refreshStatus();
+      }).catch(function(e){toast(e.message);log('connect error: '+e.message)})
+      .then(function(){b.disabled=false});
+  });
+  document.getElementById('disconnectBtn').addEventListener('click',function(){
+    if(!confirm('اتصال اینستاگرام قطع شود؟'))return;
+    api('/api/ig/disconnect',{method:'POST'}).then(function(){toast('قطع شد');log('disconnected');refreshStatus(true)})
+      .catch(function(e){toast(e.message)});
+  });
+  function bindAction(id,path){
+    document.getElementById(id).addEventListener('click',function(){
+      if(!latestMediaId){toast('اول پست‌ها را بارگذاری کن');return}
+      var b=this;b.disabled=true;
+      api(path,{method:'POST',body:JSON.stringify({media_id:latestMediaId})})
+        .then(function(j){toast(j.message);log(j.message)})
+        .catch(function(e){toast(e.message);log('action error: '+e.message)})
+        .then(function(){b.disabled=false});
+    });
+  }
+  bindAction('likeLatest','/api/ig/like');
+  bindAction('unlikeLatest','/api/ig/unlike');
+  document.getElementById('refreshProfile').addEventListener('click',loadProfile);
+  document.getElementById('refreshMedias').addEventListener('click',loadMedias);
+  document.getElementById('logoutBtn').addEventListener('click',function(){
+    api('/api/auth/logout',{method:'POST'}).then(function(){location.replace('/')}).catch(function(){location.replace('/')});
+  });
+  document.getElementById('adminLink').addEventListener('click',function(){location.href='/admin.html'});
+
+  function clearPanels(){
+    ['kFollowers','kFollowing','kPosts'].forEach(function(id){document.getElementById(id).textContent='—'});
+    document.getElementById('kEng').textContent='—';
+    document.getElementById('profileCard').innerHTML='<div class="empty-note">هنوز اکانتی متصل نیست.</div>';
+    document.getElementById('mediaGrid').innerHTML='<div class="empty-note" style="grid-column:1/-1">هنوز اکانتی متصل نیست.</div>';
+    document.getElementById('bestGrid').innerHTML='<div class="empty-note" style="grid-column:1/-1">—</div>';
+    document.getElementById('heatmap').innerHTML='<div class="empty-note">—</div>';
+    latestMedias=[];latestMediaId=null;commentMediaId=null;activeThread=null;
+    socialCache={followers:null,following:null};
   }
   function refreshStatus(silent){
     return api('/api/ig/status').then(function(j){
       setBadge(j.connected,j.username);
-      if(j.connected){if(!silent){loadProfile();loadMedias();}}
-      else{
-        document.getElementById('profileCard').innerHTML='<div class="empty-note">هنوز اکانتی متصل نیست.</div>';
-        document.getElementById('mediaGrid').innerHTML='<div class="empty-note" style="grid-column:1/-1">هنوز اکانتی متصل نیست.</div>';
-        latestMediaId=null;
+      if(j.connected){
+        if(!silent){loadProfile();loadMedias();loadDashboard()}
+      }else{
+        clearPanels();
       }
       return j;
-    }).catch(function(e){if(!silent)toast(e.message);});
+    }).catch(function(e){if(!silent)toast(e.message)});
   }
 
-  document.getElementById('connectBtn').addEventListener('click',function(){
-    var btn=this;btn.disabled=true;btn.textContent='در حال اتصال…';
-    var payload={sessionid:document.getElementById('igSession').value};
-    log('connecting with sessionid …');
-    api('/api/ig/connect',{method:'POST',body:JSON.stringify(payload)}).then(function(j){
-      log('connected @'+j.username);
-      toast('متصل شد: @'+j.username);
-      document.getElementById('igSession').value='';
-      refreshStatus().then(function(){showPanel('profile');});
-    }).catch(function(e){
-      log('connect error ['+(e.code||'?')+']: '+e.message);
-      toast(e.message);
-    }).then(function(){btn.disabled=false;btn.textContent='اتصال';});
+  document.addEventListener('panel:user',function(ev){
+    var u=ev.detail||{};
+    document.getElementById('sbUserName').textContent=u.name||u.email||'…';
+    document.getElementById('sbUserMail').textContent=u.email||'';
+    if(u.role==='admin')document.getElementById('adminLink').style.display='';
+    refreshStatus(true).then(function(j){
+      if(j&&j.connected){loadProfile();loadMedias();loadDashboard()}
+      else{clearPanels()}
+    });
   });
-
-  document.getElementById('disconnectBtn').addEventListener('click',function(){
-    if(!confirm('اتصال اینستاگرام قطع شود؟'))return;
-    api('/api/ig/disconnect',{method:'POST'}).then(function(){toast('قطع شد');log('disconnected');refreshStatus(true);setBadge(false);document.getElementById('profileCard').innerHTML='<div class="empty-note">هنوز اکانتی متصل نیست.</div>';document.getElementById('mediaGrid').innerHTML='<div class="empty-note" style="grid-column:1/-1">هنوز اکانتی متصل نیست.</div>';});
-  });
-
-  document.getElementById('refreshProfile').addEventListener('click',loadProfile);
-  document.getElementById('refreshMedias').addEventListener('click',loadMedias);
-  document.getElementById('likeLatest').addEventListener('click',function(){
-    if(!latestMediaId){toast('اول پست‌ها را بارگذاری کن');showPanel('medias');loadMedias();return;}
-    if(!confirm('آخرین پست واقعاً لایک شود؟'))return;
-    api('/api/ig/like',{method:'POST',body:JSON.stringify({media_id:latestMediaId})}).then(function(){toast('لایک شد ✓');log('liked '+latestMediaId);loadMedias();}).catch(function(e){toast(e.message);log('like error: '+e.message);});
-  });
-  document.getElementById('unlikeLatest').addEventListener('click',function(){
-    if(!latestMediaId){toast('اول پست‌ها را بارگذاری کن');showPanel('medias');loadMedias();return;}
-    api('/api/ig/unlike',{method:'POST',body:JSON.stringify({media_id:latestMediaId})}).then(function(){toast('لایک برداشته شد');log('unliked '+latestMediaId);loadMedias();}).catch(function(e){toast(e.message);log('unlike error: '+e.message);});
-  });
-
-  refreshStatus(true).then(function(j){if(j&&j.connected){loadProfile();loadMedias();}});
+  setTimeout(function(){if(!window.__me){refreshStatus(true).then(function(j){if(j&&j.connected){loadProfile();loadMedias();loadDashboard()}})}},2500);
 })();
-</script>
-<script>
-document.addEventListener('panel:user',function(e){
-  var me=e.detail, initial=(me.name||'ک').trim().charAt(0);
-  document.querySelectorAll('.sidebar .avatar').forEach(function(a){a.textContent=initial;});
-  var n=document.getElementById('sbUserName');if(n)n.textContent=me.name;
-  var m=document.getElementById('sbUserMail');if(m)m.textContent=me.email;
-  if(me.role==='admin'){var al=document.getElementById('adminLink');if(al)al.style.display='';}
-});
-document.getElementById('adminLink').addEventListener('click',function(){location.href='/admin.html';});
-document.getElementById('logoutBtn').addEventListener('click',function(){
-  fetch('/api/auth/logout',{method:'POST'}).then(function(){location.replace('/');}).catch(function(){location.replace('/');});
-});
 </script>
 </body>
 </html>
